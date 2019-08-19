@@ -59,7 +59,7 @@ def tell_relative(node_id, agent, graph, parents, pstree, depths):
 
 
 def pseudotree_creation(agent):
-    print str(agent.id)+': Begin pseudotree_creation'
+    print(str(agent.id) + ': Begin pseudotree_creation')
     # The dict where all the messages are stored
     msgs = agent.msgs
 
@@ -81,9 +81,9 @@ def pseudotree_creation(agent):
     listen.start()
     
     # Wait before all agents have started listening
-    print str(agent.id) + ': Waiting ...'
+    print(str(agent.id) + ': Waiting ...')
     time.sleep(2)
-    print str(agent.id) + ': Continuing'
+    print(str(agent.id) + ': Continuing')
 
     if agent.is_root:
         # Wait till the each agent sends its neighbors' list.
@@ -160,4 +160,4 @@ def pseudotree_creation(agent):
         for parent in [agent.p]+agent.pp:
             info[parent]['domain'] = msgs['domain_'+str(parent)]
 
-    print str(agent.id)+': End pseudotree_creation'
+    print(str(agent.id) + ': End pseudotree_creation')
