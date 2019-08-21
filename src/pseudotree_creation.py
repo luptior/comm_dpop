@@ -99,7 +99,7 @@ def pseudotree_creation(agent):
         # Create the graph and use it to generate the pseudo-tree structure.
         graph = {}
         graph[agent.id] = agent.neighbors
-        for key, value in msgs.iteritems():
+        for key, value in msgs.items():
             if key[0:10] == 'neighbors_':
                 graph[int(key[10:])] = list(value)
         pstree = {}

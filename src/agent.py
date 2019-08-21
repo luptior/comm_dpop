@@ -112,7 +112,7 @@ class Agent:
 
         # TCP
         sock.connect((info[dest_node_id]['IP'], int(info[dest_node_id]['PORT'])))
-        sock.send(pdata.encode())
+        sock.send(pdata)
 
         sock.close()
 
