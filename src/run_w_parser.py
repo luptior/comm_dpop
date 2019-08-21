@@ -1,3 +1,10 @@
+"""The entry point of the program
+Parse the input files
+Setting up the agents
+Start the running.
+"""
+
+
 import os
 import sys
 import numpy as np
