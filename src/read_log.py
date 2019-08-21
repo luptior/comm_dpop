@@ -10,4 +10,4 @@ with open(sys.argv[1]) as f:
 #                                           for x in lines if x.find('Msg received') != -1])
 #
 # print "Time spent:", int(lines[-1].strip())-int(lines[0].strip()), "s"
-print int(lines[-1].strip())-int(lines[0].strip())
+print(int(lines[-1].strip()) - int(lines[0].strip()))
