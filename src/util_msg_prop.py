@@ -163,8 +163,7 @@ def util_msg_handler(agent):
 
 
 def util_msg_prop(agent):
-
-    print str(agent.id)+': Begin util_msg_prop'
+    print(str(agent.id) + ': Begin util_msg_prop')
 
     if agent.is_leaf():
         info = agent.agents_info
@@ -181,4 +180,4 @@ def util_msg_prop(agent):
     else:
         util_msg_handler(agent)
 
-    print str(agent.id)+': End util_msg_prop'
+    print(str(agent.id) + ': End util_msg_prop')

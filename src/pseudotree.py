@@ -37,7 +37,7 @@ def dfsTreeHelper(graph, node, parent, tree, added):
 def get_parents(pstree):
     "Given a pseudo-tree (dfsTree), get the parents for each node as a dict."
     parents = {}
-    for node, children in pstree.iteritems():
+    for node, children in pstree.items():
         for child in children:
             parents[child] = node
     return parents
