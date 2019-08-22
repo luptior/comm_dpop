@@ -8,6 +8,7 @@ import itertools
 
 import utility
 
+
 def get_util_msg(agent):
     """
     Get the util_msg to be sent to the parent and the table to be stored as
@@ -25,8 +26,7 @@ def get_util_msg(agent):
     stored_table = np.empty(dim_util_msg, dtype=object)
 
     lists = [parent_domain] + [info[x]['domain'] for x in agent.pp]
-    indices = [range(len(parent_domain))] + \
-        [range(len(info[x]['domain'])) for x in agent.pp]
+    indices = [range(len(parent_domain))] + [range(len(info[x]['domain'])) for x in agent.pp]
 
     for item, index in zip(itertools.product(*lists), itertools.product(*indices)):
         max_util = agent.max_util
@@ -41,7 +41,7 @@ def get_util_msg(agent):
 
     agent.table_ant = tuple([agent.p] + agent.pp)
 
-    return (util_msg, stored_table)
+    return util_msg, stored_table
 
 
 def get_util_cube(agent):
@@ -57,18 +57,18 @@ def get_util_cube(agent):
     # Calculate the dimensions of the util_msg
     # The dimensions of util_msg and table_stored will be the same.
     dim_util_msg = [len(agent.domain)] + [len(parent_domain)] + \
-        [len(info[x]['domain']) for x in agent.pp]
+                   [len(info[x]['domain']) for x in agent.pp]
     dim_util_msg = tuple(dim_util_msg)
     util_msg = np.empty(dim_util_msg, dtype=object)
 
     lists = [parent_domain] + [info[x]['domain'] for x in agent.pp]
     indices = [range(len(parent_domain))] + \
-        [range(len(info[x]['domain'])) for x in agent.pp]
+              [range(len(info[x]['domain'])) for x in agent.pp]
 
     for item, index in zip(itertools.product(*lists), itertools.product(*indices)):
         for i, xi in enumerate(agent.domain):
             util = agent.calculate_util(item, xi)
-            util_msg[(i,)+index] = util
+            util_msg[(i,) + index] = util
 
     return util_msg, dim_util_msg
 
@@ -90,24 +90,24 @@ def util_msg_handler(agent):
     while True:
         all_children_msgs_arrived = True
         for child in agent.c:
-            if ('util_msg_'+str(child)) not in agent.msgs:
+            if ('util_msg_' + str(child)) not in agent.msgs:
                 all_children_msgs_arrived = False
                 break
-        if all_children_msgs_arrived == True:
+        if all_children_msgs_arrived:
             break
 
     util_msgs = []
     for child in sorted(agent.c):
-        util_msgs.append(agent.msgs['util_msg_'+str(child)])
+        util_msgs.append(agent.msgs['util_msg_' + str(child)])
     for child in sorted(agent.c):
-        util_msgs.append(agent.msgs['pre_util_msg_'+str(child)])
+        util_msgs.append(agent.msgs['pre_util_msg_' + str(child)])
 
     # Combine the util_msgs received from all children
     combined_msg, combined_ant = utility.combine(*util_msgs)
 
     info = agent.agents_info
     if agent.is_root:
-        assert combined_ant == (agent.id, )
+        assert combined_ant == (agent.id,)
 
         # Choose the optimal utility
         utilities = list(combined_msg)
@@ -119,7 +119,7 @@ def util_msg_handler(agent):
         # Send the index of assigned value
         D = {}
         ind = agent.domain.index(xi_star)
-        D[agent.id] = ind        
+        D[agent.id] = ind
         for node in agent.c:
             # agent.udp_send('value_msg_'+str(agent.id), D, node)
             agent.tcp_send('value_msg_' + str(agent.id), D, node)
@@ -130,21 +130,21 @@ def util_msg_handler(agent):
         combined_cube, cube_ant = utility.combine(
             util_cube, combined_msg,
             tuple([agent.id] + [agent.p] + agent.pp), combined_ant
-            )
+        )
 
         # Removing own dimension by taking maximum
         L_ant = list(cube_ant)
         ownid_index = L_ant.index(agent.id)
         msg_to_send = np.maximum.reduce(combined_cube, axis=ownid_index)
         # Ant to send in pre_util_msg
-        ant_to_send = cube_ant[:ownid_index] + cube_ant[ownid_index+1:]
+        ant_to_send = cube_ant[:ownid_index] + cube_ant[ownid_index + 1:]
 
         # Creating the table to store
         cc = combined_cube
         table_shape = list(cc.shape[:])
         del table_shape[ownid_index]
         table_shape = tuple(table_shape)
-        
+
         table = np.zeros(table_shape, dtype=object)
         cc_rolled = np.rollaxis(cc, ownid_index)
         for i, abc in enumerate(cc_rolled):
@@ -158,8 +158,8 @@ def util_msg_handler(agent):
         # agent.udp_send('pre_util_msg_'+str(agent.id), ant_to_send, agent.p)
         # agent.udp_send('util_msg_'+str(agent.id), msg_to_send, agent.p)
 
-        agent.tcp_send('pre_util_msg_'+str(agent.id), ant_to_send, agent.p)
-        agent.tcp_send('util_msg_'+str(agent.id), msg_to_send, agent.p)
+        agent.tcp_send('pre_util_msg_' + str(agent.id), ant_to_send, agent.p)
+        agent.tcp_send('util_msg_' + str(agent.id), msg_to_send, agent.p)
 
 
 def util_msg_prop(agent):
@@ -171,11 +171,11 @@ def util_msg_prop(agent):
 
         # Send the assignment-nodeid-tuple
         # agent.udp_send('pre_util_msg_'+str(agent.id), tuple([agent.p]+agent.pp), agent.p)
-        agent.tcp_send('pre_util_msg_'+str(agent.id), tuple([agent.p]+agent.pp), agent.p)
+        agent.tcp_send('pre_util_msg_' + str(agent.id), tuple([agent.p] + agent.pp), agent.p)
 
         # Send 'util_msg_<ownid>'' to parent
         # agent.udp_send('util_msg_'+str(agent.id), util_msg, agent.p)
-        agent.tcp_send('util_msg_'+str(agent.id), util_msg, agent.p)
+        agent.tcp_send('util_msg_' + str(agent.id), util_msg, agent.p)
 
     else:
         util_msg_handler(agent)

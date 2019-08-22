@@ -104,6 +104,7 @@ class Agent:
         print(str(self.id) + ': Message sent, ' + title + ": " + str(data))
 
     def tcp_send(self, title, data, dest_node_id):
+
         print(str(self.id) + ': tcp_send, sending a message ...')
         info = self.agents_info
         pdata = pickle.dumps((title, data))

@@ -2,6 +2,9 @@
 Parse the input files
 Setting up the agents
 Start the running.
+
+
+xml_parser can be change to other scripts to read different types of input.
 """
 
 
@@ -18,6 +21,7 @@ def get_relatives(num_agents, contatints):
 def main():
 
     f = sys.argv[1]
+
     agents, domains, variables, relations, constraints = xml_parser.parse(f)
 
     agent_ids = list(range(len(agents)))
@@ -41,7 +45,6 @@ def main():
         agent_relations[i] = i_relation
 
     with open("sim_jbs.txt", "w") as f:
-
         f.write("id=42 root_id=" + str(root_id) + "\n\n")
         id = np.random.randint(1000)
         for u in agent_ids:
