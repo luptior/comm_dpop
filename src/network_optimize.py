@@ -15,7 +15,7 @@ def throughPut(q, rtt, s):
 
 def tran_time(size):
     # return 0.1 + size / 100
-    return size / throughput
+    return size / throughput /1000.
 
 
 def loss(s):

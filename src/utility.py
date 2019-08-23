@@ -120,7 +120,7 @@ def combine(*args):
         new_array, _ = expand(array, ant, merged_ant, new_shape)
         merged_array += new_array
 
-    return (merged_array, merged_ant)
+    return merged_array, merged_ant
 
 
 def expand(array, ant, new_ant, new_shape):
@@ -193,7 +193,7 @@ def add_dims(array, ant, index, nodeid, depth):
     new_ant = list(ant)
     new_ant.insert(index, nodeid)
     new_ant = tuple(new_ant)
-    return (new_a, new_ant)
+    return new_a, new_ant
 
 
 def prod(S):

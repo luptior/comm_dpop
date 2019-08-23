@@ -4,10 +4,12 @@ import utility
 import pickle
 import socket
 import sys
+from time import sleep
 
 import pseudotree_creation
 import util_msg_prop
 import value_msg_prop
+from network_optimize import *
 
 
 class Agent:
@@ -104,6 +106,8 @@ class Agent:
         print(str(self.id) + ': Message sent, ' + title + ": " + str(data))
 
     def tcp_send(self, title, data, dest_node_id):
+
+        sleep(tran_time(sys.getsizeof(data)))
 
         print(str(self.id) + ': tcp_send, sending a message ...')
         info = self.agents_info
