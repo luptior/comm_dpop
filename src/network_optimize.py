@@ -4,7 +4,7 @@ from time import sleep
 # some constants for network communication
 
 Q = 0.01
-RTT = 1000.
+RTT = 100.
 MAX_SEG = 576.
 
 throughput = 1.22 * MAX_SEG / (RTT * np.sqrt(Q))

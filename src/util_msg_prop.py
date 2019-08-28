@@ -103,8 +103,12 @@ def util_msg_handler(agent):
     for child in sorted(agent.c):
         util_msgs.append(agent.msgs['pre_util_msg_' + str(child)])
 
+    print("-" * 100)
+    print(util_msgs)
     # Combine the util_msgs received from all children
     combined_msg, combined_ant = utility.combine(*util_msgs)
+    print(combined_msg)
+    print(combined_ant)
 
     info = agent.agents_info
     if agent.is_root:
@@ -166,30 +170,51 @@ def util_msg_handler(agent):
 def util_msg_handler_split(agent):
     """
     Change the handling of util message from waiting to piece by piece
-    :param agent:
+    :param agent:the agnet which is waiting for util msg
     :return:
     """
 
     unprocessed_children = agent.c
 
+    # initialize the dict before message arrive
     util_msgs = {}
     for child in sorted(agent.c):
         util_msgs['util_msg_' + str(child)] = ''
     for child in sorted(agent.c):
         util_msgs['pre_util_msg_' + str(child)] = ''
 
+    # while len(unprocessed_children) > 0:
+    #     for child in unprocessed_children:
+    #         if ('util_msg_' + str(child)) in agent.msgs:
+    #             # process the children
+    #             util_msgs['util_msg_' + str(child)] = agent.msgs['util_msg_' + str(child)]
+    #             util_msgs['pre_util_msg_' + str(child)] = agent.msgs['pre_util_msg_' + str(child)]
+    #
+    #             unprocessed_children.remove(child)
+    #             break
     while True:
-        if len(unprocessed_children) == 0:
-            break
-        for child in unprocessed_children:
-            if ('util_msg_' + str(child)) in agent.msgs:
-                # process the children
+        all_children_msgs_arrived = True
+        for child in agent.c:
+            if ('util_msg_' + str(child)) not in agent.msgs:
+                all_children_msgs_arrived = False
+                break
+            elif ('util_msg_' + str(child)) not in util_msgs.keys():
                 util_msgs['util_msg_' + str(child)] = agent.msgs['util_msg_' + str(child)]
                 util_msgs['pre_util_msg_' + str(child)] = agent.msgs['pre_util_msg_' + str(child)]
+        if all_children_msgs_arrived:
+            break
+        print(util_msgs)
 
-                unprocessed_children.remove(child)
+    # for child in agent.c:
+    #         util_msgs['util_msg_' + str(child)] = agent.msgs['util_msg_' + str(child)]
+    #         util_msgs['pre_util_msg_' + str(child)] = agent.msgs['pre_util_msg_' + str(child)]
 
     util_msgs = list(util_msgs.values())
+
+    # Wait till util_msg from all the children have arrived
+
+    print("-" * 100)
+    print(util_msgs)
 
     # Combine the util_msgs received from all children
     combined_msg, combined_ant = utility.combine(*util_msgs)
