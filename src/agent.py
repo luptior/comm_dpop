@@ -15,8 +15,7 @@ from network_optimize import *
 class Agent:
     def __init__(self, i, domain, relations, agents_file):
         # Use utils.get_agents_info to initialize all the agents.
-        # All the information from 'agents.txt' will be retrieved and stored in
-        # this dict 'agents_info'.
+        # All the information from 'agents.txt' will be retrieved and stored in this dict 'agents_info'.
         # Also, the domains of some agents will be added to this dict later on.
         # You can access a value as:
         # agent.agents_info[<agent_id>]['field_required']

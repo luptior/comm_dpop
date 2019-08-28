@@ -189,7 +189,7 @@ def util_msg_handler_split(agent):
 
                 unprocessed_children.remove(child)
 
-    util_msgs=list(util_msgs.values())
+    util_msgs = list(util_msgs.values())
 
     # Combine the util_msgs received from all children
     combined_msg, combined_ant = utility.combine(*util_msgs)
