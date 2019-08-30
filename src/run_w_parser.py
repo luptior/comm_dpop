@@ -25,7 +25,7 @@ def main():
 
     if f.split(".")[-1] == "xml":
         agents, domains, variables, relations, constraints = xml_parser.parse(f)
-    elif f.split(".")[-1] == "":
+    else:
         agents, domains, variables, relations, constraints = xml_parser.parse(f)
 
     agent_ids = list(range(len(agents)))

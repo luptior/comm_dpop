@@ -6,12 +6,10 @@ from time import sleep
 import sys
 import socket
 import numpy as np
-import logging
 
 from network_optimize import *
 
 Relatives = collections.namedtuple('Relatives', 'parent pseudoparents children pseudochildren')
-logger = logging.getLogger("dpop.utility")
 
 
 def draw_graph(graph, pstree):
@@ -48,8 +46,7 @@ def listen_func(msgs, sock, agent):
         agent_id = 'No agent'
     else:
         agent_id = agent.id
-    logger.info(str(agent_id) + ': Begin listen_func')
-    # print(str(agent_id) + ': Begin listen_func')
+    print(str(agent_id) + ': Begin listen_func')
 
     while True:
         # The 'data' which is received should be the pickled string
@@ -87,15 +84,10 @@ def listen_func(msgs, sock, agent):
 
 
         msgs[udata[0]] = udata[1]
-
-        # print(str(agent_id) + ': Msg received, size is ' + str(len(data)) + " bytes\n"\
-        #       + udata[0] + ": " + str(udata[1]))
-        logger.info(str(agent_id) + ': Msg received, size is ' + str(len(data)) + " bytes\n" \
-                    + udata[0] + ": " + str(udata[1]))
-
+        print(
+            str(agent_id) + ': Msg received, size is ' + str(len(data)) + " bytes\n" + udata[0] + ": " + str(udata[1]))
         if str(udata[1]) == "exit":
-            logger.info(str(agent_id) + ': End listen_func')
-            # print(str(agent_id) + ': End listen_func')
+            print(str(agent_id) + ': End listen_func')
             return
 
 
