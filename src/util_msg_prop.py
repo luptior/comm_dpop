@@ -6,8 +6,11 @@ part of the DPOP algorithm
 import numpy as np
 import itertools
 import sys
+import logging
 
 import utility
+
+logger = logging.getLogger("dpop.util_msg_prop")
 
 
 def get_util_msg(agent):
@@ -277,7 +280,8 @@ def util_msg_handler_split(agent):
 
 
 def util_msg_prop(agent):
-    print(str(agent.id) + ': Begin util_msg_prop')
+    logger.info(str(agent.id) + ': Begin util_msg_prop')
+    # print(str(agent.id) + ': Begin util_msg_prop')
 
     if agent.is_leaf():
         # if agents is leaf, just send the infos needed
@@ -295,5 +299,5 @@ def util_msg_prop(agent):
     else:
         util_msg_handler(agent)
         # util_msg_handler_split(agent)
-
-    print(str(agent.id) + ': End util_msg_prop')
+    logger.info(str(agent.id) + ': End util_msg_prop')
+    # print(str(agent.id) + ': End util_msg_prop')

@@ -5,11 +5,14 @@ import pickle
 import socket
 import sys
 from time import sleep
+import logging
 
 import pseudotree_creation
 import util_msg_prop
 import value_msg_prop
 from network_optimize import *
+
+logger = logging.getLogger("dpop.agent")
 
 
 class Agent:
@@ -94,7 +97,8 @@ class Agent:
             return False
 
     def udp_send(self, title, data, dest_node_id):
-        print(str(self.id) + ': udp_send, sending a message ...')
+        # print(str(self.id) + ': udp_send, sending a message ...')
+        logger.info(str(self.id) + ': udp_send, sending a message ...')
 
         info = self.agents_info
         pdata = pickle.dumps((title, data))
@@ -102,13 +106,15 @@ class Agent:
         sock.sendto(pdata, (info[dest_node_id]['IP'], int(info[dest_node_id]['PORT'])))
         sock.close()
 
-        print(str(self.id) + ': Message sent, ' + title + ": " + str(data))
+        logger.info(str(self.id) + ': Message sent, ' + title + ": " + str(data))
+        # print(str(self.id) + ': Message sent, ' + title + ": " + str(data))
 
     def tcp_send(self, title, data, dest_node_id):
 
         sleep(tran_time(sys.getsizeof(data)))
 
-        print(str(self.id) + ': tcp_send, sending a message ...')
+        logger.info(str(self.id) + ': tcp_send, sending a message ...')
+        # print(str(self.id) + ': tcp_send, sending a message ...')
         info = self.agents_info
         pdata = pickle.dumps((title, data))
 
@@ -119,13 +125,17 @@ class Agent:
         sock.send(pdata)
 
         sock.close()
-
-        print(str(self.id) + ': Message sent to agent ' + str(dest_node_id) + ', ' + title + ": " + str(data))
+        logger.info(str(self.id) + ': Message sent to agent ' + str(dest_node_id) + ', ' + title + ": " + str(data))
+        # print(str(self.id) + ': Message sent to agent ' + str(dest_node_id) + ', ' + title + ": " + str(data))
 
     def start(self):
-        print(str(self.id) + ': Started')
+
+        logger.info(str(self.id) + ': Started')
+        # print(str(self.id) + ': Started')
         pseudotree_creation.pseudotree_creation(self)
         util_msg_prop.util_msg_prop(self)
         if not self.is_root:
             value_msg_prop.value_msg_prop(self)
-        print(str(self.id) + ': Finished')
+
+        # print(str(self.id) + ': Finished')
+        logger.info(str(self.id) + ': Finished')

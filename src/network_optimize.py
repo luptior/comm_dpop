@@ -4,18 +4,20 @@ from time import sleep
 # some constants for network communication
 
 Q = 0.01
-RTT = 100.
-MAX_SEG = 576.
+RTT = 100.  # unit in ms
+MAX_SEG = 1460.  # unit in bytes
 
-throughput = 1.22 * MAX_SEG / (RTT * np.sqrt(Q))
+throughput = 1.22 * MAX_SEG / (RTT * np.sqrt(Q))  # unit in bytes / ms
+
+throughput = 25 * 10 ** 6 / 8  # unit in bytes / s
 
 def throughPut(q, rtt, s):
     return 1.22 * s / (rtt & np.sqrt(q))
 
 
 def tran_time(size):
-    # return 0.1 + size / 100
-    return size / throughput /1000.
+    # return 0.1 + size / 100 , return unit in s
+    return size / throughput
 
 
 def loss(s):
