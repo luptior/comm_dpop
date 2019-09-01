@@ -103,12 +103,12 @@ def util_msg_handler(agent):
     for child in sorted(agent.c):
         util_msgs.append(agent.msgs['pre_util_msg_' + str(child)])
 
-    print("-" * 100)
-    print(util_msgs)
+    # print("-" * 100)
+    # print(util_msgs)
     # Combine the util_msgs received from all children
     combined_msg, combined_ant = utility.combine(*util_msgs)
-    print(combined_msg)
-    print(combined_ant)
+    # print(combined_msg)
+    # print(combined_ant)
 
     info = agent.agents_info
     if agent.is_root:
@@ -204,7 +204,7 @@ def util_msg_handler_split(agent):
                 util_msgs['pre_util_msg_' + str(child)] = agent.msgs['pre_util_msg_' + str(child)]
         if all_children_msgs_arrived:
             break
-        print(util_msgs)
+        # print(util_msgs)
 
     # for child in agent.c:
     #         util_msgs['util_msg_' + str(child)] = agent.msgs['util_msg_' + str(child)]
@@ -214,8 +214,8 @@ def util_msg_handler_split(agent):
 
     # Wait till util_msg from all the children have arrived
 
-    print("-" * 100)
-    print(util_msgs)
+    # print("-" * 100)
+    # print(util_msgs)
 
     # Combine the util_msgs received from all children
     combined_msg, combined_ant = utility.combine(*util_msgs)

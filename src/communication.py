@@ -31,7 +31,8 @@ def tcp_send(info, title, data, ori_node_id, dest_node_id):
 
     sock.close()
 
-    print(str(ori_node_id) + ': Message sent to agent ' + str(dest_node_id) + ', ' + title + ": " + str(data))
+    # print(str(ori_node_id) + ': Message sent to agent ' + str(dest_node_id) + ', ' + title + ": " + str(data))
+    print(str(ori_node_id) + ': Message sent to agent ' + str(dest_node_id) + ', ' + title)
 
 
 def listen_func(msgs, sock, agent):
@@ -83,7 +84,7 @@ def listen_func(msgs, sock, agent):
         msgs[udata[0]] = udata[1]
         # print(
         #     str(agent_id) + ': Msg received, size is ' + str(len(data)) + " bytes\n" + udata[0] + ": " + str(udata[1]))
-        print(str(agent_id) + ': Msg received, size is ' + str(len(data)) + " bytes\n")
+        print(str(agent_id) + ': Msg received, size is ' + str(len(data)) + " bytes")
         if str(udata[1]) == "exit":
             print(str(agent_id) + ': End listen_func')
             return

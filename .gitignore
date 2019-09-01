@@ -3,6 +3,7 @@
 .DS_Store
 *.xml
 *.iml
+*.log
 log
 
 sim_jbs.txt
