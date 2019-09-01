@@ -11,6 +11,7 @@ throughput = 1.22 * MAX_SEG / (RTT * np.sqrt(Q))  # unit in bytes / ms
 
 throughput = 25 * 10 ** 6 / 8  # unit in bytes / s
 
+
 def throughPut(q, rtt, s):
     return 1.22 * s / (rtt & np.sqrt(q))
 
