@@ -3,6 +3,7 @@
 .DS_Store
 *.xml
 *.iml
-*.txt
-*.sh
 log
+
+test.sh
+sim_jbs.txt
