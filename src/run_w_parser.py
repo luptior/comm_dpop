@@ -12,7 +12,7 @@ import os
 import sys
 import numpy as np
 import agent
-import xml_parser
+import dpop_parser
 
 
 def get_relatives(num_agents, contatints):
@@ -24,9 +24,9 @@ def main():
     f = sys.argv[1]
 
     if f.split(".")[-1] == "xml":
-        agents, domains, variables, relations, constraints = xml_parser.parse(f)
+        agents, domains, variables, relations, constraints = dpop_parser.xml_parse(f)
     else:
-        agents, domains, variables, relations, constraints = xml_parser.parse(f)
+        agents, domains, variables, relations, constraints = dpop_parser.parse(f)
 
     agent_ids = list(range(len(agents)))
     root_id = int(len(agent_ids) / 2)
