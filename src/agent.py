@@ -1,15 +1,11 @@
-"Defines the class Agent which represents a node/agent in the DPOP algorithm."
+"""Defines the class Agent which represents a node/agent in the DPOP algorithm."""
 
 import utility
-import pickle
-import socket
-import sys
-from time import sleep
 
 import pseudotree_creation
 import util_msg_prop
 import value_msg_prop
-from network_optimize import *
+import communication
 
 
 class Agent:
@@ -56,13 +52,13 @@ class Agent:
         return graph_nodes
 
     def get_neighbors(self):
-        L = []
+        l = []
         for first, second in self.relations.keys():
             if first == self.i:
-                L.append(second)
+                l.append(second)
             else:
-                L.append(first)
-        return sorted(L)
+                l.append(first)
+        return sorted(l)
 
     def calculate_util(self, tup, xi):
         """
@@ -85,42 +81,13 @@ class Agent:
         return util
 
     def is_leaf(self):
-        "Return True if this node is a leaf node and False otherwise."
+        """Return True if this node is a leaf node and False otherwise."""
 
-        assert self.c != None, 'self.c not yet initialized.'
-        if self.c == []:
+        assert self.c is not None, 'self.c not yet initialized.'
+        if not self.c:
             return True
         else:
             return False
-
-    def udp_send(self, title, data, dest_node_id):
-        print(str(self.id) + ': udp_send, sending a message ...')
-
-        info = self.agents_info
-        pdata = pickle.dumps((title, data))
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.sendto(pdata, (info[dest_node_id]['IP'], int(info[dest_node_id]['PORT'])))
-        sock.close()
-
-        print(str(self.id) + ': Message sent, ' + title + ": " + str(data))
-
-    def tcp_send(self, title, data, dest_node_id):
-
-        sleep(tran_time(sys.getsizeof(data)))
-
-        print(str(self.id) + ': tcp_send, sending a message ...')
-        info = self.agents_info
-        pdata = pickle.dumps((title, data))
-
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-        # TCP
-        sock.connect((info[dest_node_id]['IP'], int(info[dest_node_id]['PORT'])))
-        sock.send(pdata)
-
-        sock.close()
-
-        print(str(self.id) + ': Message sent to agent ' + str(dest_node_id) + ', ' + title + ": " + str(data))
 
     def start(self):
         print(str(self.id) + ': Started')
@@ -129,3 +96,6 @@ class Agent:
         if not self.is_root:
             value_msg_prop.value_msg_prop(self)
         print(str(self.id) + ': Finished')
+
+    def send(self, title, data, dest_node_id):
+        communication.tcp_send(self, title, data, dest_node_id)

@@ -2,7 +2,7 @@
 PATH="/usr/local/bin/gdate:$PATH"
 
 #sudo sysctl -w net.inet.udp.maxdgram=65535
-script=/Users/luptior/Desktop/Research_3/dpop/src/run_w_parser.py
+script=/Users/luptior/Desktop/Research_3/dpop/src/run.py
 datadir=/Users/luptior/Desktop/Research_3/python_generator/data
 logdir=./log
 mkdir -p $logdir
@@ -12,7 +12,7 @@ timestamp() {
   date +%s
 }
 
-for dom in $(seq 10 10 120); do
+for dom in 10; do
   for repo in 0; do
       for num in 5; do
              name=random_a${num}_d${dom}_r${repo}
