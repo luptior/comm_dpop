@@ -8,6 +8,7 @@ sh test.sh
 ```
 
 ##Updated to use Python3
+Updated from previous Py2 version
 
 ##Sending and receiving message
 sending message function is in agent\
