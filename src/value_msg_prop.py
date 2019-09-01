@@ -18,6 +18,6 @@ def value_msg_prop(agent):
     ind = agent.domain.index(agent.value)
     D[agent.id] = ind    
     for child in agent.c:
-        agent.tcp_send('value_msg_' + str(agent.id), D, child)
+        agent.send('value_msg_' + str(agent.id), D, child)
 
     print(str(agent.id) + ': End value_msg_prop')

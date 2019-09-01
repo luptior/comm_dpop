@@ -16,11 +16,11 @@ def udp_send(a, title, data, dest_node_id):
     print(str(a.id) + ': Message sent, ' + title + ": " + str(data))
 
 
-def tcp_send(a, title, data, dest_node_id):
+def tcp_send(info, title, data, ori_node_id, dest_node_id):
     sleep(tran_time(sys.getsizeof(data)))
 
-    print(str(a.id) + ': tcp_send, sending a message ...')
-    info = a.agents_info
+    print(str(ori_node_id) + ': tcp_send, sending a message ...')
+    # info = this.agents_info
     pdata = pickle.dumps((title, data))
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -31,7 +31,7 @@ def tcp_send(a, title, data, dest_node_id):
 
     sock.close()
 
-    print(str(a.id) + ': Message sent to agent ' + str(dest_node_id) + ', ' + title + ": " + str(data))
+    print(str(ori_node_id) + ': Message sent to agent ' + str(dest_node_id) + ', ' + title + ": " + str(data))
 
 
 def listen_func(msgs, sock, agent):
@@ -41,7 +41,7 @@ def listen_func(msgs, sock, agent):
     comments in the source code for more information.
     """
 
-    if agent == None:
+    if agent is None:
         agent_id = 'No agent'
     else:
         agent_id = agent.id
@@ -81,8 +81,9 @@ def listen_func(msgs, sock, agent):
         udata = pickle.loads(data)  # Unpickled data
 
         msgs[udata[0]] = udata[1]
-        print(
-            str(agent_id) + ': Msg received, size is ' + str(len(data)) + " bytes\n" + udata[0] + ": " + str(udata[1]))
+        # print(
+        #     str(agent_id) + ': Msg received, size is ' + str(len(data)) + " bytes\n" + udata[0] + ": " + str(udata[1]))
+        print(str(agent_id) + ': Msg received, size is ' + str(len(data)) + " bytes\n")
         if str(udata[1]) == "exit":
             print(str(agent_id) + ': End listen_func')
             return

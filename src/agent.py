@@ -98,4 +98,4 @@ class Agent:
         print(str(self.id) + ': Finished')
 
     def send(self, title, data, dest_node_id):
-        communication.tcp_send(self, title, data, dest_node_id)
+        communication.tcp_send(self.agents_info, title, data, self.id, dest_node_id)
