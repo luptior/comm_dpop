@@ -10,9 +10,9 @@ sh test.sh
 ## Updated to use Python3
 Updated from previous Py2 version
 
-## Sending and receiving message
-sending message function is in agent\
-receiveing message function is in utility.listen_func
+## Send and receive message
+send message function is in agent\
+receive message function is in communication.listen_func
 
 ## To-Do-List
 1, working on the ability to process msg by parts\

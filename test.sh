@@ -12,8 +12,8 @@ timestamp() {
   date +%s
 }
 
-for dom in 10; do
-  for repo in $(seq 0 9); do
+for dom in 10 20 30 40 50 60 70 80 90 100; do
+  for repo in 0; do
       for num in 5; do
              name=random_a${num}_d${dom}_r${repo}
              log=$logdir/${name}.log

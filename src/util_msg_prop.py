@@ -103,14 +103,9 @@ def util_msg_handler(agent):
     for child in sorted(agent.c):
         util_msgs.append(agent.msgs['pre_util_msg_' + str(child)])
 
-    # print("-" * 100)
-    # print(util_msgs)
-    # Combine the util_msgs received from all children
     combined_msg, combined_ant = utility.combine(*util_msgs)
-    # print(combined_msg)
-    # print(combined_ant)
 
-    info = agent.agents_info
+    info = agent.agents_info n
     if agent.is_root:
         assert combined_ant == (agent.id,)
 
