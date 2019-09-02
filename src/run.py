@@ -17,12 +17,13 @@ import argparse
 import agent
 import dpop_parser
 
+network_customization = False
 
 def get_relatives(num_agents, contatints):
     return {i: [[j for j in x if j != i][0] for x in contatints if i in x] for i in range(num_agents)}
 
 
-def main(f, network_setting):
+def main(f):
 
     if f.split(".")[-1] == "xml":
         agents, domains, variables, relations, constraints = dpop_parser.xml_parse(f)
@@ -96,4 +97,6 @@ if __name__ == '__main__':
     # parser.add_argument("--output", help="# output file", type=str)
     args = parser.parse_args()
 
-    main(f=args.input, network_setting=args.network)
+    network_customization = eval(args.network)
+
+    main(f=args.input)

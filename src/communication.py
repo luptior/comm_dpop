@@ -2,6 +2,7 @@ from utility import *
 import socket
 import pickle
 from network import *
+from run import network_customization
 
 
 def udp_send(a, title, data, dest_node_id):
@@ -75,15 +76,16 @@ def listen_func(msgs, sock, agent):
         """
         the optimization comes into play
         """
-        size = sys.getsizeof(data)
 
-        sleep(tran_time(size))
+        if network_customization:
+            size = sys.getsizeof(data)
+            sleep(tran_time(size))
 
         udata = pickle.loads(data)  # Unpickled data
 
         msgs[udata[0]] = udata[1]
         # print(
-        #     str(agent_id) + ': Msg received, size is ' + str(len(data)) + " bytes\n" + udata[0] + ": " + str(udata[1]))
+        #    str(agent_id) + ': Msg received, size is ' + str(len(data)) + " bytes\n" + udata[0] + ": " + str(udata[1]))
         print(str(agent_id) + ': Msg received, size is ' + str(len(data)) + " bytes")
         if str(udata[1]) == "exit":
             print(str(agent_id) + ': End listen_func')
