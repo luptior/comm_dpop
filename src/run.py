@@ -11,6 +11,9 @@ xml_parser can be change to other scripts to read different types of input.
 import os
 import sys
 import numpy as np
+import argparse
+
+# Package
 import agent
 import dpop_parser
 
@@ -19,9 +22,7 @@ def get_relatives(num_agents, contatints):
     return {i: [[j for j in x if j != i][0] for x in contatints if i in x] for i in range(num_agents)}
 
 
-def main():
-
-    f = sys.argv[1]
+def main(f, network_setting):
 
     if f.split(".")[-1] == "xml":
         agents, domains, variables, relations, constraints = dpop_parser.xml_parse(f)
@@ -88,4 +89,11 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--input", help="# input file", type=str)
+    parser.add_argument("--network", help="# if network customization is turned on", type=str, default="False")
+    # parser.add_argument("--output", help="# output file", type=str)
+    args = parser.parse_args()
+
+    main(f=args.input, network_setting=args.network)

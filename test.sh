@@ -19,7 +19,7 @@ for dom in 10; do
              log=$logdir/${name}.log
              timestamp > $log &&
              echo "start running ${name}" &&
-             python $script $datadir/${name}.xml / >> $log &&
+             python $script --input $datadir/${name}.xml >> $log &&
              echo "finish running ${name}" &&
              timestamp >> $log
              python src/read_log.py $log
