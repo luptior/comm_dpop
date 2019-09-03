@@ -12,37 +12,45 @@ import utility
 
 def get_util_msg(agent):
     """
-    Get the util_msg to be sent to the parent and the table to be stored as
-    a tuple, (util_msg, stored_table).
+    Get the util_table to be sent to the parent and the table to be stored as
+    a tuple, (util_table, value_table).
     """
 
     info = agent.agents_info
     # Domain of the parent
     parent_domain = info[agent.p]['domain']
-    # Calculate the dimensions of the util_msg
-    # The dimensions of util_msg and table_stored will be the same.
+    # Calculate the dimensions of the util_table
+    # The dimensions of util_table and table_stored will be the same.
+    # [ len_of_parent_domain, len_of_pparent_domain...]
     dim_util_msg = [len(parent_domain)] + [len(info[x]['domain']) for x in agent.pp]
-    dim_util_msg = dim_stored_table = tuple(dim_util_msg)
-    util_msg = np.empty(dim_util_msg, dtype=object)
-    stored_table = np.empty(dim_util_msg, dtype=object)
+    dim_util_msg = tuple(dim_util_msg)
 
+    # util_table for utility value, value_table for the chosen value for agent
+    util_table = np.empty(dim_util_msg, dtype=object)
+    value_table = np.empty(dim_util_msg, dtype=object)
+
+    # [[p_domain],[pp_domain], ...]
     lists = [parent_domain] + [info[x]['domain'] for x in agent.pp]
+
+    # [[1,2,...,len p_domain], ...]
     indices = [range(len(parent_domain))] + [range(len(info[x]['domain'])) for x in agent.pp]
 
+    # tuple(v1, v2, ...), tuple(index1, index2, ...)
     for item, index in zip(itertools.product(*lists), itertools.product(*indices)):
         max_util = agent.max_util
         xi_val = -1
         for xi in agent.domain:
+            # for each set value of p/parents, choose the with most gain
             util = agent.calculate_util(item, xi)
             if util > max_util:
                 max_util = util
                 xi_val = xi
-        util_msg[index] = max_util
-        stored_table[index] = xi_val
+        util_table[index] = max_util
+        value_table[index] = xi_val
 
     agent.table_ant = tuple([agent.p] + agent.pp)
 
-    return util_msg, stored_table
+    return util_table, value_table
 
 
 def get_util_cube(agent):
@@ -105,7 +113,7 @@ def util_msg_handler(agent):
 
     combined_msg, combined_ant = utility.combine(*util_msgs)
 
-    info = agent.agents_info n
+    info = agent.agents_info
     if agent.is_root:
         assert combined_ant == (agent.id,)
 
