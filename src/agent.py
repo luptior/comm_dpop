@@ -34,7 +34,7 @@ class Agent:
         self.c = None  # A list of the childrens' ids
         self.pc = None  # A list of the pseudo-childrens' ids
         self.table = None  # The table that will be stored
-        self.table_ant = None  # The ANT of the table that will be stored
+        self.table_ant = None  # The ANT of the table that will be stored, assignment-nodeid-tuples 'ants'.
         self.IP = info[self.id]['IP']
         self.PORT = eval(info[self.id]['PORT'])  # Listening Port
         self.is_root = False

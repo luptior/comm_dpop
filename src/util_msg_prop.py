@@ -8,6 +8,7 @@ import itertools
 import sys
 
 import utility
+import optimization
 
 
 def get_util_msg(agent):
@@ -61,10 +62,12 @@ def get_util_cube(agent):
     """
 
     info = agent.agents_info
+
     # Domain of the parent
     parent_domain = info[agent.p]['domain']
     # Calculate the dimensions of the util_msg
     # The dimensions of util_msg and table_stored will be the same.
+    # dim_util_msg = [ size_agent_domain, size_pdoomain, size_ppdomain,..]
     dim_util_msg = [len(agent.domain)] + [len(parent_domain)] + \
                    [len(info[x]['domain']) for x in agent.pp]
     dim_util_msg = tuple(dim_util_msg)
@@ -84,15 +87,16 @@ def get_util_cube(agent):
 
 def util_msg_handler(agent):
     """
-    The util_msg_handler routine in the util_msg_propogation part; this method
-    is run for non-leaf nodes; it waits till all the children of this agent
-    have sent their util_msg, combines them, and then calculates and sends the
-    util_msg to its parent; if this node is the root node, it waits till all
-    the children have sent their util_msg, combines these messages, chooses the
-    assignment for itself with the optimal utility, and then sends this
-    assignment and optimal utility value to all its children and pseudo-
-    children; assumes that the listening thread is active; given the 'agent'
-    which runs this function.
+    The util_msg_handler routine in the util_msg_prop part; this method
+    is run for non-leaf nodes;
+    It waits till all the children of this agent have sent their util_msg,
+    combines them, and then calculates and sends the util_msg to its parent;
+    If this node is the root node, it waits till all the children have sent
+    their util_msg, combines these messages, chooses the assignment for itself
+    with the optimal utility, and then sends this assignment and optimal utility
+    value to all its children and pseudo-children; assumes that the listening
+    thread is active;
+    given the 'agent' which runs this function.
     """
 
     # Wait till util_msg from all the children have arrived
@@ -174,8 +178,6 @@ def util_msg_handler(agent):
 def util_msg_handler_split(agent):
     """
     Change the handling of util message from waiting to piece by piece
-    :param agent:the agnet which is waiting for util msg
-    :return:
     """
 
     unprocessed_children = agent.c
@@ -289,12 +291,32 @@ def util_msg_prop(agent):
         util_msg, agent.table = get_util_msg(agent)
 
         # Send the assignment-nodeid-tuple
-        # agent.udp_send('pre_util_msg_'+str(agent.id), tuple([agent.p]+agent.pp), agent.p)
         agent.send('pre_util_msg_' + str(agent.id), tuple([agent.p] + agent.pp), agent.p)
 
         # Send 'util_msg_<ownid>'' to parent
-        # agent.udp_send('util_msg_'+str(agent.id), util_msg, agent.p)
         agent.send('util_msg_' + str(agent.id), util_msg, agent.p)
+
+    else:
+        util_msg_handler(agent)
+        # util_msg_handler_split(agent)
+
+    print(str(agent.id) + ': End util_msg_prop')
+
+def util_msg_prop_split(agent):
+    print(str(agent.id) + ': Begin util_msg_prop')
+
+    if agent.is_leaf():
+        # if agents is leaf, just send the infos needed
+        info = agent.agents_info
+        util_msg, agent.table = get_util_msg(agent)
+
+        # Send the assignment-nodeid-tuple
+        agent.send('pre_util_msg_' + str(agent.id), tuple([agent.p] + agent.pp), agent.p)
+
+        list_util_msg = optimization.slice(util_msg) # return a list of sliced tables for sending
+        for index, data in enumerate(list_util_msg):
+            # Send 'util_msg_<ownid>'' to parent
+            agent.send(f'util_msg_{agent.id}_{index}', data, agent.p)
 
     else:
         util_msg_handler(agent)

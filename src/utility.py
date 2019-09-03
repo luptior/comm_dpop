@@ -15,7 +15,7 @@ def draw_graph(graph, pstree):
     raise NotImplementedError
 
 
-def get_agents_info(filepath):
+def get_agents_info(filepath:str) -> dict:
     """
     Return a dict with that has all the information extracted from a file like
     'agents.txt'.
@@ -38,8 +38,8 @@ def combine(*args):
     n assignment-nodeid-tuples ('ants')."""
 
     largs = len(args)
-    arrays = args[:int(largs / 2)]
-    ants = args[int(largs / 2):]
+    arrays = args[:int(largs / 2)] # list of actual util tables
+    ants = args[int(largs / 2):] # list of [p, pps]
 
     # Calculate the new shape
     D = {}
