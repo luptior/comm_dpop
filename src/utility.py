@@ -53,10 +53,7 @@ def combine(*args):
     new_shape = tuple([D[key] for key in sorted(D)])
 
     # Calculate the merged ant
-    merged_ant = set()
-    for ant in ants:
-        merged_ant = merged_ant | set(ant)
-    merged_ant = tuple(sorted(tuple(merged_ant)))
+    merged_ant = merge_ant(ants)
 
     merged_array, _ = expand(arrays[0], ants[0], merged_ant, new_shape)
     for array, ant in zip(arrays[1:], ants[1:]):
@@ -64,6 +61,16 @@ def combine(*args):
         merged_array += new_array
 
     return merged_array, merged_ant
+
+
+def merge_ant(ants):
+    # Calculate the merged ant
+    merged_ant = set()
+    for ant in ants:
+        merged_ant = merged_ant | set(ant)
+    merged_ant = tuple(sorted(tuple(merged_ant)))
+
+    return merged_ant
 
 
 def expand(array, ant, new_ant, new_shape):
@@ -140,9 +147,4 @@ def add_dims(array, ant, index, nodeid, depth):
 
 
 def prod(S):
-    """Returns the product of all elements in a sequence S."""
-
-    product = 1
-    for i in S:
-        product = product * i
-    return product
+    return np.product(S)

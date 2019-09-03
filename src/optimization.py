@@ -3,16 +3,31 @@ const tp comes from network.py
 
 """
 
-from network import *
+import network
+import sys
+import numpy as np
 
 
-def optimize_size(original_table):
+def optimize_size(original_table, tp = network.tp) -> tuple:
+    """
+    return the size of smaller pieces based on the computation function and tp
+    :param tp: the throughput from network
+    :param original_table:
+    :return: a tuple represents the shape
+    """
     timw_woOpt = sys.getsizeof(original_table) / tp + comp_time(original_table.shape)
+
+    return original_table.shape
 
 
 def total_time(original_table, piece_shape: tuple) -> float:
+    """
+    :param original_table:
+    :param piece_shape:
+    :return: the total time calculated based on the shape of pieces
+    """
     n_pieces = np.size(original_table) / np.product(piece_shape)
-    trans = size_shape(piece_shape) / tp
+    trans = size_shape(piece_shape) / network.tp
     comp = comp_time(piece_shape)
 
     if trans >= comp:

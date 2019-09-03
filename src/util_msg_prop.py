@@ -180,106 +180,21 @@ def util_msg_handler_split(agent):
     Change the handling of util message from waiting to piece by piece
     """
 
-    unprocessed_children = agent.c
-
-    # initialize the dict before message arrive
-    util_msgs = {}
-    for child in sorted(agent.c):
-        util_msgs['util_msg_' + str(child)] = ''
-    for child in sorted(agent.c):
-        util_msgs['pre_util_msg_' + str(child)] = ''
-
-    # while len(unprocessed_children) > 0:
-    #     for child in unprocessed_children:
-    #         if ('util_msg_' + str(child)) in agent.msgs:
-    #             # process the children
-    #             util_msgs['util_msg_' + str(child)] = agent.msgs['util_msg_' + str(child)]
-    #             util_msgs['pre_util_msg_' + str(child)] = agent.msgs['pre_util_msg_' + str(child)]
-    #
-    #             unprocessed_children.remove(child)
-    #             break
+    # need to wait until all pre_util_msg arrived
     while True:
-        all_children_msgs_arrived = True
+        all_children_pre_msgs_arrived = True
         for child in agent.c:
-            if ('util_msg_' + str(child)) not in agent.msgs:
-                all_children_msgs_arrived = False
+            if ('pre_util_msg_' + str(child)) not in agent.msgs:
+                all_children_pre_msgs_arrived = False
                 break
-            elif ('util_msg_' + str(child)) not in util_msgs.keys():
-                util_msgs['util_msg_' + str(child)] = agent.msgs['util_msg_' + str(child)]
-                util_msgs['pre_util_msg_' + str(child)] = agent.msgs['pre_util_msg_' + str(child)]
-        if all_children_msgs_arrived:
+        if all_children_pre_msgs_arrived:
             break
-        # print(util_msgs)
 
-    # for child in agent.c:
-    #         util_msgs['util_msg_' + str(child)] = agent.msgs['util_msg_' + str(child)]
-    #         util_msgs['pre_util_msg_' + str(child)] = agent.msgs['pre_util_msg_' + str(child)]
+    pre_msgs = [agent.msgs['pre_util_msg_' + str(child)] for child in sorted(agent.c)]
+    merged_ant = utility.merge_ant(pre_msgs)
 
-    util_msgs = list(util_msgs.values())
 
-    # Wait till util_msg from all the children have arrived
 
-    # print("-" * 100)
-    # print(util_msgs)
-
-    # Combine the util_msgs received from all children
-    combined_msg, combined_ant = utility.combine(*util_msgs)
-
-    info = agent.agents_info
-    if agent.is_root:
-        assert combined_ant == (agent.id,)
-
-        # Choose the optimal utility
-        utilities = list(combined_msg)
-        max_util = max(utilities)
-        xi_star = agent.domain[utilities.index(max_util)]
-        agent.value = xi_star
-        agent.max_util = max_util
-
-        # Send the index of assigned value
-        D = {}
-        ind = agent.domain.index(xi_star)
-        D[agent.id] = ind
-        for node in agent.c:
-            # agent.udp_send('value_msg_'+str(agent.id), D, node)
-            agent.send('value_msg_' + str(agent.id), D, node)
-    else:
-        util_cube, _ = get_util_cube(agent)
-
-        # Combine the 2 cubes
-        combined_cube, cube_ant = utility.combine(
-            util_cube, combined_msg,
-            tuple([agent.id] + [agent.p] + agent.pp), combined_ant
-        )
-
-        # Removing own dimension by taking maximum
-        L_ant = list(cube_ant)
-        ownid_index = L_ant.index(agent.id)
-        msg_to_send = np.maximum.reduce(combined_cube, axis=ownid_index)
-        # Ant to send in pre_util_msg
-        ant_to_send = cube_ant[:ownid_index] + cube_ant[ownid_index + 1:]
-
-        # Creating the table to store
-        cc = combined_cube
-        table_shape = list(cc.shape[:])
-        del table_shape[ownid_index]
-        table_shape = tuple(table_shape)
-
-        table = np.zeros(table_shape, dtype=object)
-        cc_rolled = np.rollaxis(cc, ownid_index)
-        for i, abc in enumerate(cc_rolled):
-            for index, _ in np.ndenumerate(abc):
-                if abc[index] == msg_to_send[index]:
-                    table[index] = agent.domain[i]
-        agent.table = table
-        agent.table_ant = ant_to_send
-
-        # Send the assignment-nodeid-tuple
-        # agent.udp_send('pre_util_msg_'+str(agent.id), ant_to_send, agent.p)
-        # agent.udp_send('util_msg_'+str(agent.id), msg_to_send, agent.p)
-
-        agent.send('pre_util_msg_' + str(agent.id), ant_to_send, agent.p)
-        agent.send('util_msg_' + str(agent.id), msg_to_send, agent.p)
 
 
 def util_msg_prop(agent):
@@ -298,9 +213,9 @@ def util_msg_prop(agent):
 
     else:
         util_msg_handler(agent)
-        # util_msg_handler_split(agent)
 
     print(str(agent.id) + ': End util_msg_prop')
+
 
 def util_msg_prop_split(agent):
     print(str(agent.id) + ': Begin util_msg_prop')
@@ -314,12 +229,12 @@ def util_msg_prop_split(agent):
         agent.send('pre_util_msg_' + str(agent.id), tuple([agent.p] + agent.pp), agent.p)
 
         list_util_msg = optimization.slice(util_msg) # return a list of sliced tables for sending
+        l = len(list_util_msg)
         for index, data in enumerate(list_util_msg):
-            # Send 'util_msg_<ownid>'' to parent
-            agent.send(f'util_msg_{agent.id}_{index}', data, agent.p)
+            # Send 'util_msg_<ownid>_partID/total' to parent
+            agent.send(f'util_msg_{agent.id}_{index}/{l}', data, agent.p)
 
     else:
-        util_msg_handler(agent)
-        # util_msg_handler_split(agent)
+        util_msg_handler_split(agent)
 
     print(str(agent.id) + ': End util_msg_prop')
