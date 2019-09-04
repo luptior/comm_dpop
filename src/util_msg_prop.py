@@ -15,6 +15,9 @@ def get_util_msg(agent):
     """
     Get the util_table to be sent to the parent and the table to be stored as
     a tuple, (util_table, value_table).
+    Each of them are:
+    the maximum utility, axes are the different domain of p and pp
+    the value for max util, axes are the different domain of p and pp
     """
 
     info = agent.agents_info
@@ -59,6 +62,9 @@ def get_util_cube(agent):
     Get the utility cube which will be used by a non-leaf node to combine with
     the combined cube it has generated from the util_msgs received from all the
     children.
+    :returns
+    util_msgs: indices of it self, p, pps: utilities
+    dim_util_msg: dims of domains basically
     """
 
     info = agent.agents_info
@@ -115,7 +121,11 @@ def util_msg_handler(agent):
     for child in sorted(agent.c):
         util_msgs.append(agent.msgs['pre_util_msg_' + str(child)])
 
+    print("#"*100)
+    print(util_msgs)
     combined_msg, combined_ant = utility.combine(*util_msgs)
+    print(combined_msg)
+    print(combined_ant)
 
     info = agent.agents_info
     if agent.is_root:
@@ -167,9 +177,6 @@ def util_msg_handler(agent):
         agent.table_ant = ant_to_send
 
         # Send the assignment-nodeid-tuple
-        # agent.udp_send('pre_util_msg_'+str(agent.id), ant_to_send, agent.p)
-        # agent.udp_send('util_msg_'+str(agent.id), msg_to_send, agent.p)
-        # agent.udp_send('util_msg_'+str(agent.id), msg_to_send, agent.p)
 
         agent.send('pre_util_msg_' + str(agent.id), ant_to_send, agent.p)
         agent.send('util_msg_' + str(agent.id), msg_to_send, agent.p)
@@ -196,12 +203,72 @@ def util_msg_handler_split(agent):
 
 
 
+    combined_msg, combined_ant = utility.combine(*util_msgs)
+
+    # split process before this point
+
+    info = agent.agents_info
+    if agent.is_root:
+        assert combined_ant == (agent.id,)
+
+        # Choose the optimal utility
+        utilities = list(combined_msg)
+        max_util = max(utilities)
+        xi_star = agent.domain[utilities.index(max_util)]
+        agent.value = xi_star
+        agent.max_util = max_util
+
+        # Send the index of assigned value
+        D = {}
+        ind = agent.domain.index(xi_star)
+        D[agent.id] = ind
+        for node in agent.c:
+            # agent.udp_send('value_msg_'+str(agent.id), D, node)
+            agent.send('value_msg_' + str(agent.id), D, node)
+    else:
+        util_cube, _ = get_util_cube(agent)
+
+        # Combine the 2 cubes
+        combined_cube, cube_ant = utility.combine(
+            util_cube, combined_msg,
+            tuple([agent.id] + [agent.p] + agent.pp), combined_ant
+        )
+
+        # Removing own dimension by taking maximum
+        L_ant = list(cube_ant)
+        ownid_index = L_ant.index(agent.id)
+        msg_to_send = np.maximum.reduce(combined_cube, axis=ownid_index)
+        # Ant to send in pre_util_msg
+        ant_to_send = cube_ant[:ownid_index] + cube_ant[ownid_index + 1:]
+
+        # Creating the table to store
+        cc = combined_cube
+        table_shape = list(cc.shape[:])
+        del table_shape[ownid_index]
+        table_shape = tuple(table_shape)
+
+        table = np.zeros(table_shape, dtype=object)
+        cc_rolled = np.rollaxis(cc, ownid_index)
+        for i, abc in enumerate(cc_rolled):
+            for index, _ in np.ndenumerate(abc):
+                if abc[index] == msg_to_send[index]:
+                    table[index] = agent.domain[i]
+        agent.table = table
+        agent.table_ant = ant_to_send
+
+        # Send the assignment-nodeid-tuple
+
+        agent.send('pre_util_msg_' + str(agent.id), ant_to_send, agent.p)
+        agent.send('util_msg_' + str(agent.id), msg_to_send, agent.p)
+
 
 def util_msg_prop(agent):
     print(str(agent.id) + ': Begin util_msg_prop')
 
     if agent.is_leaf():
-        # if agents is leaf, just send the infos needed
+        # if agents is leaf, just send the utility messages needed
+        # no need to include it self so get_util_msg()
+
         info = agent.agents_info
         util_msg, agent.table = get_util_msg(agent)
 

@@ -8,7 +8,7 @@ import sys
 import numpy as np
 
 
-def optimize_size(original_table, tp = network.tp) -> tuple:
+def optimize_size(original_table, tp=network.tp) -> tuple:
     """
     return the size of smaller pieces based on the computation function and tp
     :param tp: the throughput from network
@@ -42,16 +42,22 @@ def comp_time(table_shape: tuple) -> float:
     return np.product(table_shape) / clock_rate  # return unit in seconds
 
 
-def slice(original_table) -> list:
+def slice_1d(original_table: np.array, length) -> list:
     """
     the method will slice the original table into smaller pieces for faster communication
 
-    :param original_table: either nested list for np.ndarray
-    :return: list of list(anchor_index, ndarray)
+    :param original_table: np.ndarray
+    :return: list of dict of length length, len(list[0])=length
     """
 
-    sliced_msgs = []
-    o_shape = original_table.shape
+    elements = {i: u for i, u in np.ndenumerate(original_table)}
+    index = [x for x in elements.keys()]
+    n_chuncks = int(len(index) / length)
+
+    chunck_index = [index[x * length: (x + 1) * length] for x in range(n_chuncks)]
+    chunck_index.append(index[n_chuncks * length:])
+
+    sliced_msgs = [{index: elements[index] for index in chunck} for chunck in chunck_index]
 
     return sliced_msgs
 

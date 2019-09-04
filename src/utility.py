@@ -64,7 +64,7 @@ def combine(*args):
 
 
 def merge_ant(ants):
-    # Calculate the merged ant
+    # Calculate the merged ant, a list of non-repeated p and pp
     merged_ant = set()
     for ant in ants:
         merged_ant = merged_ant | set(ant)
@@ -148,3 +148,5 @@ def add_dims(array, ant, index, nodeid, depth):
 
 def prod(S):
     return np.product(S)
+
+# def combine():
