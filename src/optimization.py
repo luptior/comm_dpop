@@ -6,18 +6,29 @@ const tp comes from network.py
 import network
 import sys
 import numpy as np
+from scipy import optimize
 
 
-def optimize_size(original_table, tp=network.tp) -> tuple:
+def optimize_size(original_table, tp=network.tp) -> int:
     """
     return the size of smaller pieces based on the computation function and tp
     :param tp: the throughput from network
     :param original_table:
     :return: a tuple represents the shape
     """
-    timw_woOpt = sys.getsizeof(original_table) / tp + comp_time(original_table.shape)
+    time_woOpt = sys.getsizeof(original_table) / tp + comp_time(original_table.shape)
 
-    return original_table.shape
+    def improvement(length):
+        package_size = length
+
+        return
+    result = optimize.minimize_scalar(improvement())
+    if result.success:  # check if solver was successful
+        length = int(result.x)
+    else :
+        length = np.size(original_table)
+
+    return length
 
 
 def total_time(original_table, piece_shape: tuple) -> float:
