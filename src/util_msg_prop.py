@@ -125,6 +125,7 @@ def util_msg_handler(agent):
     combined_msg, combined_ant = utility.combine(*util_msgs)
 
     info = agent.agents_info
+
     if agent.is_root:
         assert combined_ant == (agent.id,)
 
@@ -220,15 +221,15 @@ def util_msg_handler_split(agent):
     merged_ant = utility.merge_ant(pre_msgs) # the combined set of nodeids for the table sent from two children
 
     info = agent.agents_info
-
+    info[agent.i]['domain'] = agent.domain
     l_domains = [info[x]['domain'] for x in merged_ant]
+
     domain_sizes = [tuple(range(len(x))) for x in l_domains]
     new_array = {indices:[] for indices in itertools.product(*domain_sizes)}
 
     if len(agent.c) == 2:
         index_ant1 = [list(merged_ant).index(i) for i in pre_msgs[0]]
         index_ant2 = [list(merged_ant).index(i) for i in pre_msgs[1]]
-
 
         while True:
             all_children_msgs_arrived = True
@@ -240,10 +241,11 @@ def util_msg_handler_split(agent):
                     msg = agent.unprocessed_util.pop(0) # a piece of info
 
                     title = msg[0]
-                    sliced_msg = msg[1] # is a dict of format {(indices) : util}
+                     # is a dict of format {(indices) : util}
 
                     # add based on the children
                     if title.split("_")[-1] == str(sorted(agent.c)[0]):
+                        sliced_msg = optimization.unfold_msg(msg[1], tuple([len(info[x]['domain']) for x in pre_msgs[0]]))
                         for i in range(len(sliced_msg)):
                             expand = []
                             for x in range(len(merged_ant)):
@@ -258,6 +260,8 @@ def util_msg_handler_split(agent):
                                 new_array[k].append(v)
 
                     elif title.split("_")[-1] == str(sorted(agent.c)[1]):
+                        sliced_msg = optimization.unfold_msg(msg[1],
+                                                             tuple([len(info[x]['domain']) for x in pre_msgs[1]]))
                         for i in range(len(sliced_msg)):
                             expand = []
                             for x in range(len(merged_ant)):
@@ -273,7 +277,22 @@ def util_msg_handler_split(agent):
             if all_children_msgs_arrived:
                 break
     elif len(agent.c) ==1:
-        print()
+        while True:
+            all_children_msgs_arrived = True
+            if sum([len(x) for x in new_array.values()]) < len(new_array):
+                all_children_msgs_arrived = False
+                if len(agent.unprocessed_util) > 0:
+                    # actually do the processing
+
+                    msg = agent.unprocessed_util.pop(0) # a piece of info
+
+                    title = msg[0]
+                     # is a dict of format {(indices) : util}
+                    sliced_msg = optimization.unfold_msg(msg[1], tuple([len(info[x]['domain']) for x in pre_msgs[0]]))
+                    for k, v in sliced_msg.items():
+                        new_array[k].append(v)
+            if all_children_msgs_arrived:
+                break
 
     combined_msg = np.zeros([len(x) for x in l_domains])
 
@@ -342,7 +361,7 @@ def util_msg_handler_split(agent):
 
 
 def util_msg_prop_split(agent):
-    print(str(agent.id) + ': Begin util_msg_prop')
+    print(str(agent.id) + ': Begin util_msg_prop_split')
 
     if agent.is_leaf():
         # if agents is leaf, just send the utility messages needed
@@ -361,6 +380,7 @@ def util_msg_prop_split(agent):
             agent.send('util_msg_' + str(agent.id), sliced_msg, agent.p)
 
     else:
-        util_msg_handler(agent)
+        util_msg_handler_split(agent)
 
-    print(str(agent.id) + ': End util_msg_prop')
+    print(str(agent.id) + ': End util_msg_prop_split')
+    print(agent.msgs)

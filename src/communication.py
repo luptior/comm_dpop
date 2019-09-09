@@ -1,8 +1,10 @@
 from utility import *
 import socket
 import pickle
+import sys
 from network import *
 from run import network_customization
+import optimization
 
 
 def udp_send(a, title, data, dest_node_id):
@@ -85,11 +87,11 @@ def listen_func(msgs, unprocessed_util, sock, agent):
         msgs[udata[0]] = udata[1]
 
         # specially desigend for the partial calculation
-        if udata[:4] == "util":
+        if udata[0][:4] == "util":
             unprocessed_util.append(udata)
 
         print(
-           str(agent_id) + ': Msg received, size is ' + str(len(data)) + " bytes\n" + udata[0] + ": " + str(udata[1]))
+           str(agent_id) + ': Msg received, size is ' + str(sys.getsizeof(data)) + " bytes\n" + udata[0] + ": " + str(udata[1]))
         # print(str(agent_id) + ': Msg received, size is ' + str(len(data)) + " bytes " + udata[0])
 
         if str(udata[1]) == "exit":

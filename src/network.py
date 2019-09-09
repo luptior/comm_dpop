@@ -31,7 +31,7 @@ tp = throughput(Q, RTT, MAX_SEG)
 
 def tran_time(size):
     # return 0.1 + size / 100 , return unit in s
-    return size / throughput
+    return size / tp
 
 
 def loss(s):

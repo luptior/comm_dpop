@@ -7,6 +7,8 @@ import util_msg_prop
 import value_msg_prop
 import communication
 
+import run
+
 
 class Agent:
     def __init__(self, i, domain, relations, agents_file):
@@ -96,7 +98,12 @@ class Agent:
     def start(self):
         print(str(self.id) + ': Started')
         pseudotree_creation.pseudotree_creation(self)
-        util_msg_prop.util_msg_prop(self)
+        if not run.split_processing:
+            print("Split is not enabled")
+            util_msg_prop.util_msg_prop(self)
+        else:
+            print("Split processing is enabled")
+            util_msg_prop.util_msg_prop_split(self)
         if not self.is_root:
             value_msg_prop.value_msg_prop(self)
         print(str(self.id) + ': Finished')

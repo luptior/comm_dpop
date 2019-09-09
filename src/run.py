@@ -17,8 +17,8 @@ import argparse
 import agent
 import dpop_parser
 
-network_customization = False
-split_processing = False
+network_customization = True
+split_processing = None
 
 def get_relatives(num_agents, contatints):
     return {i: [[j for j in x if j != i][0] for x in contatints if i in x] for i in range(num_agents)}
@@ -100,6 +100,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     network_customization = eval(args.network)
-    network_customization = eval(args.split)
+    split_processing = eval(args.split)
 
     main(f=args.input)
