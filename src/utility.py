@@ -63,8 +63,12 @@ def combine(*args):
     return merged_array, merged_ant
 
 
-def merge_ant(ants):
-    # Calculate the merged ant, a list of non-repeated p and pp
+def merge_ant(ants) -> set:
+    """
+    :param ants: a list of two lists of p and pps from children
+    :return: a tuple of non-repeated p and pp
+    """
+    # Calculate the merged ant,
     merged_ant = set()
     for ant in ants:
         merged_ant = merged_ant | set(ant)
@@ -81,6 +85,8 @@ def expand(array, ant, new_ant, new_shape):
     # The values of the nodeids in ant and new_ant must be sorted.
     # Insertion sort is used as there is already an inbuilt function in numpy
     # to swap axes.
+
+    # sort the ant sort array based on it
     ant = list(ant)
     for j in range(len(ant) - 1):
         i_min = j
@@ -98,7 +104,7 @@ def expand(array, ant, new_ant, new_shape):
     i = j = 0
     end_of_ant_reached = False
 
-    while (i != len(new_ant)):
+    while i != len(new_ant):
         x = new_ant[i]
         try:
             y = ant[j]
@@ -129,9 +135,17 @@ def expand(array, ant, new_ant, new_shape):
 
 
 def add_dims(array, ant, index, nodeid, depth):
-    """Return a numpy array with an additional dimension in the place of index.
-    The values of all additional elements created are 0. The depth of the 
-    'nodeid' is given by 'depth'."""
+    """
+    Return a numpy array with an additional dimension in the place of index.
+    The values of all additional elements created are 0. The depth of the
+    'nodeid' is given by 'depth'.
+    :param array: original data array
+    :param ant: corresponding nodeids for original data array
+    :param index: where should the additional axis be added
+    :param nodeid: the added dim's corresponded nodeid
+    :param depth: depth for the added dim
+    :return: a numpy array with an additional dimension in the place of index.
+    """
 
     assert ant == tuple(sorted(ant))
 
@@ -149,4 +163,24 @@ def add_dims(array, ant, index, nodeid, depth):
 def prod(S):
     return np.product(S)
 
-# def combine():
+
+def element_projection(agent, ants:list,  new_entry):
+    """
+    :param ants:  The ants for the two data entry
+    :param new_entry:
+    :return:
+    """
+
+    merged_ant=merge_ant(ants)
+
+    if len(ants) == 2 :
+        # this projection involves array from 2 children
+        shared_ax = (set(ants[0]) & set(ants[1]))[0]
+        shared_id = list(merged_ant).index(shared_ax)
+        id1 = ants[0].index(shared_ax)
+        id2 = ants[2].index(shared_ax)
+
+
+
+
+
