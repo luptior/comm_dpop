@@ -18,6 +18,7 @@ import agent
 import dpop_parser
 
 network_customization = False
+split_processing = False
 
 def get_relatives(num_agents, contatints):
     return {i: [[j for j in x if j != i][0] for x in contatints if i in x] for i in range(num_agents)}
@@ -94,9 +95,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", help="# input file", type=str)
     parser.add_argument("--network", help="# if network customization is turned on", type=str, default="False")
+    parser.add_argument("--split", help="# if network split processing is  turned on ", type=str, default="False")
     # parser.add_argument("--output", help="# output file", type=str)
     args = parser.parse_args()
 
     network_customization = eval(args.network)
+    network_customization = eval(args.split)
 
     main(f=args.input)

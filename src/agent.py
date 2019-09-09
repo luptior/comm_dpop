@@ -45,7 +45,7 @@ class Agent:
 
         # the foollowing are added for split processing
         self.unprocessed_util = [] # The dict where all the received util_messages are stored
-        self.util_table = {} # the table to store the processed util msg
+
 
     def get_graph_nodes(self):
         info = self.agents_info

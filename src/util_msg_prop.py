@@ -63,7 +63,7 @@ def get_util_cube(agent):
     the combined cube it has generated from the util_msgs received from all the
     children.
     :returns
-    util_msgs: indices of it self, p, pps: utilities
+    util_msgs: indices of itself, p, pps: utilities
     dim_util_msg: dims of domains basically
     """
 
@@ -121,11 +121,8 @@ def util_msg_handler(agent):
     for child in sorted(agent.c):
         util_msgs.append(agent.msgs['pre_util_msg_' + str(child)])
 
-    print("#"*100)
-    print(util_msgs)
+
     combined_msg, combined_ant = utility.combine(*util_msgs)
-    print(combined_msg)
-    print(combined_ant)
 
     info = agent.agents_info
     if agent.is_root:
@@ -220,25 +217,68 @@ def util_msg_handler_split(agent):
             break
 
     pre_msgs = [agent.msgs['pre_util_msg_' + str(child)] for child in sorted(agent.c)]
-    merged_ant = utility.merge_ant(pre_msgs)
+    merged_ant = utility.merge_ant(pre_msgs) # the combined set of nodeids for the table sent from two children
 
     info = agent.agents_info
 
     l_domains = [info[x]['domain'] for x in merged_ant]
-    new_array = {indices:[] for indices in itertools.product(l_domains)}
+    domain_sizes = [tuple(range(len(x))) for x in l_domains]
+    new_array = {indices:[] for indices in itertools.product(*domain_sizes)}
 
-    counter = 0
-    while True:
-        all_children_msgs_arrived = True
-        if counter < 2*len(new_array):
-            all_children_msgs_arrived = False
-            if len(agent.unprocessed_util) > 0:
-                # actually do the processing
-        if all_children_msgs_arrived:
-            break
+    if len(agent.c) == 2:
+        index_ant1 = [list(merged_ant).index(i) for i in pre_msgs[0]]
+        index_ant2 = [list(merged_ant).index(i) for i in pre_msgs[1]]
 
 
+        while True:
+            all_children_msgs_arrived = True
+            if sum([len(x) for x in new_array.values()]) < 2*len(new_array): # there should be 2 value in each entry
+                all_children_msgs_arrived = False
+                if len(agent.unprocessed_util) > 0:
+                    # actually do the processing
 
+                    msg = agent.unprocessed_util.pop(0) # a piece of info
+
+                    title = msg[0]
+                    sliced_msg = msg[1] # is a dict of format {(indices) : util}
+
+                    # add based on the children
+                    if title.split("_")[-1] == str(sorted(agent.c)[0]):
+                        for i in range(len(sliced_msg)):
+                            expand = []
+                            for x in range(len(merged_ant)):
+                                if x not in index_ant1:
+                                    expand.append(tuple(range(len(l_domains[x]))))
+                                else:
+                                    expand.append((list(sliced_msg.keys())[0][index_ant1.index(x)],))
+
+                            to_add = {x:list(sliced_msg.values())[0] for x in itertools.product(*expand)}
+
+                            for k, v in to_add.items():
+                                new_array[k].append(v)
+
+                    elif title.split("_")[-1] == str(sorted(agent.c)[1]):
+                        for i in range(len(sliced_msg)):
+                            expand = []
+                            for x in range(len(merged_ant)):
+                                if x not in index_ant2:
+                                    expand.append(tuple(range(len(l_domains[x]))))
+                                else:
+                                    expand.append((list(sliced_msg.keys())[0][index_ant2.index(x)],))
+
+                            to_add = {x:list(sliced_msg.values())[0] for x in itertools.product(*expand)}
+
+                            for k, v in to_add.items():
+                                new_array[k].append(v)
+            if all_children_msgs_arrived:
+                break
+    elif len(agent.c) ==1:
+        print()
+
+    combined_msg = np.zeros([len(x) for x in l_domains])
+
+    for k, v in new_array.items():
+        combined_msg[k] = sum(v)
 
     combined_ant = merged_ant
 
@@ -295,7 +335,10 @@ def util_msg_handler_split(agent):
         # Send the assignment-nodeid-tuple
 
         agent.send('pre_util_msg_' + str(agent.id), ant_to_send, agent.p)
-        agent.send('util_msg_' + str(agent.id), msg_to_send, agent.p)
+
+        sliced_msgs = optimization.slice_1d(msg_to_send)
+        for sliced_msg in sliced_msgs:
+            agent.send('util_msg_' + str(agent.id), sliced_msg, agent.p)
 
 
 def util_msg_prop_split(agent):
@@ -313,8 +356,9 @@ def util_msg_prop_split(agent):
 
         # Send 'util_msg_<ownid>'' to parent
 
-
-        agent.send('util_msg_' + str(agent.id), util_msg, agent.p)
+        sliced_msgs = optimization.slice_1d(util_msg)
+        for sliced_msg in sliced_msgs:
+            agent.send('util_msg_' + str(agent.id), sliced_msg, agent.p)
 
     else:
         util_msg_handler(agent)

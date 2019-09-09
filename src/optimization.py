@@ -65,7 +65,7 @@ def comp_time(table_dim: tuple, length: int):
     return np.product(table_dim) * length / clock_rate  # return unit in seconds
 
 
-def slice_1d(original_table: np.array, length: int) -> list:
+def slice_1d(original_table: np.array) -> list:
     """
     the method will slice the original table into smaller pieces for faster communication
 
@@ -74,6 +74,7 @@ def slice_1d(original_table: np.array, length: int) -> list:
     :return: list of dict of length length, len(list[0])=length
             each element will have (index of first element), list of continuous
     """
+    length = optimize_size(original_table)
 
     elements = {i: u for i, u in np.ndenumerate(original_table)}
     index = list(elements.keys())

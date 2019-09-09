@@ -63,6 +63,7 @@ def pseudotree_creation(agent):
     print(str(agent.id) + ': Begin pseudotree_creation')
     # The dict where all the messages are stored
     msgs = agent.msgs
+    unprocessed_util = agent.unprocessed_util
 
     info = agent.agents_info
     # UDP
@@ -76,7 +77,7 @@ def pseudotree_creation(agent):
     # Creating and starting the 'listen' thread
     listen = threading.Thread(name='Listening-Thread-of-Agent-'+str(agent.id),
                               target=communication.listen_func,
-                              args=(msgs, listening_socket),
+                              args=(msgs, unprocessed_util, listening_socket),
                               kwargs={'agent': agent})
     listen.setDaemon(True)
     listen.start()

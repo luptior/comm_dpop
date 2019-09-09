@@ -30,14 +30,16 @@ def tcp_send(info, title, data, ori_node_id, dest_node_id):
     sock.send(pdata)
     sock.close()
 
-    print(str(ori_node_id) + ': Message sent to agent ' + str(dest_node_id) + ', ' + title + ": " + str(data))
-    # print(str(ori_node_id) + ': Message sent to agent ' + str(dest_node_id) + ', ' + title)
+    # print(str(ori_node_id) + ': Message sent to agent ' + str(dest_node_id) + ', ' + title + ": " + str(data))
+    print(str(ori_node_id) + ': Message sent to agent ' + str(dest_node_id) + ', ' + title)
 
 
-def listen_func(msgs, sock, agent):
+def listen_func(msgs, unprocessed_util, sock, agent):
     """
     Listening on function, and stores the messages in the dict 'msgs'
     Exit when an 'exit' message is received.
+
+    Used in pseudotree_creation
     """
 
     if agent is None:
@@ -81,6 +83,11 @@ def listen_func(msgs, sock, agent):
 
         # msgs entry example util_msg_1:[[...]]
         msgs[udata[0]] = udata[1]
+
+        # specially desigend for the partial calculation
+        if udata[:4] == "util":
+            unprocessed_util.append(udata)
+
         print(
            str(agent_id) + ': Msg received, size is ' + str(len(data)) + " bytes\n" + udata[0] + ": " + str(udata[1]))
         # print(str(agent_id) + ': Msg received, size is ' + str(len(data)) + " bytes " + udata[0])

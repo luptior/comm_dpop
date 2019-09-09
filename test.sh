@@ -12,14 +12,14 @@ timestamp() {
   date +%s
 }
 
-for dom in 10 20 30 40 50 60 70 80 90 100; do
-  for repo in 0; do
+for dom in 10; do
+  for repo in 2; do
       for num in 5; do
              name=random_a${num}_d${dom}_r${repo}
              log=$logdir/${name}.log
              timestamp > $log &&
              echo "start running ${name}" &&
-             python $script --input $datadir/${name}.xml >> $log &&
+             python $script --input $datadir/${name}.xml --network True>> $log &&
              echo "finish running ${name}" &&
              timestamp >> $log
              python src/read_log.py $log
