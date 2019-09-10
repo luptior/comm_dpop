@@ -63,7 +63,7 @@ def combine(*args):
     return merged_array, merged_ant
 
 
-def merge_ant(ants) -> set:
+def merge_ant(ants):
     """
     :param ants: a list of two lists of p and pps from children
     :return: a tuple of non-repeated p and pp

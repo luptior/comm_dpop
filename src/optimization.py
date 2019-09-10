@@ -29,7 +29,7 @@ def optimize_size(original_table: np.array, tp=network.tp) -> int:
     v_improv = np.vectorize(improvement)
     result = v_improv(np.arange(1, original_table.size))
     max_improv = max(result)
-    length = list(result).index(max_improv)
+    length = list(result).index(max_improv)+1
 
     return length
 
@@ -62,7 +62,7 @@ def total_time(original_table: np.array, length: int) -> float:
 
 def comp_time(table_dim: tuple, length: int):
     clock_rate = 3 * 10 ** 9  # unit in Hz
-    return np.product(table_dim) * length / clock_rate  # return unit in seconds
+    return np.product(table_dim) * length * 10  / clock_rate  # return unit in seconds
 
 
 def slice_1d(original_table: np.array) -> list:
@@ -101,7 +101,7 @@ def unfold_msg(sliced_msg: list, shape: tuple) -> dict:
     index_list = generate_index(shape)
 
     position = index_list.index(sliced_msg[0])  # the index of the first element of the sliced_msg
-    sub_index_list = index_list[position: position+len(sliced_msg[1])]
+    sub_index_list = index_list[position: position + len(sliced_msg[1])]
     return dict(zip(sub_index_list, sliced_msg[1]))
 
 
