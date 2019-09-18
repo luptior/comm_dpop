@@ -12,8 +12,6 @@ import optimization
 import datetime
 
 
-
-
 def get_util_msg(agent):
     """
     Get the util_table to be sent to the parent and the table to be stored as

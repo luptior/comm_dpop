@@ -3,7 +3,6 @@ Parse the input files
 Setting up the agents
 Start the running.
 
-
 xml_parser can be change to other scripts to read different types of input.
 """
 
@@ -20,8 +19,8 @@ network_customization = True
 split_processing = True
 
 
-def get_relatives(num_agents, contatints):
-    return {i: [[j for j in x if j != i][0] for x in contatints if i in x] for i in range(num_agents)}
+def get_relatives(num_agents, constrains):
+    return {i: [[j for j in x if j != i][0] for x in constrains if i in x] for i in range(num_agents)}
 
 
 def main(f):

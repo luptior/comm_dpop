@@ -78,13 +78,13 @@ def slice_1d(original_table: np.array) -> list:
 
     elements = {i: u for i, u in np.ndenumerate(original_table)}
     index = list(elements.keys())
-    n_chuncks = int(len(index) / length)
+    n_chunks = int(len(index) / length)
 
-    chunck_index = [index[x * length: (x + 1) * length] for x in range(n_chuncks)]
-    if n_chuncks * length != len(elements):
-        chunck_index.append(index[n_chuncks * length:])
+    chunk_index = [index[x * length: (x + 1) * length] for x in range(n_chunks)]
+    if n_chunks * length != len(elements):
+        chunk_index.append(index[n_chunks * length:])
 
-    sliced_msgs = [{index: elements[index] for index in chunck} for chunck in chunck_index]
+    sliced_msgs = [{index: elements[index] for index in chunck} for chunck in chunk_index]
 
     sliced_msgs = [[list(sliced_msg.keys())[0], list(sliced_msg.values())] for sliced_msg in sliced_msgs]
 
