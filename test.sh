@@ -12,11 +12,19 @@ timestamp() {
   date +%s
 }
 
+<<<<<<< Updated upstream
 for repo in 0; do
     for num in 5; do
          for dom in 20; do
          # for dom in 55 60 65 70 75 80 85 90 95 100; do
              log=$logdir/random_${num}_rep_${repo}_d${dom}.log
+=======
+for dom in 10; do
+  for repo in 6; do
+      for num in 5; do
+             name=random_a${num}_d${dom}_r${repo}
+             log=$logdir/${name}.log
+>>>>>>> Stashed changes
              timestamp > $log &&
              echo "start running random_${num}_rep_${repo}_d${dom}" &&
              python $script $simdir/random_${num}_d${dom}/rep_${repo}_random_${num}_d${dom}.xml / >> $log &&
