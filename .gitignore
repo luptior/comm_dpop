@@ -4,3 +4,7 @@
 *.xml
 *.iml
 sim_jbs.txt
+
+log*
+test.sh
+sim_jbs.txt
