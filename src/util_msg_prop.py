@@ -207,7 +207,7 @@ def util_msg_handler_split(agent):
     Change the handling of util message from waiting to piece by piece
     """
 
-    # need to wait until all pre_util_msg arrived
+    # need to wait until all pre_util_msg arrived, need to know the dimensions
     while True:
         all_children_pre_msgs_arrived = True
         for child in agent.c:
@@ -222,15 +222,17 @@ def util_msg_handler_split(agent):
 
     info = agent.agents_info
     info[agent.i]['domain'] = agent.domain
+
+    # the current problem is that it may only have domain info for neighbors, tmp fix
     try:
         l_domains = [info[x]['domain'] for x in merged_ant]
     except KeyError:
         l_domains = [agent.domain for x in merged_ant]
 
-    domain_ranges = [tuple(range(len(x))) for x in l_domains]
+    domain_ranges = [tuple(range(len(x))) for x in l_domains] # list of index tuples
     new_array = {indices: [] for indices in itertools.product(*domain_ranges)}
 
-    if len(agent.c) == 2:
+    if len(agent.c) == 2: # the will wait for 2 piece of infomation
         index_ant1 = [list(merged_ant).index(i) for i in pre_msgs[0]]
         index_ant2 = [list(merged_ant).index(i) for i in pre_msgs[1]]
 

@@ -15,12 +15,8 @@ import argparse
 import agent
 import dpop_parser
 
-network_customization = True
+network_customization = False
 split_processing = True
-
-
-def get_relatives(num_agents, constrains):
-    return {i: [[j for j in x if j != i][0] for x in constrains if i in x] for i in range(num_agents)}
 
 
 def main(f):
@@ -85,7 +81,9 @@ def main(f):
         for i in children:
             os.wait()
 
-    ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ###
+
+def get_relatives(num_agents, constrains) -> dict:
+    return {i: [[j for j in x if j != i][0] for x in constrains if i in x] for i in range(num_agents)}
 
 
 if __name__ == '__main__':
@@ -100,3 +98,4 @@ if __name__ == '__main__':
     split_processing = eval(args.split)
 
     main(f=args.input)
+
