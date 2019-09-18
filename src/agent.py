@@ -1,20 +1,19 @@
-"Defines the class Agent which represents a node/agent in the DPOP algorithm."
+"""Defines the class Agent which represents a node/agent in the DPOP algorithm."""
 
 import utility
-import pickle
-import socket
-import sys
 
 import pseudotree_creation
 import util_msg_prop
 import value_msg_prop
+import communication
+
+import run
 
 
 class Agent:
     def __init__(self, i, domain, relations, agents_file):
         # Use utils.get_agents_info to initialize all the agents.
-        # All the information from 'agents.txt' will be retrieved and stored in
-        # this dict 'agents_info'.
+        # All the information from 'agents.txt' will be retrieved and stored in this dict 'agents_info'.
         # Also, the domains of some agents will be added to this dict later on.
         # You can access a value as:
         # agent.agents_info[<agent_id>]['field_required']
@@ -37,7 +36,7 @@ class Agent:
         self.c = None  # A list of the childrens' ids
         self.pc = None  # A list of the pseudo-childrens' ids
         self.table = None  # The table that will be stored
-        self.table_ant = None  # The ANT of the table that will be stored
+        self.table_ant = None  # The ANT of the table that will be stored, assignment-nodeid-tuples 'ants'.
         self.IP = info[self.id]['IP']
         self.PORT = eval(info[self.id]['PORT'])  # Listening Port
         self.is_root = False
@@ -45,6 +44,9 @@ class Agent:
             self.is_root = eval(info[self.i]['is_root'])
         self.root_id = eval(info[42]['root_id'])
         self.msgs = {}  # The dict where all the received messages are stored
+
+        # the foollowing are added for split processing
+        self.unprocessed_util = []  # The dict where all the received util_messages are stored
 
     def get_graph_nodes(self):
         info = self.agents_info
@@ -55,22 +57,22 @@ class Agent:
         return graph_nodes
 
     def get_neighbors(self):
-        L = []
+        neighbors = []
         for first, second in self.relations.keys():
             if first == self.i:
-                L.append(second)
+                neighbors.append(second)
             else:
-                L.append(first)
-        return sorted(L)
+                neighbors.append(first)
+        return sorted(neighbors)
 
     def calculate_util(self, tup, xi):
         """
         Calculates the util; given a tuple 'tup' which has the assignments of
         values of parent and pseudo-parent nodes, in order; given a value 'xi'
         of this agent.
-        """
 
-        # Assumed that utilities are combined by adding to each other
+        Assumed that utilities are combined by adding to each other
+        """
         try:
             util = self.relations[self.id, self.p][xi, tup[0]]
         except KeyError:
@@ -83,45 +85,29 @@ class Agent:
                 continue
         return util
 
-    def is_leaf(self):
-        "Return True if this node is a leaf node and False otherwise."
+    def is_leaf(self) -> bool:
+        """
+        Return True if this node is a leaf node and False otherwise.
+        """
+        assert self.c is not None, 'self.c not yet initialized.'
 
-        assert self.c != None, 'self.c not yet initialized.'
-        if self.c == []:
+        if not self.c:
             return True
         else:
             return False
 
-    def udp_send(self, title, data, dest_node_id):
-        print(str(self.id) + ': udp_send, sending a message ...')
-
-        info = self.agents_info
-        pdata = pickle.dumps((title, data))
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.sendto(pdata, (info[dest_node_id]['IP'], int(info[dest_node_id]['PORT'])))
-        sock.close()
-
-        print(str(self.id) + ': Message sent, ' + title + ": " + str(data))
-
-    def tcp_send(self, title, data, dest_node_id):
-        print(str(self.id) + ': tcp_send, sending a message ...')
-        info = self.agents_info
-        pdata = pickle.dumps((title, data))
-
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-        # TCP
-        sock.connect((info[dest_node_id]['IP'], int(info[dest_node_id]['PORT'])))
-        sock.send(pdata)
-
-        sock.close()
-
-        print(str(self.id) + ': Message sent to agent ' + str(dest_node_id) + ', ' + title + ": " + str(data))
-
     def start(self):
         print(str(self.id) + ': Started')
         pseudotree_creation.pseudotree_creation(self)
-        util_msg_prop.util_msg_prop(self)
+        if not run.split_processing:
+            print("Split is not enabled")
+            util_msg_prop.util_msg_prop(self)
+        else:
+            print("Split processing is enabled")
+            util_msg_prop.util_msg_prop_split(self)
         if not self.is_root:
             value_msg_prop.value_msg_prop(self)
         print(str(self.id) + ': Finished')
+
+    def send(self, title, data, dest_node_id):
+        communication.tcp_send(self.agents_info, title, data, self.id, dest_node_id)

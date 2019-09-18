@@ -1,17 +1,33 @@
+"""The entry point of the program
+Parse the input files
+Setting up the agents
+Start the running.
+
+xml_parser can be change to other scripts to read different types of input.
+"""
+
 import os
 import sys
 import numpy as np
-import agent, xml_parser
+import argparse
+
+# Package
+import agent
+import dpop_parser
+
+network_customization = True
+split_processing = True
 
 
-def get_relatives(num_agents, contatints):
-    return {i: [[j for j in x if j != i][0] for x in contatints if i in x] for i in range(num_agents)}
+def get_relatives(num_agents, constrains):
+    return {i: [[j for j in x if j != i][0] for x in constrains if i in x] for i in range(num_agents)}
 
 
-def main():
-
-    f = sys.argv[1]
-    agents, domains, variables, relations, constraints = xml_parser.parse(f)
+def main(f):
+    if f.split(".")[-1] == "xml":
+        agents, domains, variables, relations, constraints = dpop_parser.xml_parse(f)
+    else:
+        agents, domains, variables, relations, constraints = dpop_parser.parse(f)
 
     agent_ids = list(range(len(agents)))
     root_id = int(len(agent_ids) / 2)
@@ -24,17 +40,16 @@ def main():
     # dict keys are agent id and values are (agent_id, neighbor_id):{(val1, val2):util}
     agent_relations = {}
     for i in agent_ids:
-        i_relation = {tu:relations[tu] for tu in relations.keys() if i in tu}
+        i_relation = {tu: relations[tu] for tu in relations.keys() if i in tu}
         keys = i_relation.keys()
         for tu in keys:
             if i != tu[0]:
-                r_value = {(v_tu[1], v_tu[0]):i_relation[tu][v_tu] for v_tu in i_relation[tu].keys()}
+                r_value = {(v_tu[1], v_tu[0]): i_relation[tu][v_tu] for v_tu in i_relation[tu].keys()}
                 del i_relation[tu]
-                i_relation[(tu[1], tu[0])]=r_value
+                i_relation[(tu[1], tu[0])] = r_value
         agent_relations[i] = i_relation
 
     with open("sim_jbs.txt", "w") as f:
-
         f.write("id=42 root_id=" + str(root_id) + "\n\n")
         id = np.random.randint(1000)
         for u in agent_ids:
@@ -74,4 +89,14 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--input", help="# input file", type=str)
+    parser.add_argument("--network", help="# if network customization is turned on", type=str, default="False")
+    parser.add_argument("--split", help="# if network split processing is  turned on ", type=str, default="False")
+    # parser.add_argument("--output", help="# output file", type=str)
+    args = parser.parse_args()
+
+    network_customization = eval(args.network)
+    split_processing = eval(args.split)
+
+    main(f=args.input)
