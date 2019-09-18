@@ -46,8 +46,7 @@ class Agent:
         self.msgs = {}  # The dict where all the received messages are stored
 
         # the foollowing are added for split processing
-        self.unprocessed_util = [] # The dict where all the received util_messages are stored
-
+        self.unprocessed_util = []  # The dict where all the received util_messages are stored
 
     def get_graph_nodes(self):
         info = self.agents_info
@@ -58,22 +57,22 @@ class Agent:
         return graph_nodes
 
     def get_neighbors(self):
-        l = []
+        neighbors = []
         for first, second in self.relations.keys():
             if first == self.i:
-                l.append(second)
+                neighbors.append(second)
             else:
-                l.append(first)
-        return sorted(l)
+                neighbors.append(first)
+        return sorted(neighbors)
 
     def calculate_util(self, tup, xi):
         """
         Calculates the util; given a tuple 'tup' which has the assignments of
         values of parent and pseudo-parent nodes, in order; given a value 'xi'
         of this agent.
-        """
 
-        # Assumed that utilities are combined by adding to each other
+        Assumed that utilities are combined by adding to each other
+        """
         try:
             util = self.relations[self.id, self.p][xi, tup[0]]
         except KeyError:
@@ -86,10 +85,12 @@ class Agent:
                 continue
         return util
 
-    def is_leaf(self):
-        """Return True if this node is a leaf node and False otherwise."""
-
+    def is_leaf(self) -> bool:
+        """
+        Return True if this node is a leaf node and False otherwise.
+        """
         assert self.c is not None, 'self.c not yet initialized.'
+
         if not self.c:
             return True
         else:

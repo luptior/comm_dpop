@@ -3,12 +3,12 @@ const tp comes from network.py
 
 """
 
-import network
+
 import sys
 import numpy as np
-import itertools
-from scipy import optimize
 import pickle
+
+import network
 
 
 def optimize_size(original_table: np.array, tp=network.tp) -> int:
@@ -18,51 +18,49 @@ def optimize_size(original_table: np.array, tp=network.tp) -> int:
     :param original_table:
     :return: a tuple represents the shape
     """
-    time_woOpt = mem_calculation(original_table) / tp + \
-                 comp_time(original_table.shape, original_table.size)
+    time_woOpt = get_actual_size(original_table) / tp + computation_time(original_table.shape, original_table.size)
 
-    def improvement(length: int):
-        time_wOpt = total_time(original_table, length)
-
+    def improvement(l: int):
+        time_wOpt = time_with_optimization(original_table, l)
         return (time_woOpt - time_wOpt) / time_woOpt
 
-    v_improv = np.vectorize(improvement)
-    result = v_improv(np.arange(1, original_table.size))
-    max_improv = max(result)
-    length = list(result).index(max_improv)+1
+    result = map(improvement, np.arange(1, original_table.size))
+
+    max_improve = max(result)
+    length = list(result).index(max_improve) + 1
 
     return length
 
-    # result = optimize.minimize_scalar(improvement, bounds=(1, original_table.size), method='bounded')
-    # if result.success:  # check if solver was successful
-    #     length = int(result.x)
-    # else:
-    #     length = original_table.size
-    #
-    # return length
 
-
-def total_time(original_table: np.array, length: int) -> float:
+def time_with_optimization(original_table: np.array, length: int) -> float:
     """
-    calculated the total time spent if we want to do the optimization
+    calculated the total time spent if apply optimization, there are two conditions, 1, transmission of
+    the msg takes more time, 2, computation takes more time.
     :param original_table:
     :param length:
     :return: the total time calculated based on the shape of pieces
     """
     n_pieces = int(np.size(original_table) / length) + 1
     trans = size_sliced_msg(original_table.shape, length) / network.tp
-    comp = comp_time(original_table.shape, length)
+    comp = computation_time(original_table.shape, length)
 
     if trans >= comp:
-        # transmition takes more time
+        # transmission takes more time
         return n_pieces * trans + comp
     else:
+        # computation takes more time
         return n_pieces * comp + trans
 
 
-def comp_time(table_dim: tuple, length: int):
-    clock_rate = 3 * 10 ** 9  # unit in Hz
-    return np.product(table_dim) * length * 10  / clock_rate  # return unit in seconds
+def computation_time(table_dim: tuple, length: int, clock_rate: int = 3 * 10 ** 9):
+    """
+    Calculate the estimated time spent
+    :param table_dim:
+    :param length:
+    :param clock_rate:
+    :return:
+    """
+    return np.product(table_dim) * length * 10 / clock_rate  # return unit in seconds
 
 
 def slice_1d(original_table: np.array) -> list:
@@ -111,8 +109,7 @@ def generate_index(shape: tuple) -> list:
     :param shape: (5,4,3)
     :return: a list. such as [(0, 0, 0), (0, 0, 1), (0, 0, 2)...]
     """
-    index = [i for i, d in np.ndenumerate(np.zeros(shape))]
-    return index
+    return [i for i, d in np.ndenumerate(np.zeros(shape))]
 
 
 def size_sliced_msg(table_dim: tuple, length: int) -> int:
@@ -125,15 +122,17 @@ def size_sliced_msg(table_dim: tuple, length: int) -> int:
 
     example = [table_dim, list(np.random.randint(100, size=length))]
 
-    return mem_calculation(example)
+    return get_actual_size(example)
 
 
 # For size calculation
 
-def mem_calculation(obj) -> int:
+def get_actual_size(obj: object) -> int:
     """
-    To better calculated the size used used by a python object, this function returns the size in bytes
-    :param ojb: an python object
+    To get the actual size used used by a python object instead of pointers,
+    this function first transform the object into pickles form, then returns the size in bytes
+
+    :param obj: an python object
     :return: size in bytes
     """
 
