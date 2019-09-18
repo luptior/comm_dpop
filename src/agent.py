@@ -1,5 +1,5 @@
 """Defines the class Agent which represents a node/agent in the DPOP algorithm."""
-
+import network
 import utility
 
 import pseudotree_creation
@@ -8,6 +8,8 @@ import value_msg_prop
 import communication
 
 import run
+import network
+import optimization
 
 
 class Agent:
@@ -97,14 +99,19 @@ class Agent:
             return False
 
     def start(self):
+
+        print(optimization.split_processing, network.network_customization)
+
         print(str(self.id) + ': Started')
         pseudotree_creation.pseudotree_creation(self)
-        if not run.split_processing:
+
+        if not optimization.split_processing:
             print("Split is not enabled")
             util_msg_prop.util_msg_prop(self)
         else:
             print("Split processing is enabled")
             util_msg_prop.util_msg_prop_split(self)
+
         if not self.is_root:
             value_msg_prop.value_msg_prop(self)
         print(str(self.id) + ': Finished')

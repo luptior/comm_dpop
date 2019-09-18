@@ -10,15 +10,17 @@ import pickle
 
 import network
 
+split_processing = False
 
-def optimize_size(original_table: np.array, tp=network.tp) -> int:
+
+def optimize_size(original_table: np.array) -> int:
     """
     return the size of smaller pieces based on the computation function and tp
-    :param tp: the throughput from network
     :param original_table:
     :return: a tuple represents the shape
     """
-    time_woOpt = get_actual_size(original_table) / tp + computation_time(original_table.shape, original_table.size)
+
+    time_woOpt = time_with_optimization(original_table, np.size(original_table))
 
     def improvement(l: int):
         time_wOpt = time_with_optimization(original_table, l)

@@ -14,6 +14,8 @@ import numpy as np
 from time import sleep
 import sys
 
+network_customization = False
+
 # some constants for network communication
 
 Q = 0.01

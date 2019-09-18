@@ -3,7 +3,6 @@ import socket
 import pickle
 import sys
 from network import *
-from run import network_customization
 import optimization
 
 

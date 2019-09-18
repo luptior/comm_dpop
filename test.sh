@@ -12,7 +12,7 @@ timestamp() {
   date +%s
 }
 
-for dom in 10; do
+for dom in 20; do
   for repo in 6; do
       for num in 5; do
              name=random_a${num}_d${dom}_r${repo}

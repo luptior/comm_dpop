@@ -14,9 +14,8 @@ import argparse
 # Package
 import agent
 import dpop_parser
-
-network_customization = False
-split_processing = True
+import network
+import optimization
 
 
 def main(f):
@@ -94,8 +93,8 @@ if __name__ == '__main__':
     # parser.add_argument("--output", help="# output file", type=str)
     args = parser.parse_args()
 
-    network_customization = eval(args.network)
-    split_processing = eval(args.split)
+    network.network_customization = eval(args.network)
+    optimization.split_processing = eval(args.split)
 
     main(f=args.input)
 
