@@ -16,9 +16,10 @@ import agent
 import dpop_parser
 import logging
 
-logging.basicConfig(level=logging.INFO)
-network_customization = True
-split_processing = True
+logger = logging.getLogger("dpop.run")
+
+network_customization = False
+split_processing = False
 
 
 def main(f):
@@ -72,7 +73,7 @@ def main(f):
                 children.append(childid)
                 if childid == 0:
                     a.start()
-                    print('agent' + str(a.id) + ': ' + str(a.value))
+                    logger.debug('agent' + str(a.id) + ': ' + str(a.value))
 
     # Start root agent
     root_agent = agents[root_id]
@@ -86,6 +87,53 @@ def main(f):
 
 def get_relatives(num_agents, constrains) -> dict:
     return {i: [[j for j in x if j != i][0] for x in constrains if i in x] for i in range(num_agents)}
+
+
+def _configure_logs(level: int, log_conf: str):
+    if log_conf is not None:
+        if not path.exists(log_conf):
+            raise ValueError(f"Could not find log configuration file {log_conf}")
+        fileConfig(log_conf)
+        logging.info(f'Using log config file {log_conf}')
+        return
+
+    # Default: remove all logs except error
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.ERROR)
+    # Format logs with hour and ms, but no date
+    formatter = logging.Formatter(
+        '%(asctime)s.%(msecs)03d - %(name)s - %(levelname)s - %(message)s',
+        '%H:%M:%S')
+    console_handler.setFormatter(formatter)
+    root_logger = logging.getLogger('')
+    root_logger.addHandler(console_handler)
+
+    # Avoid logs when sending http requests:
+    urllib_logger = logging.getLogger('urllib3.connectionpool')
+    urllib_logger.setLevel(logging.ERROR)
+    # Remove ui and communication layer logs:
+    comm_logger = logging.getLogger('infrastructure.communication')
+    comm_logger.setLevel(logging.ERROR)
+    ui_logger = logging.getLogger('pydcop.agent.ui')
+    ui_logger.setLevel(logging.ERROR)
+
+    levels = {
+        0: logging.ERROR,
+        1: logging.WARNING,
+        2: logging.INFO,
+        3: logging.DEBUG
+    }
+
+    root_logger.setLevel(levels[level])
+    console_handler.setLevel(levels[level])
+    console_handler.setFormatter(formatter)
+
+    if level == 1:
+        logging.warning('logging: warning')
+    elif level == 2:
+        logging.info('logging: info')
+    elif level == 3:
+        logging.debug('logging: debug')
 
 
 if __name__ == '__main__':
