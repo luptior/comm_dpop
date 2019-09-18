@@ -24,10 +24,10 @@ def optimize_size(original_table: np.array, tp=network.tp) -> int:
         time_wOpt = time_with_optimization(original_table, l)
         return (time_woOpt - time_wOpt) / time_woOpt
 
-    result = map(improvement, np.arange(1, original_table.size))
+    result = [improvement(x) for x in np.arange(1, original_table.size)]
 
     max_improve = max(result)
-    length = list(result).index(max_improve) + 1
+    length = result.index(max_improve) + 1
 
     return length
 

@@ -14,13 +14,11 @@ import argparse
 # Package
 import agent
 import dpop_parser
+import logging
 
+logging.basicConfig(level=logging.INFO)
 network_customization = True
 split_processing = True
-
-
-def get_relatives(num_agents, constrains):
-    return {i: [[j for j in x if j != i][0] for x in constrains if i in x] for i in range(num_agents)}
 
 
 def main(f):
@@ -82,10 +80,12 @@ def main(f):
         root_agent.start()
         print('max_util: ' + str(root_agent.max_util))
         print('agent' + str(root_agent.id) + ': ' + str(root_agent.value))
-        for i in children:
+        for _ in children:
             os.wait()
 
-    ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ###
+
+def get_relatives(num_agents, constrains) -> dict:
+    return {i: [[j for j in x if j != i][0] for x in constrains if i in x] for i in range(num_agents)}
 
 
 if __name__ == '__main__':

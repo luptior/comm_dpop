@@ -6,10 +6,12 @@ part of the DPOP algorithm
 import numpy as np
 import itertools
 import sys
-
+import logging
 import utility
 import optimization
 import datetime
+
+logging.basicConfig(level=logging.INFO)
 
 
 def get_util_msg(agent):
