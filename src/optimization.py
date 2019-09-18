@@ -20,6 +20,8 @@ def optimize_size(original_table: np.array) -> int:
     :return: a tuple represents the shape
     """
 
+    # time_woOpt = get_actual_size(original_table) / tp + computation_time(original_table.shape, original_table.size)
+    # should be changed
     time_woOpt = time_with_optimization(original_table, np.size(original_table))
 
     def improvement(l: int):
