@@ -90,6 +90,31 @@ def slice_1d(original_table: np.array) -> list:
 
     return sliced_msgs
 
+def slice_original(original_table: np.array) -> list:
+    """
+    the method will slice the original table into smaller pieces for faster communication
+
+    :param length: the length for sliced list
+    :param original_table: np.ndarray
+    :return: list of dict of length length, len(list[0])=length
+            each element will have (index of first element), list of continuous
+    """
+    length = np.size(original_table)
+
+    elements = {i: u for i, u in np.ndenumerate(original_table)}
+    index = list(elements.keys())
+    n_chunks = int(len(index) / length)
+
+    chunk_index = [index[x * length: (x + 1) * length] for x in range(n_chunks)]
+    if n_chunks * length != len(elements):
+        chunk_index.append(index[n_chunks * length:])
+
+    sliced_msgs = [{index: elements[index] for index in chunck} for chunck in chunk_index]
+
+    sliced_msgs = [[list(sliced_msg.keys())[0], list(sliced_msg.values())] for sliced_msg in sliced_msgs]
+
+    return sliced_msgs
+
 
 def unfold_msg(sliced_msg: list, shape: tuple) -> dict:
     """
@@ -100,7 +125,11 @@ def unfold_msg(sliced_msg: list, shape: tuple) -> dict:
     """
     index_list = generate_index(shape)
 
-    position = index_list.index(sliced_msg[0])  # the index of the first element of the sliced_msg
+    try:
+        position = index_list.index(sliced_msg[0])  # the index of the first element of the sliced_msg
+    except ValueError:
+        sliced_msg = sliced_msg[0]
+        position = index_list.index(sliced_msg[0])
     sub_index_list = index_list[position: position + len(sliced_msg[1])]
     return dict(zip(sub_index_list, sliced_msg[1]))
 

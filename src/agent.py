@@ -100,14 +100,12 @@ class Agent:
 
     def start(self):
 
-        print(optimization.split_processing, network.network_customization)
-
         print(str(self.id) + ': Started')
         pseudotree_creation.pseudotree_creation(self)
 
         if not optimization.split_processing:
-            print("Split is not enabled")
-            util_msg_prop.util_msg_prop(self)
+            print("Split is not enabled, but send all table in special format")
+            util_msg_prop.util_msg_prop_split_orignal(self)
         else:
             print("Split processing is enabled")
             util_msg_prop.util_msg_prop_split(self)

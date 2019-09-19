@@ -96,5 +96,9 @@ if __name__ == '__main__':
     network.network_customization = eval(args.network)
     optimization.split_processing = eval(args.split)
 
+    print(f"split: {optimization.split_processing}, network: {network.network_customization}")
+    if network.network_customization:
+        print("net speed", network.tp)
+
     main(f=args.input)
 
