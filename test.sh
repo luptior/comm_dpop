@@ -2,8 +2,8 @@
 PATH="/usr/local/bin/gdate:$PATH"
 
 #sudo sysctl -w net.inet.udp.maxdgram=65535
-script=/Users/luptior/Desktop/Research_3/dpop/src/run.py
-datadir=/Users/luptior/Desktop/Research_3/python_generator/data
+script=/Users/gx/Documents/Research_3/dpop/src/run.py
+datadir=/Users/gx/Documents/Research_3/python_generator/data
 logdir=./log
 mkdir -p $logdir
 
