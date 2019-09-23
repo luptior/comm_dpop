@@ -9,6 +9,7 @@ import numpy as np
 import pickle
 
 import network
+import util_msg_prop
 
 split_processing = False
 
@@ -19,16 +20,23 @@ def optimize_size(original_table: np.array) -> int:
     :param original_table:
     :return: a tuple represents the shape
     """
+    r = lambda size: int(size / 10 ** int(np.log10(size))) * 10 ** (int(np.log10(size)) - 2)
 
-    time_woOpt = time_with_optimization(original_table, np.size(original_table))
+    # if original_table.size <= 100:
+    #     step = 1
+    # else:
+    #     step = r(original_table.size)
 
-    def improvement(l: int):
-        time_wOpt = time_with_optimization(original_table, l)
-        return (time_woOpt - time_wOpt) / time_woOpt
+    # test_range = np.concatenate((np.arange(1, 100), np.arange(100, original_table.size, step)))
 
-    result = [improvement(x) for x in np.arange(1, original_table.size)]
+    def top(length):
+        return time_with_optimization(original_table, length)
 
-    max_improve = max(result)
+    vtop = np.vectorize(top)
+
+    result = list(vtop(np.arange(1, np.size(original_table))))
+
+    max_improve = min(result)
     length = result.index(max_improve) + 1
 
     return length
@@ -43,8 +51,10 @@ def time_with_optimization(original_table: np.array, length: int) -> float:
     :return: the total time calculated based on the shape of pieces
     """
     n_pieces = int(np.size(original_table) / length) + 1
-    trans = size_sliced_msg(original_table.shape, length) / network.tp
-    comp = computation_time(original_table.shape, length)
+    sliced_size = size_sliced_msg(original_table.shape, length)
+
+    trans = sliced_size / network.tp
+    comp = computation_time(sliced_size)
 
     if trans >= comp:
         # transmission takes more time
@@ -54,15 +64,18 @@ def time_with_optimization(original_table: np.array, length: int) -> float:
         return n_pieces * comp + trans
 
 
-def computation_time(table_dim: tuple, length: int, clock_rate: int = 3 * 10 ** 9):
+def computation_time(sliced_size: int, clock_rate: int = 3 * 10 ** 9):
     """
     Calculate the estimated time spent
-    :param table_dim:
-    :param length:
-    :param clock_rate:
+    :param sliced_size: size in int
+    :param clock_rate: need to be calculated based on local machine, currently not implemented
     :return:
     """
-    return np.product(table_dim) * length * 10 / clock_rate  # return unit in seconds
+    # return np.product(table_dim) * length * 10 / clock_rate  # return unit in seconds
+    if util_msg_prop.slow_processing:
+        return 6.144387919188346e-06 * sliced_size + 0.017582085621144466 * 100
+    else:
+        return 6.144387919188346e-06 * sliced_size + 0.017582085621144466
 
 
 def slice_1d(original_table: np.array) -> list:
@@ -75,6 +88,7 @@ def slice_1d(original_table: np.array) -> list:
             each element will have (index of first element), list of continuous
     """
     length = optimize_size(original_table)
+    # length = int(np.size(original_table)/2)
 
     elements = {i: u for i, u in np.ndenumerate(original_table)}
     index = list(elements.keys())
@@ -89,6 +103,7 @@ def slice_1d(original_table: np.array) -> list:
     sliced_msgs = [[list(sliced_msg.keys())[0], list(sliced_msg.values())] for sliced_msg in sliced_msgs]
 
     return sliced_msgs
+
 
 def slice_original(original_table: np.array) -> list:
     """
@@ -140,7 +155,7 @@ def generate_index(shape: tuple) -> list:
     :param shape: (5,4,3)
     :return: a list. such as [(0, 0, 0), (0, 0, 1), (0, 0, 2)...]
     """
-    return [i for i, d in np.ndenumerate(np.zeros(shape))]
+    return [i for i in np.ndindex(shape)]
 
 
 def size_sliced_msg(table_dim: tuple, length: int) -> int:
@@ -151,9 +166,9 @@ def size_sliced_msg(table_dim: tuple, length: int) -> int:
     :return: size in byte
     """
 
-    example = [table_dim, list(np.random.randint(100, size=length))]
+    example = [table_dim, np.random.random()]
 
-    return get_actual_size(example)
+    return get_actual_size(example) + 8 * (length - 1)
 
 
 # For size calculation

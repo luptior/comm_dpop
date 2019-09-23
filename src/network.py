@@ -14,7 +14,7 @@ import numpy as np
 from time import sleep
 import sys
 
-network_customization = False
+network_customization = True
 
 # some constants for network communication
 
@@ -28,11 +28,12 @@ def throughput(q, rtt, s) -> float:
     return 1.22 * s / (rtt * np.sqrt(q))
 
 
-tp = throughput(Q, RTT, MAX_SEG)
+# retun KB/s
+tp = throughput(Q, RTT, MAX_SEG) * 100
 
 
-def tran_time(size):
-    # return 0.1 + size / 100 , return unit in s
+def tran_time(size: int) -> float:
+    # size in byte, return unit in s
     return size / tp
 
 
@@ -75,6 +76,3 @@ def proactive(size):
                 sleep(5)
             else:
                 sleep(tran_time(last))
-
-
-
