@@ -12,8 +12,6 @@ from datetime import datetime as dt
 import utility
 import optimization
 
-
-
 slow_processing = False
 
 def slow_process(msg):
