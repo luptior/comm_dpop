@@ -14,7 +14,7 @@ import numpy as np
 from time import sleep
 import sys
 
-network_customization = False
+network_customization = True
 
 # some constants for network communication
 

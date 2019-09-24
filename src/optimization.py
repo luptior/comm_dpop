@@ -22,15 +22,15 @@ def optimize_size(original_table: np.array) -> int:
 
     # time_woOpt = get_actual_size(original_table) / tp + computation_time(original_table.shape, original_table.size)
     # should be changed
-    time_woOpt = time_with_optimization(original_table, np.size(original_table))
+    # time_woOpt = time_with_optimization(original_table, np.size(original_table))
+    #
+    # def improvement(l: int):
+    #     time_wOpt = time_with_optimization(original_table, l)
+    #     return (time_woOpt - time_wOpt) / time_woOpt
 
-    def improvement(l: int):
-        time_wOpt = time_with_optimization(original_table, l)
-        return (time_woOpt - time_wOpt) / time_woOpt
+    result = [time_with_optimization(original_table, x) for x in np.arange(1, original_table.size)]
 
-    result = [improvement(x) for x in np.arange(1, original_table.size)]
-
-    max_improve = max(result)
+    max_improve = min(result)
     length = result.index(max_improve) + 1
 
     return length

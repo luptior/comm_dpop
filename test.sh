@@ -7,7 +7,7 @@ datadir=/Users/gx/Documents/Research_3/python_generator/data
 logdir=./log
 mkdir -p $logdir
 
-network=False
+network=True
 split=True
 
 
@@ -16,7 +16,7 @@ timestamp() {
   date +%s
 }
 
-for dom in 5; do
+for dom in 20; do
   for repo in 6; do
       for num in 5; do
              name=random_a${num}_d${dom}_r${repo}
