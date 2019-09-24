@@ -70,12 +70,12 @@ def computation_time(table_dim: tuple, length: int, clock_rate: int = 3 * 10 ** 
 def slice_to_list(original_table: np.array) -> list:
     """
     the method will slice the original table into smaller pieces for faster communication
-
-    :param length: the length for sliced list
     :param original_table: np.ndarray
     :return: list of dict of length length, len(list[0])=length
             each element will have (index of first element), list of continuous
     """
+
+    # optimization comes into play
     length = optimize_size(original_table)
 
     elements = {i: u for i, u in np.ndenumerate(original_table)}
@@ -86,14 +86,14 @@ def slice_to_list(original_table: np.array) -> list:
     if n_chunks * length != len(elements):
         chunk_index.append(index[n_chunks * length:])
 
-    sliced_msgs = [{index: elements[index] for index in chunck} for chunck in chunk_index]
+    sliced_msgs = [{index: elements[index] for index in chunk} for chunk in chunk_index]
 
     sliced_msgs = [[list(sliced_msg.keys())[0], list(sliced_msg.values())] for sliced_msg in sliced_msgs]
 
     return sliced_msgs
 
 
-def unfold_list(sliced_msg: list, shape: tuple) -> dict:
+def unfold_sliced_msg(sliced_msg: list, shape: tuple) -> dict:
     """
     Unfold the sliced msg to be a dictionary where each entry is (index) : value
     :param sliced_msg: an element in the output list from the slice_1d()
@@ -119,8 +119,6 @@ def size_sliced_msg(table_dim: tuple, length: int) -> int:
 
     return get_actual_size(example) + 8* (length-1)
 
-
-# For size calculation
 
 def get_actual_size(obj: object) -> int:
     """
