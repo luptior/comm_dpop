@@ -1,6 +1,7 @@
 """Defines the class Agent which represents a node/agent in the DPOP algorithm."""
 import network
 import utility
+from datetime import datetime as dt
 
 import pseudotree_creation
 import util_msg_prop
@@ -100,9 +101,7 @@ class Agent:
 
     def start(self):
 
-        print(optimization.split_processing, network.network_customization)
-
-        print(str(self.id) + ': Started')
+        print(dt.now(), str(self.id) + ': Started')
         pseudotree_creation.pseudotree_creation(self)
 
         if not optimization.split_processing:
@@ -114,7 +113,7 @@ class Agent:
 
         if not self.is_root:
             value_msg_prop.value_msg_prop(self)
-        print(str(self.id) + ': Finished')
+        print(dt.now(), str(self.id) + ': Finished')
 
     def send(self, title, data, dest_node_id):
         communication.tcp_send(self.agents_info, title, data, self.id, dest_node_id)

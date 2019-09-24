@@ -7,7 +7,7 @@ import numpy as np
 import itertools
 import sys
 from time import sleep
-import datetime
+from datetime import datetime as dt
 
 import utility
 import optimization
@@ -189,7 +189,7 @@ def util_msg_handler(agent):
 
 
 def util_msg_prop(agent):
-    print(str(agent.id) + ': Begin util_msg_prop')
+    print(dt.now(), str(agent.id) + ': Begin util_msg_prop')
 
     if agent.is_leaf():
         # if agents is leaf, just send the utility messages needed
@@ -207,7 +207,7 @@ def util_msg_prop(agent):
     else:
         util_msg_handler(agent)
 
-    print(str(agent.id) + ': End util_msg_prop')
+    print(dt.now(), str(agent.id) + ': End util_msg_prop')
 
 
 def util_msg_handler_split(agent):
@@ -385,7 +385,7 @@ def util_msg_handler_split(agent):
 
 
 def util_msg_prop_split(agent):
-    print(str(agent.id) + ': Begin util_msg_prop_split')
+    print(dt.now(), str(agent.id) + ': Begin util_msg_prop_split')
 
     if agent.is_leaf():
         # if agents is leaf, just send the utility messages needed
@@ -406,4 +406,4 @@ def util_msg_prop_split(agent):
     else:
         util_msg_handler_split(agent)
 
-    print(str(agent.id) + ': End util_msg_prop_split')
+    print(dt.now(), str(agent.id) + ': End util_msg_prop_split')
