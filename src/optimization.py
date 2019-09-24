@@ -64,7 +64,7 @@ def computation_time(table_dim: tuple, length: int, clock_rate: int = 3 * 10 ** 
     :param clock_rate:
     :return:
     """
-    return np.product(table_dim) * length * 10 / clock_rate  # return unit in seconds
+    return 6.144387919188346e-06 * size_sliced_msg(table_dim, length) + 0.017582085621144466
 
 
 def slice_to_list(original_table: np.array) -> list:

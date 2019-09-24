@@ -6,10 +6,18 @@ part of the DPOP algorithm
 import numpy as np
 import itertools
 import sys
+from time import sleep
+import datetime
 
 import utility
 import optimization
-import datetime
+
+
+
+slow_processing = False
+
+def slow_process(msg):
+    sleep((6.144387919188346e-06 * optimization.get_actual_size(msg) + 0.017582085621144466) * 100)
 
 
 def get_util_msg(agent):
