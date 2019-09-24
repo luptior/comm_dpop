@@ -106,7 +106,7 @@ class Agent:
 
         if not optimization.split_processing:
             print("Split is not enabled")
-            util_msg_prop.util_msg_prop(self)
+            util_msg_prop.util_msg_prop_list(self)
         else:
             print("Split processing is enabled")
             util_msg_prop.util_msg_prop_split(self)
