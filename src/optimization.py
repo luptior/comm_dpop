@@ -1,9 +1,3 @@
-"""
-const tp comes from network.py
-
-"""
-
-
 import sys
 import numpy as np
 import pickle
@@ -45,7 +39,7 @@ def time_with_optimization(original_table: np.array, length: int) -> float:
     :return: the total time calculated based on the shape of pieces
     """
     n_pieces = int(np.size(original_table) / length) + 1
-    trans = size_sliced_msg(original_table.shape, length) / network.tp
+    trans = network.tran_time(size_sliced_msg(original_table.shape, length))
     comp = computation_time(original_table.shape, length)
 
     if trans >= comp:
