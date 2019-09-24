@@ -7,15 +7,16 @@ datadir=/Users/gx/Documents/Research_3/python_generator/data
 logdir=./log
 mkdir -p $logdir
 
-network=True
+network=False
 split=True
+
 
 # Define a timestamp function, return seconds.nanoseconds
 timestamp() {
   date +%s
 }
 
-for dom in 10; do
+for dom in 5; do
   for repo in 6; do
       for num in 5; do
              name=random_a${num}_d${dom}_r${repo}

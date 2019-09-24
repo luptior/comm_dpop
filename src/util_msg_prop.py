@@ -13,7 +13,7 @@ import utility
 import network
 from datetime import datetime as dt
 
-slow_processing = True
+slow_processing = False
 
 
 def slow_process(msg):
@@ -225,7 +225,7 @@ def util_msg_handler_split(agent):
         if all_children_pre_msgs_arrived:
             break
 
-    print(dt.now(), str(agent.id) + f" start processing util message")
+    print(dt.now(), f"{str(agent.id)}: start processing util message")
 
     pre_msgs = [agent.msgs['pre_util_msg_' + str(child)] for child in sorted(agent.c)]
     merged_ant = utility.merge_ant(pre_msgs)  # the combined set of nodeids for the table sent from two children
@@ -266,7 +266,7 @@ def util_msg_handler_split(agent):
                         # is a dict of format {(indices) : util}
 
                         # add based on the children
-                        if title.split("_")[-1] == str(sorted(agent.c)[0]):
+                        if title.split("_")[-2] == str(sorted(agent.c)[0]):
                             try:
                                 sliced_msg = optimization.unfold_msg(msg[1],
                                                                      tuple(
@@ -287,7 +287,7 @@ def util_msg_handler_split(agent):
                                 for k, v in to_add.items():
                                     new_array[k].append(v)
 
-                        elif title.split("_")[-1] == str(sorted(agent.c)[1]):
+                        elif title.split("_")[-2] == str(sorted(agent.c)[1]):
                             try:
                                 sliced_msg = optimization.unfold_msg(msg[1],
                                                                      tuple(
@@ -307,8 +307,13 @@ def util_msg_handler_split(agent):
 
                                 for k, v in to_add.items():
                                     new_array[k].append(v)
+
                         print(dt.now(), str(agent.id) + f" Finish processing util message {title}")
             if all_children_msgs_arrived:
+                combined_msg = np.zeros([len(x) for x in l_domains])
+
+                for k, v in new_array.items():
+                    combined_msg[k] = sum(v)
                 break
     elif len(agent.c) == 1:
         while True:
@@ -407,7 +412,7 @@ def util_msg_handler_split(agent):
 
 
 def util_msg_prop_split(agent):
-    print(str(agent.id) + ': Begin util_msg_prop_split')
+    print(dt.now(), str(agent.id) + ': Begin util_msg_prop_split')
 
     if agent.is_leaf():
         # if agents is leaf, just send the utility messages needed
@@ -428,7 +433,7 @@ def util_msg_prop_split(agent):
     else:
         util_msg_handler_split(agent)
 
-    print(str(agent.id) + ': End util_msg_prop_split')
+    print(dt.now(), str(agent.id) + ': End util_msg_prop_split')
 
 
 def util_msg_handler_split_original(agent):
