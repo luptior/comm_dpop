@@ -8,7 +8,7 @@ logdir=./log
 mkdir -p $logdir
 
 network=True
-split=False
+split=True
 
 
 # Define a timestamp function, return seconds.nanoseconds

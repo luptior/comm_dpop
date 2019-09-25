@@ -14,6 +14,7 @@ import optimization
 
 slow_processing = False
 
+
 def slow_process(msg):
     sleep((6.144387919188346e-06 * optimization.get_actual_size(msg) + 0.017582085621144466) * 100)
 
@@ -233,12 +234,12 @@ def util_msg_handler_split(agent):
     try:
         l_domains = [info[x]['domain'] for x in merged_ant]
     except KeyError:
-        l_domains = [agent.domain for x in merged_ant]
+        l_domains = [agent.domain for _ in merged_ant]
 
-    domain_ranges = [tuple(range(len(x))) for x in l_domains] # list of index tuples
+    domain_ranges = [tuple(range(len(x))) for x in l_domains]  # list of index tuples
     new_array = {indices: [] for indices in itertools.product(*domain_ranges)}
 
-    if len(agent.c) == 2: # the will wait for 2 piece of infomation
+    if len(agent.c) == 2:  # the will wait for 2 piece of infomation
         index_ant1 = [list(merged_ant).index(i) for i in pre_msgs[0]]
         index_ant2 = [list(merged_ant).index(i) for i in pre_msgs[1]]
 
@@ -258,7 +259,8 @@ def util_msg_handler_split(agent):
                     if title.split("_")[-1] == str(sorted(agent.c)[0]):
                         try:
                             sliced_msg = optimization.unfold_sliced_msg(msg[1],
-                                                                        tuple([len(info[x]['domain']) for x in pre_msgs[0]]))
+                                                                        tuple([len(info[x]['domain']) for x in
+                                                                               pre_msgs[0]]))
                         except KeyError:
                             sliced_msg = optimization.unfold_sliced_msg(msg[1],
                                                                         tuple([len(agent.domain) for x in pre_msgs[0]]))
@@ -278,7 +280,8 @@ def util_msg_handler_split(agent):
                     elif title.split("_")[-1] == str(sorted(agent.c)[1]):
                         try:
                             sliced_msg = optimization.unfold_sliced_msg(msg[1],
-                                                                        tuple([len(info[x]['domain']) for x in pre_msgs[1]]))
+                                                                        tuple([len(info[x]['domain']) for x in
+                                                                               pre_msgs[1]]))
                         except KeyError:
                             sliced_msg = optimization.unfold_sliced_msg(msg[1],
                                                                         tuple([len(agent.domain) for x in pre_msgs[1]]))
@@ -310,9 +313,11 @@ def util_msg_handler_split(agent):
                     # is a dict of format {(indices) : util}
                     try:
                         sliced_msg = optimization.unfold_sliced_msg(msg[1],
-                                                                    tuple([len(info[x]['domain']) for x in pre_msgs[0]]))
+                                                                    tuple(
+                                                                        [len(info[x]['domain']) for x in pre_msgs[0]]))
                     except KeyError:
-                        sliced_msg = optimization.unfold_sliced_msg(msg[1], tuple([len(agent.domain) for x in pre_msgs[0]]))
+                        sliced_msg = optimization.unfold_sliced_msg(msg[1],
+                                                                    tuple([len(agent.domain) for x in pre_msgs[0]]))
                     for k, v in sliced_msg.items():
                         new_array[k].append(v)
             if all_children_msgs_arrived:
@@ -434,12 +439,12 @@ def util_msg_handler_list(agent):
     try:
         l_domains = [info[x]['domain'] for x in merged_ant]
     except KeyError:
-        l_domains = [agent.domain for x in merged_ant]
+        l_domains = [agent.domain for _ in merged_ant]
 
     domain_ranges = [tuple(range(len(x))) for x in l_domains]  # list of index tuples
     new_array = {indices: [] for indices in itertools.product(*domain_ranges)}
 
-    if len(agent.c) == 2:  # the will wait for 2 piece of infomation
+    if len(agent.c) == 2:  # the will wait for 2 piece of information
         index_ant1 = [list(merged_ant).index(i) for i in pre_msgs[0]]
         index_ant2 = [list(merged_ant).index(i) for i in pre_msgs[1]]
 
@@ -462,11 +467,12 @@ def util_msg_handler_list(agent):
                     # add based on the children
                     if title.split("_")[-1] == str(sorted(agent.c)[0]):
                         try:
-                            sliced_msg = optimization.unfold_msg(msg[1],
-                                                                 tuple([len(info[x]['domain']) for x in pre_msgs[0]]))
+                            sliced_msg = optimization.unfold_sliced_msg(msg[1],
+                                                                        tuple([len(info[x]['domain']) for x in
+                                                                               pre_msgs[0]]))
                         except KeyError:
-                            sliced_msg = optimization.unfold_msg(msg[1],
-                                                                 tuple([len(agent.domain) for x in pre_msgs[0]]))
+                            sliced_msg = optimization.unfold_sliced_msg(msg[1],
+                                                                        tuple([len(agent.domain) for _ in pre_msgs[0]]))
                         for i in range(len(sliced_msg)):
                             expand = []
                             for x in range(len(merged_ant)):
@@ -482,11 +488,12 @@ def util_msg_handler_list(agent):
 
                     elif title.split("_")[-1] == str(sorted(agent.c)[1]):
                         try:
-                            sliced_msg = optimization.unfold_msg(msg[1],
-                                                                 tuple([len(info[x]['domain']) for x in pre_msgs[1]]))
+                            sliced_msg = optimization.unfold_sliced_msg(msg[1],
+                                                                        tuple([len(info[x]['domain']) for x in
+                                                                               pre_msgs[1]]))
                         except KeyError:
-                            sliced_msg = optimization.unfold_msg(msg[1],
-                                                                 tuple([len(agent.domain) for _ in pre_msgs[1]]))
+                            sliced_msg = optimization.unfold_sliced_msg(msg[1],
+                                                                        tuple([len(agent.domain) for _ in pre_msgs[1]]))
                         for i in range(len(sliced_msg)):
                             expand = []
                             for x in range(len(merged_ant)):
@@ -519,10 +526,12 @@ def util_msg_handler_list(agent):
                         slow_process(msg)  # slow down processing
                     # is a dict of format {(indices) : util}
                     try:
-                        sliced_msg = optimization.unfold_msg(msg[1],
-                                                             tuple([len(info[x]['domain']) for x in pre_msgs[0]]))
+                        sliced_msg = optimization.unfold_sliced_msg(msg[1],
+                                                                    tuple(
+                                                                        [len(info[x]['domain']) for x in pre_msgs[0]]))
                     except KeyError:
-                        sliced_msg = optimization.unfold_msg(msg[1], tuple([len(agent.domain) for x in pre_msgs[0]]))
+                        sliced_msg = optimization.unfold_sliced_msg(msg[1],
+                                                                    tuple([len(agent.domain) for x in pre_msgs[0]]))
                     for k, v in sliced_msg.items():
                         new_array[k].append(v)
             if all_children_msgs_arrived:
@@ -589,7 +598,7 @@ def util_msg_handler_list(agent):
 
         agent.send('pre_util_msg_' + str(agent.id), ant_to_send, agent.p)
 
-        sliced_msg = optimization.slice_original(msg_to_send)
+        sliced_msg = optimization.table_to_list(msg_to_send)
         agent.send('util_msg_' + str(agent.id), sliced_msg, agent.p)
 
 
@@ -609,7 +618,7 @@ def util_msg_prop_list(agent):
         # Send 'util_msg_<ownid>'' to parent
 
         # make table to list
-        sliced_msg = optimization.slice_original(util_msg)
+        sliced_msg = optimization.table_to_list(util_msg)
         agent.send('util_msg_' + str(agent.id), sliced_msg, agent.p)
 
     else:

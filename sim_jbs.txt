@@ -1,12 +1,12 @@
 id=42 root_id=2
 
-id=0 IP=127.0.0.1 PORT=5494 
+id=0 IP=127.0.0.1 PORT=5379 
 
-id=1 IP=127.0.0.1 PORT=5495 
+id=1 IP=127.0.0.1 PORT=5380 
 
-id=2 IP=127.0.0.1 PORT=5496 is_root=True 
+id=2 IP=127.0.0.1 PORT=5381 is_root=True 
 
-id=3 IP=127.0.0.1 PORT=5497 
+id=3 IP=127.0.0.1 PORT=5382 
 
-id=4 IP=127.0.0.1 PORT=5498 
+id=4 IP=127.0.0.1 PORT=5383 
 
