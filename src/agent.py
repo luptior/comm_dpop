@@ -1,11 +1,16 @@
 """Defines the class Agent which represents a node/agent in the DPOP algorithm."""
-
+import network
 import utility
+from datetime import datetime as dt
 
 import pseudotree_creation
 import util_msg_prop
 import value_msg_prop
 import communication
+
+import run
+import network
+import optimization
 
 
 class Agent:
@@ -43,6 +48,9 @@ class Agent:
         self.root_id = eval(info[42]['root_id'])
         self.msgs = {}  # The dict where all the received messages are stored
 
+        # the foollowing are added for split processing
+        self.unprocessed_util = []  # The dict where all the received util_messages are stored
+
     def get_graph_nodes(self):
         info = self.agents_info
         graph_nodes = []
@@ -52,22 +60,22 @@ class Agent:
         return graph_nodes
 
     def get_neighbors(self):
-        l = []
+        neighbors = []
         for first, second in self.relations.keys():
             if first == self.i:
-                l.append(second)
+                neighbors.append(second)
             else:
-                l.append(first)
-        return sorted(l)
+                neighbors.append(first)
+        return sorted(neighbors)
 
     def calculate_util(self, tup, xi):
         """
         Calculates the util; given a tuple 'tup' which has the assignments of
         values of parent and pseudo-parent nodes, in order; given a value 'xi'
         of this agent.
-        """
 
-        # Assumed that utilities are combined by adding to each other
+        Assumed that utilities are combined by adding to each other
+        """
         try:
             util = self.relations[self.id, self.p][xi, tup[0]]
         except KeyError:
@@ -80,22 +88,32 @@ class Agent:
                 continue
         return util
 
-    def is_leaf(self):
-        """Return True if this node is a leaf node and False otherwise."""
-
+    def is_leaf(self) -> bool:
+        """
+        Return True if this node is a leaf node and False otherwise.
+        """
         assert self.c is not None, 'self.c not yet initialized.'
+
         if not self.c:
             return True
         else:
             return False
 
     def start(self):
-        print(str(self.id) + ': Started')
+
+        print(dt.now(), str(self.id) + ': Started')
         pseudotree_creation.pseudotree_creation(self)
-        util_msg_prop.util_msg_prop(self)
+
+        if not optimization.split_processing:
+            print("Split is not enabled")
+            util_msg_prop.util_msg_prop_list(self)
+        else:
+            print("Split processing is enabled")
+            util_msg_prop.util_msg_prop_split(self)
+
         if not self.is_root:
             value_msg_prop.value_msg_prop(self)
-        print(str(self.id) + ': Finished')
+        print(dt.now(), str(self.id) + ': Finished')
 
     def send(self, title, data, dest_node_id):
         communication.tcp_send(self.agents_info, title, data, self.id, dest_node_id)
