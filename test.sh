@@ -8,7 +8,7 @@ logdir=./log
 mkdir -p $logdir
 
 network=True
-split=True
+split=False
 
 
 # Define a timestamp function, return seconds.nanoseconds
@@ -16,8 +16,8 @@ timestamp() {
   date +%s
 }
 
-for dom in 20; do
-  for repo in 6; do
+for dom in 50; do
+  for repo in 2; do
       for num in 5; do
              name=random_a${num}_d${dom}_r${repo}
              log=$logdir/${name}_split${split}_network${network}.log

@@ -90,6 +90,8 @@ if __name__ == '__main__':
     parser.add_argument("--input", help="# input file", type=str)
     parser.add_argument("--network", help="# if network customization is turned on", type=str, default="False")
     parser.add_argument("--split", help="# if network split processing is  turned on ", type=str, default="False")
+    parser.add_argument("--comp_speed", help="# a parameter to adjust the network speed ", type=str, default="False")
+    parser.add_argument("--net_speed", help="# if network split processing is  turned on ", type=str, default="False")
     # parser.add_argument("--output", help="# output file", type=str)
     args = parser.parse_args()
 

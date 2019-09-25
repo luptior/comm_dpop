@@ -3,6 +3,7 @@ import numpy as np
 import pickle
 
 import network
+import util_msg_prop
 
 split_processing = False
 
@@ -13,14 +14,11 @@ def optimize_size(original_table: np.array) -> int:
     :param original_table:
     :return: a tuple represents the shape
     """
-
-    # time_woOpt = get_actual_size(original_table) / tp + computation_time(original_table.shape, original_table.size)
-    # should be changed
-    # time_woOpt = time_with_optimization(original_table, np.size(original_table))
-    #
-    # def improvement(l: int):
-    #     time_wOpt = time_with_optimization(original_table, l)
-    #     return (time_woOpt - time_wOpt) / time_woOpt
+    # if np.size(original_table) < 100:
+    #     test_range = np.arange(1, original_table.size)
+    # else:
+    #     test_range = list(np.arange(1, 100)) + \
+    #                  list(np.arange(100, original_table.size, 2*int(np.log10(np.size(original_table)))))
 
     result = [time_with_optimization(original_table, x) for x in np.arange(1, original_table.size)]
 
@@ -40,7 +38,7 @@ def time_with_optimization(original_table: np.array, length: int) -> float:
     """
     n_pieces = int(np.size(original_table) / length) + 1
     trans = network.tran_time(size_sliced_msg(original_table.shape, length))
-    comp = computation_time(original_table.shape, length)
+    comp = computation_time(size_sliced_msg(original_table.shape, length))
 
     if trans >= comp:
         # transmission takes more time
@@ -50,15 +48,18 @@ def time_with_optimization(original_table: np.array, length: int) -> float:
         return n_pieces * comp + trans
 
 
-def computation_time(table_dim: tuple, length: int, clock_rate: int = 3 * 10 ** 9):
+def computation_time(sliced_size: int, clock_rate: int = 3 * 10 ** 9):
     """
     Calculate the estimated time spent
-    :param table_dim:
-    :param length:
-    :param clock_rate:
+    :param sliced_size: size in int
+    :param clock_rate: need to be calculated based on local machine, currently not implemented
     :return:
     """
-    return 6.144387919188346e-06 * size_sliced_msg(table_dim, length) + 0.017582085621144466
+    # return np.product(table_dim) * length * 10 / clock_rate  # return unit in seconds
+    if util_msg_prop.slow_processing:
+        return (6.144387919188346e-06 * sliced_size + 0.017582085621144466) * 10
+    else:
+        return 6.144387919188346e-06 * sliced_size + 0.017582085621144466
 
 
 def slice_to_list(original_table: np.array) -> list:

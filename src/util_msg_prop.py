@@ -12,11 +12,12 @@ from datetime import datetime as dt
 import utility
 import optimization
 
-slow_processing = False
+slow_processing = True
 
 
 def slow_process(msg):
-    sleep((6.144387919188346e-06 * optimization.get_actual_size(msg) + 0.017582085621144466) * 100)
+    time = optimization.computation_time(optimization.get_actual_size(msg))
+    sleep(time)
 
 
 def get_util_msg(agent):
@@ -252,6 +253,9 @@ def util_msg_handler_split(agent):
 
                     msg = agent.unprocessed_util.pop(0)  # a piece of info
 
+                    if slow_process:
+                        slow_process(msg)
+
                     title = msg[0]
                     # is a dict of format {(indices) : util}
 
@@ -308,6 +312,9 @@ def util_msg_handler_split(agent):
                     # actually do the processing
 
                     msg = agent.unprocessed_util.pop(0)  # a piece of info
+
+                    if slow_process:
+                        slow_process(msg)
 
                     title = msg[0]
                     # is a dict of format {(indices) : util}
