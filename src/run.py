@@ -90,13 +90,15 @@ if __name__ == '__main__':
     parser.add_argument("--input", help="# input file", type=str)
     parser.add_argument("--network", help="# if network customization is turned on", type=str, default="False")
     parser.add_argument("--split", help="# if network split processing is  turned on ", type=str, default="False")
-    parser.add_argument("--comp_speed", help="# a parameter to adjust the network speed ", type=str, default="False")
-    parser.add_argument("--net_speed", help="# if network split processing is  turned on ", type=str, default="False")
+    parser.add_argument("--comp_speed", help="# a parameter to adjust the computation speed ", type=float, default=10)
+    parser.add_argument("--net_speed", help="# a parameter to adjust the network speed ", type=float, default=10)
     # parser.add_argument("--output", help="# output file", type=str)
     args = parser.parse_args()
 
     network.network_customization = eval(args.network)
+    network.net_speed = args.net_speed
     optimization.split_processing = eval(args.split)
+    optimization.computation_speed = args.comp_speed
 
     main(f=args.input)
 

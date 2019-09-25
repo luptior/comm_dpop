@@ -102,13 +102,16 @@ class Agent:
     def start(self):
 
         print(dt.now(), str(self.id) + ': Started')
+
         pseudotree_creation.pseudotree_creation(self)
+        print(f"Split processing is {optimization.split_processing}, " +
+              f"computation speed is {optimization.computation_speed} " +
+              f"network customization is {network.network_customization} "+
+              f"network speed is {network.net_speed} " )
 
         if not optimization.split_processing:
-            print("Split is not enabled")
             util_msg_prop.util_msg_prop_list(self)
         else:
-            print("Split processing is enabled")
             util_msg_prop.util_msg_prop_split(self)
 
         if not self.is_root:

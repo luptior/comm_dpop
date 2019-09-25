@@ -6,6 +6,7 @@ import network
 import util_msg_prop
 
 split_processing = False
+computation_speed = 10
 
 
 def optimize_size(original_table: np.array) -> int:
@@ -57,7 +58,7 @@ def computation_time(sliced_size: int, clock_rate: int = 3 * 10 ** 9):
     """
     # return np.product(table_dim) * length * 10 / clock_rate  # return unit in seconds
     if util_msg_prop.slow_processing:
-        return (6.144387919188346e-06 * sliced_size + 0.017582085621144466) * 10
+        return (6.144387919188346e-06 * sliced_size + 0.017582085621144466) * computation_speed
     else:
         return 6.144387919188346e-06 * sliced_size + 0.017582085621144466
 
