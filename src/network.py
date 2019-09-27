@@ -14,8 +14,9 @@ import numpy as np
 from time import sleep
 import sys
 
-network_customization = False
-net_speed = 10
+network_customization = True
+net_speed = 100
+
 
 # some constants for network communication
 

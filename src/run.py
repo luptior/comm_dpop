@@ -77,7 +77,7 @@ def main(f):
         root_agent.start()
         print('max_util: ' + str(root_agent.max_util))
         print('agent' + str(root_agent.id) + ': ' + str(root_agent.value))
-        for i in children:
+        for _ in children:
             os.wait()
 
 
