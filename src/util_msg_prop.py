@@ -16,6 +16,10 @@ slow_processing = True
 
 
 def slow_process(msg):
+    """
+    sleep by a certain amount of time based on the size of msg
+    :param msg: the msg extracted and waited to be processed
+    """
     time = optimization.computation_time(msg_structure.get_actual_size(msg))
     sleep(time)
 

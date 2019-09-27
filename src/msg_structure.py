@@ -1,3 +1,10 @@
+"""
+Date structure for DPOP message, original implementation used multidimensional array, addition data structure is list
+based, [(indedx of first element), [sequential values from ndarray]]
+
+"""
+
+
 import numpy as np
 import sys
 import pickle
