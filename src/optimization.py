@@ -62,7 +62,10 @@ def computation_time(sliced_size: int, clock_rate: int = 3 * 10 ** 9):
         return 6.144387919188346e-06 * sliced_size + 0.017582085621144466
 
 
-if __name__ == '__main__':
-    table = np.random.randint(100, size=(6, 5, 4))
-    # print(size_sliced_msg(table.shape, 10))
-    print(optimize_size(table))
+def gradient_descent(f, range, step) -> int:
+
+    size = 1
+
+
+
+    return size

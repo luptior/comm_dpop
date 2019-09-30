@@ -7,7 +7,6 @@ xml_parser can be change to other scripts to read different types of input.
 """
 
 import os
-import sys
 import numpy as np
 import argparse
 
@@ -65,9 +64,9 @@ def main(f):
     for a in agents:
         if not a.is_root:
             if pid == os.getpid():
-                childid = os.fork()
-                children.append(childid)
-                if childid == 0:
+                child_id = os.fork()
+                children.append(child_id)
+                if child_id == 0:
                     a.start()
                     print('agent' + str(a.id) + ': ' + str(a.value))
 
