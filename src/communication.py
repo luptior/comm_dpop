@@ -67,6 +67,7 @@ def listen_func(msgs, unprocessed_util, sock, agent):
 
         total_data = []
         while True:
+            # continuously receive packages
             data = connectionSocket.recv(4096)
             if not data:
                 break
@@ -91,7 +92,8 @@ def listen_func(msgs, unprocessed_util, sock, agent):
         if udata[0][:4] == "util":
             unprocessed_util.append(udata)
 
-        if len(str(udata[1])) <100:
+        # just some record printing
+        if len(str(udata[1])) < 100:
             print(dt.now(), str(agent_id) +
                   ': Msg received, size is ' + str(sys.getsizeof(data)) + " bytes\n"
                   + udata[0] + ": " + str(udata[1]))
@@ -100,6 +102,7 @@ def listen_func(msgs, unprocessed_util, sock, agent):
                   ': Msg received, size is ' + str(sys.getsizeof(data)) + " bytes\n"
                   + udata[0] + ": " + str(udata[1])[:100] + "...")
 
+        # exit only when exit is received
         if str(udata[1]) == "exit":
             print(dt.now(), str(agent_id) + ': End listen_func')
             return

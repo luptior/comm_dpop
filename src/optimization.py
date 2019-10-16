@@ -1,4 +1,5 @@
 import numpy as np
+from scipy import optimize
 
 import network
 import util_msg_prop
@@ -26,6 +27,26 @@ def optimize_size(original_table: np.array) -> int:
     length = result.index(max_improve) + 1
 
     return length
+
+
+def optimize_size2(original_table: np.array) -> int:
+    """
+    return the size of smaller pieces based on the computation function and tp
+    :param original_table:
+    :return: a tuple represents the shape
+    """
+    # if np.size(original_table) < 100:
+    #     test_range = np.arange(1, original_table.size)
+    # else:
+    #     test_range = list(np.arange(1, 100)) + \
+    #                  list(np.arange(100, original_table.size, 2*int(np.log10(np.size(original_table)))))
+
+    func = lambda x: time_with_optimization(original_table, x)
+    result = optimize.minimize(func, np.array(np.size(original_table) / 2))
+    print(result)
+    result = int(result)
+
+    return result
 
 
 def time_with_optimization(original_table: np.array, length: int) -> float:
@@ -62,7 +83,14 @@ def computation_time(sliced_size: int, clock_rate: int = 3 * 10 ** 9):
         return 6.144387919188346e-06 * sliced_size + 0.017582085621144466
 
 
-def gradient_descent(f, range, step) -> int:
+def gradient_descent(f, r, step) -> int:
+    """
+    TODO: be complete to speed up the minimizer finding of optimize size
+    :param f:
+    :param limit: the upper limit of the range, by default should be the np.size of original table
+    :param step:
+    :return:
+    """
 
     size = 1
 
