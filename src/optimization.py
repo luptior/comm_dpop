@@ -9,9 +9,10 @@ split_processing = False
 computation_speed = 30
 
 
-def optimize_size(original_table: np.array) -> int:
+def optimize_size(original_table: np.array, start_length: int = 1) -> int:
     """
     return the size of smaller pieces based on the computation function and tp
+    :param start_length: a parameter sets the minimum length for the minimizer search
     :param original_table:
     :return: a tuple represents the shape
     """
@@ -21,7 +22,7 @@ def optimize_size(original_table: np.array) -> int:
     #     test_range = list(np.arange(1, 100)) + \
     #                  list(np.arange(100, original_table.size, 2*int(np.log10(np.size(original_table)))))
 
-    result = [time_with_optimization(original_table, x) for x in np.arange(1, original_table.size)]
+    result = [time_with_optimization(original_table, x) for x in np.arange(start_length, original_table.size)]
 
     max_improve = min(result)
     length = result.index(max_improve) + 1
@@ -31,7 +32,7 @@ def optimize_size(original_table: np.array) -> int:
 
 def optimize_size2(original_table: np.array) -> int:
     """
-    return the size of smaller pieces based on the computation function and tp
+    where i tried to add gradient descent
     :param original_table:
     :return: a tuple represents the shape
     """

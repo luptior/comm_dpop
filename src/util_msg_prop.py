@@ -640,3 +640,38 @@ def util_msg_prop_list(agent):
         util_msg_handler_list(agent)
 
     print(dt.now(), str(agent.id) + ': End util_msg_prop_split')
+
+
+def util_msg_handler_split_pipeline(agent):
+    """
+    handle piece by piece
+    """
+
+
+def util_msg_prop_split_pipeline(agent):
+
+    """
+    for pipeline, the current naive implementation is do optimization at leaf then send them all
+
+    """
+    print(dt.now(), str(agent.id) + ': Begin util_msg_prop_split_pipeline')
+
+    if agent.is_leaf():
+        # if agents is leaf, just send the utility messages needed
+        # no need to include it self so get_util_msg()
+
+        info = agent.agents_info
+        util_msg, agent.table = get_util_msg(agent)
+
+        # Send the assignment-nodeid-tuple
+        agent.send('pre_util_msg_' + str(agent.id), tuple([agent.p] + agent.pp), agent.p)
+
+        # Send 'util_msg_<ownid>'' to parent
+        sliced_msgs = msg_structure.slice_to_list(util_msg)
+        for sliced_msg in sliced_msgs:
+            agent.send('util_msg_' + str(agent.id), sliced_msg, agent.p)
+
+    else:
+        util_msg_handler_split(agent)
+
+    print(dt.now(), str(agent.id) + ': End util_msg_prop_split')
