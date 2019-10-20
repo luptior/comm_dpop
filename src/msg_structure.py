@@ -15,7 +15,7 @@ import optimization
 def slice_to_list_pipeline(original_table: np.array) -> list:
     """
     now add the minimum of length into consideration
-    
+
     :param original_table: np.ndarray
     :return: list of dict of length length, len(list[0])=length
             each element will have (index of first element), list of continuous
@@ -23,8 +23,6 @@ def slice_to_list_pipeline(original_table: np.array) -> list:
 
     # optimization comes into play
     length = optimization.optimize_size(original_table, min(original_table.shape))
-
-
 
     elements = {i: u for i, u in np.ndenumerate(original_table)}
     index = list(elements.keys())

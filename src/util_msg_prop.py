@@ -667,7 +667,7 @@ def util_msg_prop_split_pipeline(agent):
         agent.send('pre_util_msg_' + str(agent.id), tuple([agent.p] + agent.pp), agent.p)
 
         # Send 'util_msg_<ownid>'' to parent
-        sliced_msgs = msg_structure.slice_to_list(util_msg)
+        sliced_msgs = msg_structure.slice_to_list_pipeline(util_msg)
         for sliced_msg in sliced_msgs:
             agent.send('util_msg_' + str(agent.id), sliced_msg, agent.p)
 

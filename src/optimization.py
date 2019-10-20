@@ -16,17 +16,15 @@ def optimize_size(original_table: np.array, start_length: int = 1) -> int:
     :param original_table:
     :return: a tuple represents the shape
     """
-    # if np.size(original_table) < 100:
-    #     test_range = np.arange(1, original_table.size)
-    # else:
-    #     test_range = list(np.arange(1, 100)) + \
-    #                  list(np.arange(100, original_table.size, 2*int(np.log10(np.size(original_table)))))
 
-    result = [time_with_optimization(original_table, x) for x in np.arange(start_length, original_table.size)]
+    if start_length == 1:
+        result = [time_with_optimization(original_table, x) for x in np.arange(start_length, original_table.size)]
+    else:
+        result = [time_with_optimization(original_table, x)
+                  for x in np.arange(start_length, original_table.size, start_length)]
 
     max_improve = min(result)
-    length = result.index(max_improve) + 1
-
+    length = np.arange(start_length, original_table.size, start_length)[result.index(max_improve)]
     return length
 
 
