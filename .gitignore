@@ -5,7 +5,9 @@
 *.iml
 *.log
 log
+*.tmp
 
 sim_jbs.txt
 test.sh
+
 
