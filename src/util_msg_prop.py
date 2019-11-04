@@ -768,6 +768,12 @@ def util_msg_handler_split_pipeline(agent):
                 agent.value = xi_star
                 agent.max_util = max_util
 
+                # Send the index of assigned value
+                D = {}
+                ind = agent.domain.index(xi_star)
+                D[agent.id] = ind
+                for node in agent.c:
+                    agent.send('value_msg_' + str(agent.id), D, node)
 
 
     elif len(agent.c) == 2:  # the will wait for 2 piece of infomation
