@@ -43,7 +43,7 @@ def main(f):
                 i_relation[(tu[1], tu[0])] = r_value
         agent_relations[i] = i_relation
 
-    with open("sim_jbs.txt", "w") as f:
+    with open("sim_jbs.tmp", "w") as f:
         f.write("id=42 root_id=" + str(root_id) + "\n\n")
         id = np.random.randint(1000)
         for u in agent_ids:
@@ -54,7 +54,7 @@ def main(f):
                 f.write("is_root=True" + " ")
             f.write("\n\n")
 
-    agents = [agent.Agent(i, d, agent_relations[i], "sim_jbs.txt")
+    agents = [agent.Agent(i, d, agent_relations[i], "sim_jbs.tmp")
               for i in agent_ids]
 
     # Running the agents
