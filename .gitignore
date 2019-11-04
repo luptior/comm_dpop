@@ -9,3 +9,4 @@ log
 sim_jbs.txt
 test.sh
 
+*.tmp
