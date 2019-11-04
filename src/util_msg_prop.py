@@ -653,11 +653,124 @@ def util_msg_handler_split_pipeline(agent):
     """
     Change the handling of util message from waiting to piece by piece
     """
+    info = agent.agents_info
+    info[agent.i]['domain'] = agent.domain
 
-    """
-    waiting for pre_util_msg
-    """
-    if len(agent.c) == 2:  # the will wait for 2 piece of infomation
+    if len(agent.c) == 1:
+        """
+        waiting for pre_util_msg
+        """
+        # need to wait until pre_util_msg arrived
+        while True:
+            if ('pre_util_msg_' + str(agent.c[0])) in agent.msgs:
+                break
+
+        pre_msgs = [agent.msgs['pre_util_msg_' + str(child)] for child in sorted(agent.c)] # a list of tuple
+        merged_ant = pre_msgs[0]  # the combined set of nodeids for the table sent from two children
+        reorder_merged_ant = swap(merged_ant, merged_ant.index(agent.id))  # move this agent's id to the last
+
+        if len(reorder_merged_ant) > 1:  # ( ant has other agents + agent.p , agent )
+            new_ant = reorder_merged_ant[:-1]  # delete this agent
+            location = new_ant.index(agent.p)  # index of parent
+            reorder_new_ant = swap(new_ant, location)  # move parent to the last
+
+            agent.send('pre_util_msg_' + str(agent.id), reorder_new_ant, agent.p)  # send the pre-util msg
+
+            try:
+                l_domains2 = [info[x]['domain'] for x in reorder_new_ant]
+            except KeyError:
+                l_domains2 = [agent.domain for _ in reorder_new_ant]
+            domain_ranges = [tuple(range(len(x))) for x in l_domains2]  # list of index tuples
+            new_array2 = {indices: [] for indices in itertools.product(*domain_ranges)}  # storage
+
+            """
+            actual piece-wise msg
+            """
+
+            while True:
+                all_children_msgs_arrived = True
+
+                if sum([len(x) for x in new_array2.values()]) < len(new_array2) * len(
+                        agent.domain):  # not all of the info are received
+                    all_children_msgs_arrived = False
+
+                    if len(agent.unprocessed_util) > 0:
+                        # actually do the processing
+
+                        msg = agent.unprocessed_util.pop(0)  # a piece of info
+
+                        if slow_process:
+                            slow_process(msg)
+
+                        title = msg[0]  # "pre_util something"
+
+                        # sliced_msg is a dict of format {(indices) : util}
+                        try:
+                            shape = tuple([len(info[x]['domain']) for x in pre_msgs[0]])
+                        except KeyError:
+                            shape = tuple([len(agent.domain) for x in pre_msgs[0]])
+
+                        sliced_msg = msg_structure.unfold_sliced_msg(msg[1], shape)  # keys will be in natural format
+
+                        for k, v in sliced_msg.items():
+                            k = k[:-1]
+                            new_array2[swap(k, k.index(agent.p))].append(v)  # add all to new array
+
+                        new_msg = {}
+
+                        for k, v in new_array2.items():
+                            if len(v) == len(agent.domain):  # enough information is collected
+                                new_msg[k] = np.max(v)
+                                new_array2.pop(k)  # remove processed from the storage
+
+                        agent.send('util_msg_' + str(agent.id), sliced_msg, agent.p)
+
+                if all_children_msgs_arrived:
+                    break
+
+        else:  # only this agent
+
+            value_list = {}
+
+            if agent.is_root:  # ignore the other conditions for now
+                while True:
+                    all_children_msgs_arrived = True
+
+                    if len(value_list) < agent.domain:
+                        all_children_msgs_arrived = False
+
+                        if len(agent.unprocessed_util) > 0:
+                            # actually do the processing
+
+                            msg = agent.unprocessed_util.pop(0)  # a piece of info
+
+                            if slow_process:
+                                slow_process(msg)
+
+                            title = msg[0]  # "pre_util something"
+
+                            # sliced_msg is a dict of format {(indices) : util}
+                            try:
+                                shape = tuple([len(info[x]['domain']) for x in pre_msgs[0]])
+                            except KeyError:
+                                shape = tuple([len(agent.domain) for x in pre_msgs[0]])
+
+                            sliced_msg = msg_structure.unfold_sliced_msg(msg[1], shape)
+
+                            for k, v in sliced_msg.items():  # add the msg back to array
+                                value_list[k] = v
+                    if all_children_msgs_arrived:
+                        break
+
+                utilities = value_list.values()
+                max_util = max(utilities)
+                xi_star = agent.domain[utilities.index(max_util)]
+                agent.value = xi_star
+                agent.max_util = max_util
+
+
+
+    elif len(agent.c) == 2:  # the will wait for 2 piece of infomation
         # need to wait until all pre_util_msg arrived, need to know the dimensions
         while True:
             all_children_pre_msgs_arrived = True
@@ -668,246 +781,12 @@ def util_msg_handler_split_pipeline(agent):
             if all_children_pre_msgs_arrived:
                 break
 
-    elif len(agent.c) == 1:
-        # need to wait until pre_util_msg arrived
-        while True:
-            if ('pre_util_msg_' + str(agent.c[0])) in agent.msgs:
-                break
-
-    pre_msgs = [agent.msgs['pre_util_msg_' + str(child)] for child in sorted(agent.c)]
-    merged_ant = utility.merge_ant(pre_msgs)  # the combined set of nodeids for the table sent from two children
-    merged_ant = swap(merged_ant, merged_ant.index(agent.id))  # move this agent's id to the last
-
-    info = agent.agents_info
-    info[agent.i]['domain'] = agent.domain
-
-    # the current problem is that it may only have domain info for neighbors, tmp fix
-    if len(merged_ant) > 1:
-        new_ant = merged_ant[:-1]
-        location = new_ant.index(agent.p)
-        reorder_new_ant = swap(new_ant, location)
-        try:
-            l_domains2 = [info[x]['domain'] for x in reorder_new_ant]
-        except KeyError:
-            l_domains2 = [agent.domain for _ in reorder_new_ant]
-        domain_ranges = [tuple(range(len(x))) for x in l_domains2]  # list of index tuples
-        new_array2 = {indices: [] for indices in itertools.product(*domain_ranges)}
-
-    else:
-        # TODO: get this done
-        # there is only one agent id in this
-        next_ant = []
-
-
-    try:
-        l_domains = [info[x]['domain'] for x in merged_ant]
-    except KeyError:
-        l_domains = [agent.domain for _ in merged_ant]
-
-    domain_ranges = [tuple(range(len(x))) for x in l_domains]  # list of index tuples
-    new_array = {indices: [] for indices in itertools.product(*domain_ranges)}
-
-    """
-    actual piece-wise msg
-    """
-
-    if len(agent.c) == 2:  # the will wait for 2 piece of infomation
-
-        index_ant1 = [list(merged_ant).index(i) for i in pre_msgs[0]]
-        index_ant2 = [list(merged_ant).index(i) for i in pre_msgs[1]]
-
-        while True:
-            all_children_msgs_arrived = True
-            if sum([len(x) for x in new_array.values()]) < 2 * len(new_array):  # there should be 2 value in each entry
-                all_children_msgs_arrived = False
-                if len(agent.unprocessed_util) > 0:
-                    # actually do the processing
-
-                    msg = agent.unprocessed_util.pop(0)  # a piece of info
-
-                    if slow_process:
-                        slow_process(msg)
-
-                    title = msg[0]
-                    # is a dict of format {(indices) : util}
-
-                    # add based on the children
-                    if title.split("_")[-1] == str(sorted(agent.c)[0]):
-                        try:
-                            sliced_msg = msg_structure.unfold_sliced_msg(msg[1],
-                                                                         tuple([len(info[x]['domain']) for x in
-                                                                                pre_msgs[0]]))
-                        except KeyError:
-                            sliced_msg = msg_structure.unfold_sliced_msg(msg[1],
-                                                                         tuple(
-                                                                             [len(agent.domain) for x in pre_msgs[0]]))
-                        for i in range(len(sliced_msg)):
-                            expand = []
-                            for x in range(len(merged_ant)):
-                                if x not in index_ant1:
-                                    expand.append(tuple(range(len(l_domains[x]))))
-                                else:
-                                    expand.append((list(sliced_msg.keys())[0][index_ant1.index(x)],))
-
-                            to_add = {x: list(sliced_msg.values())[0] for x in itertools.product(*expand)}
-
-                            for k, v in to_add.items():
-                                new_array[k].append(v)
-
-                    elif title.split("_")[-1] == str(sorted(agent.c)[1]):
-                        try:
-                            sliced_msg = msg_structure.unfold_sliced_msg(msg[1],
-                                                                         tuple([len(info[x]['domain']) for x in
-                                                                                pre_msgs[1]]))
-                        except KeyError:
-                            sliced_msg = msg_structure.unfold_sliced_msg(msg[1],
-                                                                         tuple(
-                                                                             [len(agent.domain) for x in pre_msgs[1]]))
-                        for i in range(len(sliced_msg)):
-                            expand = []
-                            for x in range(len(merged_ant)):
-                                if x not in index_ant2:
-                                    expand.append(tuple(range(len(l_domains[x]))))
-                                else:
-                                    expand.append((list(sliced_msg.keys())[0][index_ant2.index(x)],))
-
-                            to_add = {x: list(sliced_msg.values())[0] for x in itertools.product(*expand)}
-
-                            for k, v in to_add.items():
-                                new_array[k].append(v)
-            if all_children_msgs_arrived:
-                break
-    elif len(agent.c) == 1:
-
-        while True:
-            all_children_msgs_arrived = True
-
-            if sum([len(x) for x in new_array.values()]) < len(new_array):
-                new_values = []
-                all_children_msgs_arrived = False
-
-                if len(agent.unprocessed_util) > 0:
-                    # actually do the processing
-
-                    msg = agent.unprocessed_util.pop(0)  # a piece of info
-
-                    if slow_process:
-                        slow_process(msg)
-
-                    title = msg[0] # "pre_util something"
-
-                    # sliced_msg is a dict of format {(indices) : util}
-                    try:
-                        shape = tuple([len(info[x]['domain']) for x in pre_msgs[0]])
-                    except KeyError:
-                        shape = tuple([len(agent.domain) for x in pre_msgs[0]])
-
-                    sliced_msg = msg_structure.unfold_sliced_msg(msg[1], shape)
-
-                    for k, v in sliced_msg.items(): # add the msg back to array
-                        new_array[k].append(v)
-
-                    """Pipeline part"""
-
-                    pre_ant = pre_msgs[0] # how sent data is orderred
+    # no more else as leaf-nodes will be dealt with different method
 
 
 
-                    if len(msg[1][0]) > 1: # (some agent_id, itself) dimensions larger than 1
-
-                        for i, chunk in enumerate(chunks):
-                            new_values.append(np.max(chunk))
-
-                        new_msg = [msg[1][0][:-1], new_values]
-
-                        new_unfold_msg = msg_structure.unfold_sliced_msg(new_msg, shape[:-1])
-
-                        if agent.p != merged_ant[-2] and len(merged_ant[:-1]) >=2: # parent is not the last in axis
-                            # reorder
-                            reorder_new_ant = merged_ant[:-1]
-                            location = reorder_new_ant.index(agent.p)
-                            reorder_new_ant = swap(reorder_new_ant, location)
-                            print("test " * 20, 'pre_util_msg_' + str(agent.id), reorder_new_ant, agent.p)
-
-                            reorder_unfold_msg = {swap(k, location):v for k,v in new_unfold_msg.items()}
-
-                            print("test " * 20, reorder_unfold_msg)
-
-                        else:
-                            # directly send
-                            print("test " * 20, 'pre_util_msg_' + str(agent.id), merged_ant[:-1], agent.p)
-                            print("test " * 20, new_unfold_msg)
-                    else: # receive an 1-d array
-                        if agent.is_root:
-                            assert merged_ant == (agent.id,)
-                            max_util = 0
 
 
-            if all_children_msgs_arrived:
-                break
-
-
-    combined_msg = np.zeros([len(x) for x in l_domains])
-    for k, v in new_array.items():
-        combined_msg[k] = sum(v)
-
-    combined_ant = merged_ant
-
-    info = agent.agents_info
-    if agent.is_root: # calculate the final value and send value
-        assert combined_ant == (agent.id,)
-
-        # Choose the optimal utility
-        utilities = list(combined_msg)
-        max_util = max(utilities)
-        xi_star = agent.domain[utilities.index(max_util)]
-        agent.value = xi_star
-        agent.max_util = max_util
-
-        # Send the index of assigned value
-        D = {}
-        ind = agent.domain.index(xi_star)
-        D[agent.id] = ind
-        for node in agent.c:
-            agent.send('value_msg_' + str(agent.id), D, node)
-    else:
-        util_cube, _ = get_util_cube(agent)
-
-        # Combine the 2 cubes
-        combined_cube, cube_ant = utility.combine(
-            util_cube, combined_msg,
-            tuple([agent.id] + [agent.p] + agent.pp), combined_ant
-        )
-
-        # Removing own dimension by taking maximum
-        L_ant = list(cube_ant)
-        ownid_index = L_ant.index(agent.id)
-        msg_to_send = np.maximum.reduce(combined_cube, axis=ownid_index)
-        # Ant to send in pre_util_msg
-        ant_to_send = cube_ant[:ownid_index] + cube_ant[ownid_index + 1:]
-
-        # Creating the table to store
-        cc = combined_cube
-        table_shape = list(cc.shape[:])
-        del table_shape[ownid_index]
-        table_shape = tuple(table_shape)
-
-        table = np.zeros(table_shape, dtype=object)
-        cc_rolled = np.rollaxis(cc, ownid_index)
-        for i, abc in enumerate(cc_rolled):
-            for index, _ in np.ndenumerate(abc):
-                if abc[index] == msg_to_send[index]:
-                    table[index] = agent.domain[i]
-        agent.table = table
-        agent.table_ant = ant_to_send
-
-        # Send the assignment-nodeid-tuple
-
-        agent.send('pre_util_msg_' + str(agent.id), ant_to_send, agent.p)
-
-        sliced_msgs = msg_structure.slice_to_list(msg_to_send)
-        for sliced_msg in sliced_msgs:
-            agent.send('util_msg_' + str(agent.id), sliced_msg, agent.p)
 
 
 def util_msg_prop_split_pipeline(agent):
