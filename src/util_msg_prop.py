@@ -15,10 +15,10 @@ import msg_structure
 slow_processing = True
 
 
-def swap(indices: tuple, location: int) -> tuple:
+def swap(indices: tuple, location: int, dest : int = -1) -> tuple:
     new_indices = list(indices)
-    new_indices[-1] = indices[location]
-    new_indices[location] = indices[-1]
+    new_indices[dest] = indices[location]
+    new_indices[location] = indices[dest]
     return tuple(new_indices)
 
 
@@ -685,16 +685,16 @@ def util_msg_handler_split_pipeline(agent):
     if len(merged_ant) > 1:
         new_ant = merged_ant[:-1]
         location = new_ant.index(agent.p)
-        new_ant = swap(new_ant, location)
+        reorder_new_ant = swap(new_ant, location)
         try:
-            l_domains2 = [info[x]['domain'] for x in new_ant]
+            l_domains2 = [info[x]['domain'] for x in reorder_new_ant]
         except KeyError:
-            l_domains2 = [agent.domain for _ in new_ant]
+            l_domains2 = [agent.domain for _ in reorder_new_ant]
         domain_ranges = [tuple(range(len(x))) for x in l_domains2]  # list of index tuples
-        new_array = {indices: [] for indices in itertools.product(*domain_ranges)}
+        new_array2 = {indices: [] for indices in itertools.product(*domain_ranges)}
 
-        print("test " * 20, new_array)
     else:
+        # TODO: get this done
         # there is only one agent id in this
         next_ant = []
 
@@ -708,7 +708,7 @@ def util_msg_handler_split_pipeline(agent):
     new_array = {indices: [] for indices in itertools.product(*domain_ranges)}
 
     """
-    actual piece wise msg
+    actual piece-wise msg
     """
 
     if len(agent.c) == 2:  # the will wait for 2 piece of infomation
@@ -807,8 +807,11 @@ def util_msg_handler_split_pipeline(agent):
                     for k, v in sliced_msg.items(): # add the msg back to array
                         new_array[k].append(v)
 
-                    chunks = [list(sliced_msg.values())[x:x + len(agent.domain)]
-                              for x in range(0, len(sliced_msg.values()), len(agent.domain))]
+                    """Pipeline part"""
+
+                    pre_ant = pre_msgs[0] # how sent data is orderred
+
+
 
                     if len(msg[1][0]) > 1: # (some agent_id, itself) dimensions larger than 1
 
@@ -821,13 +824,12 @@ def util_msg_handler_split_pipeline(agent):
 
                         if agent.p != merged_ant[-2] and len(merged_ant[:-1]) >=2: # parent is not the last in axis
                             # reorder
-                            new_ant = merged_ant[:-1]
-                            location = new_ant.index(agent.p)
-                            new_ant = swap(new_ant, location)
-                            print("test " * 20, 'pre_util_msg_' + str(agent.id), new_ant, agent.p)
+                            reorder_new_ant = merged_ant[:-1]
+                            location = reorder_new_ant.index(agent.p)
+                            reorder_new_ant = swap(reorder_new_ant, location)
+                            print("test " * 20, 'pre_util_msg_' + str(agent.id), reorder_new_ant, agent.p)
 
                             reorder_unfold_msg = {swap(k, location):v for k,v in new_unfold_msg.items()}
-                            reorder_unfold_msg = {k:reorder_unfold_msg[k] for k in sorted(reorder_unfold_msg.keys()) }
 
                             print("test " * 20, reorder_unfold_msg)
 
