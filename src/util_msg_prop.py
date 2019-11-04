@@ -672,6 +672,6 @@ def util_msg_prop_split_pipeline(agent):
             agent.send('util_msg_' + str(agent.id), sliced_msg, agent.p)
 
     else:
-        util_msg_handler_split(agent)
+        util_msg_handler_split_pipeline(agent)
 
     print(dt.now(), str(agent.id) + ': End util_msg_prop_split')
