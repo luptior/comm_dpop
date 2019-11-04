@@ -682,15 +682,18 @@ def util_msg_handler_split_pipeline(agent):
     info[agent.i]['domain'] = agent.domain
 
     # the current problem is that it may only have domain info for neighbors, tmp fix
-    try:
-        l_domains2 = [info[x]['domain'] for x in merged_ant]
-    except KeyError:
-        l_domains2 = [agent.domain for _ in merged_ant]
-
-
     if len(merged_ant) > 1:
-        next_ant = merged_ant[:-1]
+        new_ant = merged_ant[:-1]
+        location = new_ant.index(agent.p)
+        new_ant = swap(new_ant, location)
+        try:
+            l_domains2 = [info[x]['domain'] for x in new_ant]
+        except KeyError:
+            l_domains2 = [agent.domain for _ in new_ant]
+        domain_ranges = [tuple(range(len(x))) for x in l_domains2]  # list of index tuples
+        new_array = {indices: [] for indices in itertools.product(*domain_ranges)}
 
+        print("test " * 20, new_array)
     else:
         # there is only one agent id in this
         next_ant = []
