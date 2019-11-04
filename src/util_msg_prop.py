@@ -865,14 +865,11 @@ def util_msg_prop_split_pipeline(agent):
         info = agent.agents_info
         util_msg, agent.table = get_util_msg(agent)
 
-        list_ant = list([agent.p] + agent.pp)
-        util_msg = np.swapaxes(util_msg, list_ant.index(agent.p), -1) # swap parent's column to the last
+        list_ant = list(agent.pp+ [agent.p])
+        util_msg = np.swapaxes(util_msg, 0, -1) # swap parent's axis to the last(was in 0)
 
-        reorderred = list_ant
-        reorderred.append(reorderred.pop(reorderred.index(agent.p)))
-        reorderred = tuple(reorderred)  # move this agent parent's id to the last
         # Send the assignment-nodeid-tuple
-        agent.send('pre_util_msg_' + str(agent.id), reorderred, agent.p)
+        agent.send('pre_util_msg_' + str(agent.id), list_ant, agent.p)
 
         # Send 'util_msg_<ownid>'' to parent
         sliced_msgs = msg_structure.slice_to_list_pipeline(util_msg)
