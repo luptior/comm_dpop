@@ -21,8 +21,10 @@ def slice_to_list_pipeline(original_table: np.array) -> list:
             each element will have (index of first element), list of continuous
     """
 
+    step = original_table.shape[-1] # use the last column which corresponds to the agent this message is sent to
+
     # optimization comes into play
-    length = optimization.optimize_size(original_table, min(original_table.shape))
+    length = optimization.optimize_size(original_table, step)
 
     elements = {i: u for i, u in np.ndenumerate(original_table)}
     index = list(elements.keys())
