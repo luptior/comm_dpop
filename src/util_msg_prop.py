@@ -875,7 +875,6 @@ def util_msg_prop_split_pipeline(agent):
         sliced_msgs = msg_structure.slice_to_list_pipeline(util_msg)
 
         for sliced_msg in sliced_msgs:
-            print("size "*10, len(sliced_msg[1]))
             agent.send('util_msg_' + str(agent.id), sliced_msg, agent.p)
 
     else:
