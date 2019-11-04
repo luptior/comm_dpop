@@ -85,7 +85,7 @@ def table_to_list(original_table: np.array) -> list:
 def unfold_sliced_msg(sliced_msg: list, shape: tuple) -> dict:
     """
     Unfold the sliced msg to be a dictionary where each entry is (index) : value
-    :param sliced_msg: an element in the output list from the slice_1d()
+    :param sliced_msg: an element in the output list from the sliced_msg
     :param shape: a tuple
     :return: a dict {(index) : value}
     """
