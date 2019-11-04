@@ -753,18 +753,18 @@ def util_msg_handler_split_pipeline(agent):
                 break
 
         pre_msgs = [agent.msgs['pre_util_msg_' + str(child)]]
-        single_ant = pre_msgs[0]
+        merged_ant = utility.merge_ant(pre_msgs)  # the combined set of nodeids for the table sent from two children
 
         info = agent.agents_info
         info[agent.i]['domain'] = agent.domain
 
         # the current problem is that it may only have domain info for neighbors, tmp fix
         try:
-            l_domains = [info[x]['domain'] for x in single_ant]
+            l_domains = [info[x]['domain'] for x in merged_ant]
         except KeyError:
-            l_domains = [agent.domain for _ in single_ant]
+            l_domains = [agent.domain for _ in merged_ant]
 
-        domain_ranges = [tuple(range(len(x))) for x in l_domains]  # list of index tuples [range(len of domain1), ...]
+        domain_ranges = [tuple(range(len(x))) for x in l_domains]  # list of index tuples
         new_array = {indices: [] for indices in itertools.product(*domain_ranges)}
 
         while True:
