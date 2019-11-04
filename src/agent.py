@@ -119,7 +119,7 @@ class Agent:
         if not optimization.split_processing:
             util_msg_prop.util_msg_prop_list(self)
         else:
-            util_msg_prop.util_msg_prop_split(self)
+            util_msg_prop.util_msg_prop_split_pipeline(self)
 
         if not self.is_root:
             value_msg_prop.value_msg_prop(self)
