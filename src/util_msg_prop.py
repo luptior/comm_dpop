@@ -745,17 +745,14 @@ def util_msg_handler_split_pipeline(agent):
             if all_children_msgs_arrived:
                 break
     elif len(agent.c) == 1:
-        # need to wait until all pre_util_msg arrived, need to know the dimensions
+        # need to wait until pre_util_msg arrived
+        child = agent.c[0]
+
         while True:
-            all_children_pre_msgs_arrived = True
-            for child in agent.c:
-                if ('pre_util_msg_' + str(child)) not in agent.msgs:
-                    all_children_pre_msgs_arrived = False
-                    break
-            if all_children_pre_msgs_arrived:
+            if ('pre_util_msg_' + str(child)) in agent.msgs:
                 break
 
-        pre_msgs = [agent.msgs['pre_util_msg_' + str(child)] for child in sorted(agent.c)]
+        pre_msgs = [agent.msgs['pre_util_msg_' + str(child)]]
         merged_ant = utility.merge_ant(pre_msgs)  # the combined set of nodeids for the table sent from two children
 
         info = agent.agents_info
