@@ -15,6 +15,12 @@ import msg_structure
 slow_processing = True
 
 
+def p_to_last(merged_ant : tuple, p : int) -> tuple:
+    list_ant = list(merged_ant)
+    list_ant.append(list_ant.pop(list_ant.index(p)))
+    return tuple(list_ant)  # move this agent's id to the last
+
+
 def slow_process(msg):
     """
     sleep by a certain amount of time based on the size of msg
@@ -670,9 +676,7 @@ def util_msg_handler_split_pipeline(agent):
     pre_msgs = [agent.msgs['pre_util_msg_' + str(child)] for child in sorted(agent.c)]
     merged_ant = utility.merge_ant(pre_msgs)  # the combined set of nodeids for the table sent from two children
 
-    list_ant = list(merged_ant)
-    list_ant.append(list_ant.pop(list_ant.index(agent.id)))
-    merged_ant = tuple(list_ant)  # move this agent's id to the last
+    merged_ant = p_to_last(merged_ant, agent.id)  # move this agent's id to the last
 
     info = agent.agents_info
     info[agent.i]['domain'] = agent.domain
@@ -759,11 +763,12 @@ def util_msg_handler_split_pipeline(agent):
                 break
     elif len(agent.c) == 1:
 
-        new_values = []
+
         while True:
             all_children_msgs_arrived = True
 
             if sum([len(x) for x in new_array.values()]) < len(new_array):
+                new_values = []
                 all_children_msgs_arrived = False
 
                 if len(agent.unprocessed_util) > 0:
@@ -774,7 +779,8 @@ def util_msg_handler_split_pipeline(agent):
                     if slow_process:
                         slow_process(msg)
 
-                    title = msg[0]
+                    title = msg[0] # "pre_util something"
+
                     # sliced_msg is a dict of format {(indices) : util}
                     try:
                         shape = tuple([len(info[x]['domain']) for x in pre_msgs[0]])
@@ -789,26 +795,22 @@ def util_msg_handler_split_pipeline(agent):
                     chunks = [list(sliced_msg.values())[x:x + len(agent.domain)]
                               for x in range(0, len(sliced_msg.values()), len(agent.domain))]
 
-
                     if len(msg[1][0]) > 1: # (some agent_id, itself)
-                        index_list = list(np.ndindex(shape[:-1]))
-                        print("Test "*20, chunks)
-
-                        start = index_list.index(msg[1][0][:-1])
-                        end = index_list.index(list(sliced_msg.keys())[-1][:-1])
-
-
                         for i, chunk in enumerate(chunks):
-                            print(i, np.max(chunk))
+                            new_values.append(np.max(chunk))
 
 
+                    new_msg = [msg[1][0][:-1], new_values]
 
+                    print("test " * 20, 'pre_util_msg_' + str(agent.id), merged_ant[:-1], agent.p)
 
+                    new_unfold_msg = msg_structure.unfold_sliced_msg(new_msg, shape[:-1])
 
-
+                    print("test " * 20, new_unfold_msg)
 
             if all_children_msgs_arrived:
                 break
+
 
     combined_msg = np.zeros([len(x) for x in l_domains])
     for k, v in new_array.items():
