@@ -666,7 +666,7 @@ def util_msg_handler_split_pipeline(agent):
                 break
 
         pre_msgs = [agent.msgs['pre_util_msg_' + str(child)] for child in sorted(agent.c)] # a list of tuple
-        merged_ant = pre_msgs[0]  # the combined set of nodeids for the table sent from two children
+        merged_ant = pre_msgs[0]  # set of nodeids for the table sent from the single child
         reorder_merged_ant = swap(merged_ant, merged_ant.index(agent.id))  # move this agent's id to the last
 
         if len(reorder_merged_ant) > 1:  # ( ant has other agents + agent.p , agent )
@@ -786,6 +786,26 @@ def util_msg_handler_split_pipeline(agent):
                     break
             if all_children_pre_msgs_arrived:
                 break
+
+        pre_msgs = [agent.msgs['pre_util_msg_' + str(child)] for child in sorted(agent.c)] # a list of tuple
+        merged_ant = utility.merge_ant(pre_msgs)  # the combined set of nodeids for the table sent from two children
+        reorder_merged_ant = swap(merged_ant, merged_ant.index(agent.id))  # move this agent's id to the last
+
+        # index of agent id in reorder_merged_ant
+
+        index_ant1 = [list(reorder_merged_ant).index(i) for i in pre_msgs[0]]
+        index_ant2 = [list(reorder_merged_ant).index(i) for i in pre_msgs[1]]
+
+        # the current problem is that it may only have domain info for neighbors, tmp fix
+        try:
+            l_domains = [info[x]['domain'] for x in merged_ant]
+        except KeyError:
+            l_domains = [agent.domain for _ in merged_ant]
+
+        domain_ranges = [tuple(range(len(x))) for x in l_domains]  # list of index tuples
+        new_array = {indices: [] for indices in itertools.product(*domain_ranges)}
+
+
 
     # no more else as leaf-nodes will be dealt with different method
 

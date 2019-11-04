@@ -16,20 +16,20 @@ timestamp() {
   date +%s
 }
 
-for dom in 10; do
-  for repo in 2; do
-      for num in 5; do
-             name=random_a${num}_d${dom}_r${repo}
-             log=$logdir/${name}_split${split}_network${network}.log
-             timestamp > $log &&
-             echo "start running ${name} split ${split} network ${network}" &&
-             python $script --input $datadir/${name}.xml --network $network --split $split --comp_speed 20 --net_speed 20 >> $log &&
-             echo "finish running ${name}" &&
-             timestamp >> $log &&
-             python src/read_log.py $log
-        done
-    done
-done
+#for dom in 10; do
+#  for repo in 2; do
+#      for num in 5; do
+#             name=random_a${num}_d${dom}_r${repo}
+#             log=$logdir/${name}_split${split}_network${network}.log
+#             timestamp > $log &&
+#             echo "start running ${name} split ${split} network ${network}" &&
+#             python $script --input $datadir/${name}.xml --network $network --split $split --comp_speed 20 --net_speed 20 >> $log &&
+#             echo "finish running ${name}" &&
+#             timestamp >> $log &&
+#             python src/read_log.py $log
+#        done
+#    done
+#done
 
 split=True
 
