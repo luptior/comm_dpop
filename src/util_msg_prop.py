@@ -759,11 +759,13 @@ def util_msg_handler_split_pipeline(agent):
                 break
     elif len(agent.c) == 1:
 
+        new_values = []
         while True:
             all_children_msgs_arrived = True
 
             if sum([len(x) for x in new_array.values()]) < len(new_array):
                 all_children_msgs_arrived = False
+
                 if len(agent.unprocessed_util) > 0:
                     # actually do the processing
 
@@ -775,15 +777,36 @@ def util_msg_handler_split_pipeline(agent):
                     title = msg[0]
                     # sliced_msg is a dict of format {(indices) : util}
                     try:
-                        sliced_msg = msg_structure.unfold_sliced_msg(msg[1],
-                                                                     tuple(
-                                                                         [len(info[x]['domain']) for x in pre_msgs[0]]))
+                        shape = tuple([len(info[x]['domain']) for x in pre_msgs[0]])
                     except KeyError:
-                        sliced_msg = msg_structure.unfold_sliced_msg(msg[1],
-                                                                     tuple([len(agent.domain) for x in pre_msgs[0]]))
+                        shape = tuple([len(agent.domain) for x in pre_msgs[0]])
+
+                    sliced_msg = msg_structure.unfold_sliced_msg(msg[1], shape)
 
                     for k, v in sliced_msg.items(): # add the msg back to array
                         new_array[k].append(v)
+
+                    chunks = [list(sliced_msg.values())[x:x + len(agent.domain)]
+                              for x in range(0, len(sliced_msg.values()), len(agent.domain))]
+
+
+                    if len(msg[1][0]) > 1: # (some agent_id, itself)
+                        index_list = list(np.ndindex(shape[:-1]))
+                        print("Test "*20, chunks)
+
+                        start = index_list.index(msg[1][0][:-1])
+                        end = index_list.index(list(sliced_msg.keys())[-1][:-1])
+
+
+                        for i, chunk in enumerate(chunks):
+                            print(i, np.max(chunk))
+
+
+
+
+
+
+
             if all_children_msgs_arrived:
                 break
 
