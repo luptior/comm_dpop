@@ -15,10 +15,11 @@ import msg_structure
 slow_processing = True
 
 
-def p_to_last(merged_ant : tuple, p : int) -> tuple:
-    list_ant = list(merged_ant)
-    list_ant.append(list_ant.pop(list_ant.index(p)))
-    return tuple(list_ant)  # move this agent's id to the last
+def swap(indices: tuple, location: int) -> tuple:
+    new_indices = list(indices)
+    new_indices[-1] = indices[location]
+    new_indices[location] = indices[-1]
+    return tuple(new_indices)
 
 
 def slow_process(msg):
@@ -675,13 +676,26 @@ def util_msg_handler_split_pipeline(agent):
 
     pre_msgs = [agent.msgs['pre_util_msg_' + str(child)] for child in sorted(agent.c)]
     merged_ant = utility.merge_ant(pre_msgs)  # the combined set of nodeids for the table sent from two children
-
-    merged_ant = p_to_last(merged_ant, agent.id)  # move this agent's id to the last
+    merged_ant = swap(merged_ant, merged_ant.index(agent.id))  # move this agent's id to the last
 
     info = agent.agents_info
     info[agent.i]['domain'] = agent.domain
 
     # the current problem is that it may only have domain info for neighbors, tmp fix
+    try:
+        l_domains2 = [info[x]['domain'] for x in merged_ant]
+    except KeyError:
+        l_domains2 = [agent.domain for _ in merged_ant]
+
+
+    if len(merged_ant) > 1:
+        next_ant = merged_ant[:-1]
+
+    else:
+        # there is only one agent id in this
+        next_ant = []
+
+
     try:
         l_domains = [info[x]['domain'] for x in merged_ant]
     except KeyError:
@@ -689,7 +703,6 @@ def util_msg_handler_split_pipeline(agent):
 
     domain_ranges = [tuple(range(len(x))) for x in l_domains]  # list of index tuples
     new_array = {indices: [] for indices in itertools.product(*domain_ranges)}
-
 
     """
     actual piece wise msg
@@ -763,7 +776,6 @@ def util_msg_handler_split_pipeline(agent):
                 break
     elif len(agent.c) == 1:
 
-
         while True:
             all_children_msgs_arrived = True
 
@@ -795,18 +807,36 @@ def util_msg_handler_split_pipeline(agent):
                     chunks = [list(sliced_msg.values())[x:x + len(agent.domain)]
                               for x in range(0, len(sliced_msg.values()), len(agent.domain))]
 
-                    if len(msg[1][0]) > 1: # (some agent_id, itself)
+                    if len(msg[1][0]) > 1: # (some agent_id, itself) dimensions larger than 1
+
                         for i, chunk in enumerate(chunks):
                             new_values.append(np.max(chunk))
 
+                        new_msg = [msg[1][0][:-1], new_values]
 
-                    new_msg = [msg[1][0][:-1], new_values]
+                        new_unfold_msg = msg_structure.unfold_sliced_msg(new_msg, shape[:-1])
 
-                    print("test " * 20, 'pre_util_msg_' + str(agent.id), merged_ant[:-1], agent.p)
+                        if agent.p != merged_ant[-2] and len(merged_ant[:-1]) >=2: # parent is not the last in axis
+                            # reorder
+                            new_ant = merged_ant[:-1]
+                            location = new_ant.index(agent.p)
+                            new_ant = swap(new_ant, location)
+                            print("test " * 20, 'pre_util_msg_' + str(agent.id), new_ant, agent.p)
 
-                    new_unfold_msg = msg_structure.unfold_sliced_msg(new_msg, shape[:-1])
+                            reorder_unfold_msg = {swap(k, location):v for k,v in new_unfold_msg.items()}
+                            reorder_unfold_msg = {k:reorder_unfold_msg[k] for k in sorted(reorder_unfold_msg.keys()) }
 
-                    print("test " * 20, new_unfold_msg)
+                            print("test " * 20, reorder_unfold_msg)
+
+                        else:
+                            # directly send
+                            print("test " * 20, 'pre_util_msg_' + str(agent.id), merged_ant[:-1], agent.p)
+                            print("test " * 20, new_unfold_msg)
+                    else: # receive an 1-d array
+                        if agent.is_root:
+                            assert merged_ant == (agent.id,)
+                            max_util = 0
+
 
             if all_children_msgs_arrived:
                 break
