@@ -644,17 +644,13 @@ def util_msg_prop_list(agent):
 
 def util_msg_handler_split_pipeline(agent):
     """
-    handle piece by piece
-    """
-
-    """
     Change the handling of util message from waiting to piece by piece
     """
 
-
-
+    """
+    waiting for pre_util_msg
+    """
     if len(agent.c) == 2:  # the will wait for 2 piece of infomation
-
         # need to wait until all pre_util_msg arrived, need to know the dimensions
         while True:
             all_children_pre_msgs_arrived = True
@@ -665,20 +661,37 @@ def util_msg_handler_split_pipeline(agent):
             if all_children_pre_msgs_arrived:
                 break
 
-        pre_msgs = [agent.msgs['pre_util_msg_' + str(child)] for child in sorted(agent.c)]
-        merged_ant = utility.merge_ant(pre_msgs)  # the combined set of nodeids for the table sent from two children
+    elif len(agent.c) == 1:
+        # need to wait until pre_util_msg arrived
+        while True:
+            if ('pre_util_msg_' + str(agent.c[0])) in agent.msgs:
+                break
 
-        info = agent.agents_info
-        info[agent.i]['domain'] = agent.domain
+    pre_msgs = [agent.msgs['pre_util_msg_' + str(child)] for child in sorted(agent.c)]
+    merged_ant = utility.merge_ant(pre_msgs)  # the combined set of nodeids for the table sent from two children
 
-        # the current problem is that it may only have domain info for neighbors, tmp fix
-        try:
-            l_domains = [info[x]['domain'] for x in merged_ant]
-        except KeyError:
-            l_domains = [agent.domain for _ in merged_ant]
+    list_ant = list(merged_ant)
+    list_ant.append(list_ant.pop(list_ant.index(agent.id)))
+    merged_ant = tuple(list_ant)  # move this agent's id to the last
 
-        domain_ranges = [tuple(range(len(x))) for x in l_domains]  # list of index tuples
-        new_array = {indices: [] for indices in itertools.product(*domain_ranges)}
+    info = agent.agents_info
+    info[agent.i]['domain'] = agent.domain
+
+    # the current problem is that it may only have domain info for neighbors, tmp fix
+    try:
+        l_domains = [info[x]['domain'] for x in merged_ant]
+    except KeyError:
+        l_domains = [agent.domain for _ in merged_ant]
+
+    domain_ranges = [tuple(range(len(x))) for x in l_domains]  # list of index tuples
+    new_array = {indices: [] for indices in itertools.product(*domain_ranges)}
+
+
+    """
+    actual piece wise msg
+    """
+
+    if len(agent.c) == 2:  # the will wait for 2 piece of infomation
 
         index_ant1 = [list(merged_ant).index(i) for i in pre_msgs[0]]
         index_ant2 = [list(merged_ant).index(i) for i in pre_msgs[1]]
@@ -745,30 +758,10 @@ def util_msg_handler_split_pipeline(agent):
             if all_children_msgs_arrived:
                 break
     elif len(agent.c) == 1:
-        # need to wait until pre_util_msg arrived
-        child = agent.c[0]
-
-        while True:
-            if ('pre_util_msg_' + str(child)) in agent.msgs:
-                break
-
-        pre_msgs = [agent.msgs['pre_util_msg_' + str(child)]]
-        merged_ant = utility.merge_ant(pre_msgs)  # the combined set of nodeids for the table sent from two children
-
-        info = agent.agents_info
-        info[agent.i]['domain'] = agent.domain
-
-        # the current problem is that it may only have domain info for neighbors, tmp fix
-        try:
-            l_domains = [info[x]['domain'] for x in merged_ant]
-        except KeyError:
-            l_domains = [agent.domain for _ in merged_ant]
-
-        domain_ranges = [tuple(range(len(x))) for x in l_domains]  # list of index tuples
-        new_array = {indices: [] for indices in itertools.product(*domain_ranges)}
 
         while True:
             all_children_msgs_arrived = True
+
             if sum([len(x) for x in new_array.values()]) < len(new_array):
                 all_children_msgs_arrived = False
                 if len(agent.unprocessed_util) > 0:
@@ -780,7 +773,7 @@ def util_msg_handler_split_pipeline(agent):
                         slow_process(msg)
 
                     title = msg[0]
-                    # is a dict of format {(indices) : util}
+                    # sliced_msg is a dict of format {(indices) : util}
                     try:
                         sliced_msg = msg_structure.unfold_sliced_msg(msg[1],
                                                                      tuple(
@@ -788,13 +781,13 @@ def util_msg_handler_split_pipeline(agent):
                     except KeyError:
                         sliced_msg = msg_structure.unfold_sliced_msg(msg[1],
                                                                      tuple([len(agent.domain) for x in pre_msgs[0]]))
-                    for k, v in sliced_msg.items():
+
+                    for k, v in sliced_msg.items(): # add the msg back to array
                         new_array[k].append(v)
             if all_children_msgs_arrived:
                 break
 
     combined_msg = np.zeros([len(x) for x in l_domains])
-
     for k, v in new_array.items():
         combined_msg[k] = sum(v)
 
