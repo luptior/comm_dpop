@@ -671,7 +671,10 @@ def util_msg_handler_split_pipeline(agent):
 
         if len(reorder_merged_ant) > 1:  # ( ant has other agents + agent.p , agent )
             new_ant = reorder_merged_ant[:-1]  # delete this agent
-            location = new_ant.index(agent.p)  # index of parent
+            try:
+                location = new_ant.index(agent.p)  # index of parent
+            except ValueError:
+                print("test test", new_ant, agent.id, agent.p)
             reorder_new_ant = swap(new_ant, location)  # move parent to the last
 
             agent.send('pre_util_msg_' + str(agent.id), reorder_new_ant, agent.p)  # send the pre-util msg
