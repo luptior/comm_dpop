@@ -723,26 +723,18 @@ def util_msg_handler_split_pipeline(agent):
         combine_ant = set(child_ant) & set(util_cube_ant) - {agent.p, agent.id}
         combine_ant = list(combine_ant) + [agent.p] + [agent.id]  # [tosend + p + itself]
 
-        child_ant_indice = [combine_ant.index(x) for x in child_ant]  # index of element in combines
-        util_cube_ant_indice = [combine_ant.index(x) for x in util_cube_ant]  # index of element in combines
+        try:
+            child_domain_sizes = [len(info[x]['domain']) for x in child_ant]
+        except KeyError:
+            child_domain_sizes = [len(agent.domain) for _ in child_ant]
 
         try:
-            domain_sizes = [len(info[x]['domain']) for x in combine_ant]
+            combine_domain_sizes = [len(info[x]['domain']) for x in combine_ant]
         except KeyError:
-            domain_sizes = [len(agent.domain) for _ in combine_ant]
-        new_array = np.ndarray(shape=tuple(domain_sizes), dtype=list)  # storage
-        new_array2 = {k: [] for k in np.ndindex(tuple(domain_sizes)[:-1])}  # storage2
+            combine_domain_sizes = [len(agent.domain) for _ in combine_ant]
+        new_array = np.zeros(shape=tuple(combine_domain_sizes))  # storage
 
-        # add util cube information first
-        # for k2 in np.ndindex(new_array.shape):
-        #     k = tuple(map(k2.__getitem__, util_cube_ant_indice))
-        #     if k in np.ndindex(util_cube.shape):
-        #         new_array[k2] = [util_cube[k]]
-        #     print("yesy")
-
-        utility.combine()
-
-        print(new_array)
+        new_array, _ = utility.combine(new_array, util_cube, tuple(combine_ant), tuple(util_cube_ant))
 
         """
         actual piece-wise msg
@@ -770,22 +762,29 @@ def util_msg_handler_split_pipeline(agent):
 
                     counter -= len(value[1])  # minus the number of values get
 
-                    if len(value) == 2 and len(value[1] > 1):
+                    if len(value) == 2 and len(value[1]) > 1:
                         # only for optimized
                         unfold_msg = msg_structure.unfold_sliced_msg(value, msg_shape)
                     else:
                         unfold_msg = value
                     # keys will be in natural format
 
-                    # add child info to new_array
+                    tmp_array = np.zeros(shape=tuple(child_domain_sizes))
                     for k, v in unfold_msg.items():
-                        for k2 in np.ndindex(new_array.shape):
-                            if tuple(map(k2.__getitem__, child_ant_indice)) == k:
-                                new_array[k2] = [v]
-                                new_array2[k2[:-1]] += [sum(new_array[k2])]
+                        tmp_array[k] += v
+                    
+                    # add child info to new_array
+                    new_array2, tmp_ant = utility.combine(new_array, tmp_array, combine_ant, child_ant)
+                    trans = tuple([combine_ant.index(x) for x in tmp_ant])
+                    new_array2 = np.transpose(new_array2, trans) # reorder the axis
+
+                    diff = new_array2-new_array
+
+                    print(np.amin(diff, axis=len(new_array2.shape) - 2))
+                    print(np.amax(diff, axis=len(new_array2.shape) - 1))
 
                     msg_tosend = {}
-                    for k, v in new_array2.items():
+                    for k, v in np.ndenumerate(new_array2):
                         if len(v) == len(agent.domain):
                             msg_tosend[k] = sum(v)
 
