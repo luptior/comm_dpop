@@ -696,6 +696,11 @@ def util_msg_handler_split_pipeline(agent):
         util_msg_handler_split(agent)
         return
 
+    util_cube, _ = get_util_cube_pipeline(agent) # now the order of dimension is different
+    util_cube_ant = [agent.id] + [agent.p] + agent.pp
+    util_cube_list = elements = {i: u for i, u in np.ndenumerate(util_cube)} # list format of the cube
+
+
     if len(agent.c) == 1:
         """
         waiting for pre_util_msg
