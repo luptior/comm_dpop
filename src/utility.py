@@ -10,11 +10,6 @@ import numpy as np
 Relatives = collections.namedtuple('Relatives', 'parent pseudoparents children pseudochildren')
 
 
-def draw_graph(graph, pstree):
-    """Draw the tree structure, given a 'graph' and its 'pstree'."""
-    raise NotImplementedError
-
-
 def get_agents_info(filepath:str) -> dict:
     """
     Return a dict with that has all the information extracted from a file like
