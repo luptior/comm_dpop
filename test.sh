@@ -34,7 +34,7 @@ timestamp() {
 split=True
 
 for dom in 10; do
-  for repo in 2; do
+  for repo in 1; do
       for num in 5; do
              name=random_a${num}_d${dom}_r${repo}
              log=$logdir/${name}_split${split}_network${network}.log
