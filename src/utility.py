@@ -53,7 +53,7 @@ def combine(*args):
     merged_array, _ = expand(arrays[0], ants[0], merged_ant, new_shape)
     for array, ant in zip(arrays[1:], ants[1:]):
         new_array, _ = expand(array, ant, merged_ant, new_shape)
-        merged_array += new_array
+        merged_array = merged_array + new_array
 
     return merged_array, merged_ant
 
