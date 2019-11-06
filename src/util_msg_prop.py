@@ -15,7 +15,7 @@ import msg_structure
 slow_processing = True
 
 
-def swap(indices: tuple, location: int, dest : int = -1) -> tuple:
+def swap(indices: tuple, location: int, dest: int = -1) -> tuple:
     new_indices = list(indices)
     new_indices[dest] = indices[location]
     new_indices[location] = indices[dest]
@@ -665,7 +665,7 @@ def util_msg_handler_split_pipeline(agent):
             if ('pre_util_msg_' + str(agent.c[0])) in agent.msgs:
                 break
 
-        pre_msgs = [agent.msgs['pre_util_msg_' + str(child)] for child in sorted(agent.c)] # a list of tuple
+        pre_msgs = [agent.msgs['pre_util_msg_' + str(child)] for child in sorted(agent.c)]  # a list of tuple
         merged_ant = pre_msgs[0]  # set of nodeids for the table sent from the single child
         reorder_merged_ant = swap(merged_ant, merged_ant.index(agent.id))  # move this agent's id to the last
 
@@ -787,7 +787,7 @@ def util_msg_handler_split_pipeline(agent):
             if all_children_pre_msgs_arrived:
                 break
 
-        pre_msgs = [agent.msgs['pre_util_msg_' + str(child)] for child in sorted(agent.c)] # a list of tuple
+        pre_msgs = [agent.msgs['pre_util_msg_' + str(child)] for child in sorted(agent.c)]  # a list of tuple
         merged_ant = utility.merge_ant(pre_msgs)  # the combined set of nodeids for the table sent from two children
         reorder_merged_ant = swap(merged_ant, merged_ant.index(agent.id))  # move this agent's id to the last
 
@@ -805,18 +805,10 @@ def util_msg_handler_split_pipeline(agent):
         domain_ranges = [tuple(range(len(x))) for x in l_domains]  # list of index tuples
         new_array = {indices: [] for indices in itertools.product(*domain_ranges)}
 
-
-
     # no more else as leaf-nodes will be dealt with different method
 
 
-
-
-
-
-
 def util_msg_prop_split_pipeline(agent):
-
     """
     for pipeline, the current naive implementation is do optimization at leaf then send them all
 
@@ -830,8 +822,8 @@ def util_msg_prop_split_pipeline(agent):
         info = agent.agents_info
         util_msg, agent.table = get_util_msg(agent)
 
-        list_ant = list(agent.pp+ [agent.p])
-        util_msg = np.swapaxes(util_msg, 0, -1) # swap parent's axis to the last(was in 0)
+        list_ant = list(agent.pp + [agent.p])
+        util_msg = np.swapaxes(util_msg, 0, -1)  # swap parent's axis to the last(was in 0)
 
         # Send the assignment-nodeid-tuple
         agent.send('pre_util_msg_' + str(agent.id), list_ant, agent.p)
