@@ -666,8 +666,8 @@ def util_msg_handler_split_pipeline(agent):
                 break
 
         pre_msgs = [agent.msgs['pre_util_msg_' + str(child)] for child in sorted(agent.c)]  # a list of tuple
-        merged_ant = pre_msgs[0]  # set of nodeids for the table sent from the single child
-        reorder_merged_ant = swap(merged_ant, merged_ant.index(agent.id))  # move this agent's id to the last
+        child_ant = pre_msgs[0]  # set of nodeids for the table sent from the single child
+        reorder_merged_ant = swap(child_ant, child_ant.index(agent.id))  # move this agent's id to the last
 
         if len(reorder_merged_ant) > 1:  # ( ant has other agents + agent.p , agent )
             new_ant = reorder_merged_ant[:-1]  # delete this agent
