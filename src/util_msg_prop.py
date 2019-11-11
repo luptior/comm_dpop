@@ -119,29 +119,20 @@ def get_util_cube_pipeline(agent):
 
     Dimension order is different
     :returns
-    util_msgs: indices of itself, p, pps: utilities
+    util_msgs: indices of pps, p , self: utilities
     dim_util_msg: dims of domains basically
     """
 
-    info = agent.agents_info
+    util_msg, dim_util_msg = get_util_cube(agent)
 
-    # Domain of the parent
-    parent_domain = info[agent.p]['domain']
-    # Calculate the dimensions of the util_msg
-    # The dimensions of util_msg and table_stored will be the same.
-    # dim_util_msg = [ size_ppdomain, size_pdomain, size_agent_domain]
-    dim_util_msg = [len(info[x]['domain']) for x in agent.pp] + [len(parent_domain)] + [len(agent.domain)]
-    dim_util_msg = tuple(dim_util_msg)
-    util_msg = np.empty(dim_util_msg, dtype=object)
+    prev = list([agent.id]+[agent.p]+agent.pp)
+    reorder = list(agent.pp+[agent.p]+[agent.id])
 
-    lists = [parent_domain] + [info[x]['domain'] for x in agent.pp]
-    indices = [range(len(parent_domain))] + \
-              [range(len(info[x]['domain'])) for x in agent.pp]
-
-    for item, index in zip(itertools.product(*lists), itertools.product(*indices)):
-        for i, xi in enumerate(agent.domain):
-            util = agent.calculate_util(item, xi)
-            util_msg[(i,) + index] = util
+    util_msg = np.transpose(util_msg, tuple([prev.index(x) for x in reorder]))
+    if len(dim_util_msg) > 2:
+        dim_util_msg = tuple(list(dim_util_msg[2:])+[dim_util_msg[1]]+[dim_util_msg[0]])
+    else:
+        dim_util_msg = [dim_util_msg[1]] + [dim_util_msg[0]]
 
     return util_msg, dim_util_msg
 
@@ -908,8 +899,12 @@ def util_msg_handler_split_pipeline(agent):
 
         combine_w_util_cube = np.zeros(shape=tuple(combine_domain_sizes))  # storage
 
-        combine_w_util_cube, _ = utility.combine(combine_w_util_cube, util_cube, tuple(combine_ant),
+        combine_w_util_cube, tmp_ant = utility.combine(combine_w_util_cube, util_cube, tuple(combine_ant),
                                                  tuple(util_cube_ant))
+
+        trans = tuple([tmp_ant.index(x) for x in combine_ant])
+        combine_w_util_cube = np.transpose(combine_w_util_cube, trans)
+
         util_w_msg_cube = combine_w_util_cube
         # print("combine_w_util_cube", combine_w_util_cube)
         """
@@ -981,12 +976,11 @@ def util_msg_handler_split_pipeline(agent):
                     processed_keys += list(msg_tosend.keys())
                     # print("processed_keys", processed_keys)
 
-
-                    print("combine_w_util_cube", combine_w_util_cube)
+                    # print("combine_w_util_cube", combine_w_util_cube)
                     print("util_w_msg_cube", util_w_msg_cube)
-                    print("diff", diff)
-                    print("amax",amax)
-                    print("amin",amin)
+                    # print("diff", diff)
+                    # print("amax",amax)
+                    # print("amin",amin)
                     # print("msg_tosend", msg_tosend, "\n")
                     # print(processed_keys)
 
