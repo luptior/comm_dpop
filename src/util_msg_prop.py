@@ -785,7 +785,10 @@ def util_msg_handler_split_pipeline(agent):
                     print("unfold_msg_array", unfold_msg_array)
 
                     # add child info to storage_combine
-                    new_array2, tmp_ant = utility.combine(storage_combine_cube, unfold_msg_array, combine_ant, child_ant)
+                    new_array2, tmp_ant = \
+                        utility.combine(storage_combine_cube, unfold_msg_array, combine_ant, child_ant)
+
+                    # add leftovers
                     for k in msg_tosave.keys():
                         new_array2[k] = new_array2[k] + msg_tosave[k]
 
