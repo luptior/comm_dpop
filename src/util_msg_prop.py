@@ -918,7 +918,6 @@ def util_msg_handler_split_pipeline(agent):
         # print("msg_shape", msg_shape)
         counter = np.prod(msg_shape)  # how many values should be received
         # print("counter", counter)
-        msg_tosave = {}
         processed_keys = []
         msg_tosend_store = {}
 
@@ -957,15 +956,9 @@ def util_msg_handler_split_pipeline(agent):
                     for k, v in unfold_msg.items():
                         unfold_msg_array[k] += v
 
-                    # print("unfold_msg_array", unfold_msg_array)
-
                     # add child info to storage_combine
                     util_w_msg_cube, tmp_ant = \
                         utility.combine(util_w_msg_cube , unfold_msg_array, combine_ant, child_ant)
-
-                    # add leftovers
-                    for k in msg_tosave.keys():
-                        util_w_msg_cube[k] = util_w_msg_cube[k] + msg_tosave[k]
 
                     # projection from util_w_msg_cube to combine_cube
                     trans = tuple([tmp_ant.index(x) for x in combine_ant])
@@ -989,11 +982,11 @@ def util_msg_handler_split_pipeline(agent):
                     # print("processed_keys", processed_keys)
 
 
-                    # print("combine_w_util_cube", combine_w_util_cube)
-                    # print("util_w_msg_cube", util_w_msg_cube)
-                    # print("diff", diff)
-                    # print("amax",amax)
-                    # print("amin",amin)
+                    print("combine_w_util_cube", combine_w_util_cube)
+                    print("util_w_msg_cube", util_w_msg_cube)
+                    print("diff", diff)
+                    print("amax",amax)
+                    print("amin",amin)
                     # print("msg_tosend", msg_tosend, "\n")
                     # print(processed_keys)
 
@@ -1001,15 +994,6 @@ def util_msg_handler_split_pipeline(agent):
                         agent.send('util_msg_' + str(agent.id), msg_tosend, agent.p)
                         msg_tosend_store.update(msg_tosend)
 
-                    msg_tosave = {k + tuple([0]): list(diff[k]) for k in np.ndindex(amin.shape)
-                                  if amin[k] == 0 and k not in processed_keys}
-                    # print("msg_tosave",msg_tosave)
-                    tmp_tosave = {}
-                    for k in msg_tosave.keys():
-                        tmp_tosave.update(msg_structure.unfold_sliced_msg([k, msg_tosave[k]], util_w_msg_cube.shape))
-
-                    msg_tosave = tmp_tosave
-                    # print("msg_tosave",msg_tosave)
 
             if all_children_msgs_arrived:
 
