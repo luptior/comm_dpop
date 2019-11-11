@@ -977,7 +977,7 @@ def util_msg_handler_split_pipeline(agent):
                     # print("processed_keys", processed_keys)
 
                     # print("combine_w_util_cube", combine_w_util_cube)
-                    print("util_w_msg_cube", util_w_msg_cube)
+                    print("util_w_msg_cube", np.sum(util_w_msg_cube))
                     # print("diff", diff)
                     # print("amax",amax)
                     # print("amin",amin)
