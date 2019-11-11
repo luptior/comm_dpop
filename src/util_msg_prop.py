@@ -125,12 +125,12 @@ def get_util_cube_pipeline(agent):
 
     util_msg, dim_util_msg = get_util_cube(agent)
 
-    prev = list([agent.id]+[agent.p]+agent.pp)
-    reorder = list(agent.pp+[agent.p]+[agent.id])
+    prev = list([agent.id] + [agent.p] + agent.pp)
+    reorder = list(agent.pp + [agent.p] + [agent.id])
 
     util_msg = np.transpose(util_msg, tuple([prev.index(x) for x in reorder]))
     if len(dim_util_msg) > 2:
-        dim_util_msg = tuple(list(dim_util_msg[2:])+[dim_util_msg[1]]+[dim_util_msg[0]])
+        dim_util_msg = tuple(list(dim_util_msg[2:]) + [dim_util_msg[1]] + [dim_util_msg[0]])
     else:
         dim_util_msg = [dim_util_msg[1]] + [dim_util_msg[0]]
 
@@ -900,7 +900,7 @@ def util_msg_handler_split_pipeline(agent):
         combine_w_util_cube = np.zeros(shape=tuple(combine_domain_sizes))  # storage
 
         combine_w_util_cube, tmp_ant = utility.combine(combine_w_util_cube, util_cube, tuple(combine_ant),
-                                                 tuple(util_cube_ant))
+                                                       tuple(util_cube_ant))
 
         trans = tuple([tmp_ant.index(x) for x in combine_ant])
         combine_w_util_cube = np.transpose(combine_w_util_cube, trans)
@@ -953,7 +953,7 @@ def util_msg_handler_split_pipeline(agent):
 
                     # add child info to storage_combine
                     util_w_msg_cube, tmp_ant = \
-                        utility.combine(util_w_msg_cube , unfold_msg_array, combine_ant, child_ant)
+                        utility.combine(util_w_msg_cube, unfold_msg_array, combine_ant, child_ant)
 
                     # projection from util_w_msg_cube to combine_cube
                     trans = tuple([tmp_ant.index(x) for x in combine_ant])
@@ -984,10 +984,9 @@ def util_msg_handler_split_pipeline(agent):
                     # print("msg_tosend", msg_tosend, "\n")
                     # print(processed_keys)
 
-                    if len(msg_tosend)>0:
+                    if len(msg_tosend) > 0:
                         agent.send('util_msg_' + str(agent.id), msg_tosend, agent.p)
                         msg_tosend_store.update(msg_tosend)
-
 
             if all_children_msgs_arrived:
 
