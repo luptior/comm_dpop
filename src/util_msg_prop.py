@@ -920,6 +920,7 @@ def util_msg_handler_split_pipeline(agent):
         # print("counter", counter)
         msg_tosave = {}
         processed_keys = []
+        msg_tosend_store = {}
 
         while True:
             all_children_msgs_arrived = True
@@ -998,6 +999,7 @@ def util_msg_handler_split_pipeline(agent):
 
                     if len(msg_tosend)>0:
                         agent.send('util_msg_' + str(agent.id), msg_tosend, agent.p)
+                        msg_tosend_store.update(msg_tosend)
 
                     msg_tosave = {k + tuple([0]): list(diff[k]) for k in np.ndindex(amin.shape)
                                   if amin[k] == 0 and k not in processed_keys}
@@ -1010,6 +1012,23 @@ def util_msg_handler_split_pipeline(agent):
                     # print("msg_tosave",msg_tosave)
 
             if all_children_msgs_arrived:
+
+                L_ant = list(combine_ant)
+                ownid_index = L_ant.index(agent.id)
+
+                cc = util_w_msg_cube
+                table_shape = list(cc.shape[:])
+                del table_shape[ownid_index]
+                table_shape = tuple(table_shape)
+
+                table = np.zeros(table_shape, dtype=object)
+                cc_rolled = np.rollaxis(cc, ownid_index)
+                for i, abc in enumerate(cc_rolled):
+                    for index, _ in np.ndenumerate(abc):
+                        if abc[index] == msg_tosend_store[index]:
+                            table[index] = agent.domain[i]
+                agent.table = table
+
                 break
 
     elif len(agent.c) == 2:  # the will wait for 2 piece of infomation
