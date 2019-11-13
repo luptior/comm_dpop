@@ -1,4 +1,3 @@
-from utility import *
 import socket
 import pickle
 import sys
@@ -80,7 +79,7 @@ def listen_func(msgs, unprocessed_util, sock, agent):
 
         if agent.network_customization:
             size = sys.getsizeof(data)
-            sleep(tran_time(size))
+            sleep(tran_time(agent, size))
 
         udata = pickle.loads(data)  # Unpickled data
 
@@ -105,5 +104,3 @@ def listen_func(msgs, unprocessed_util, sock, agent):
         if str(udata[1]) == "exit":
             print(dt.now(), str(agent_id) + ': End listen_func')
             return
-
-
