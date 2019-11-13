@@ -5,11 +5,8 @@ import network
 import util_msg_prop
 import msg_structure
 
-split_processing = False
-computation_speed = 30
 
-
-def optimize_size(original_table: np.array, start_length: int = 1) -> int:
+def optimize_size(original_table: np.array, computation_speed, start_length: int = 1) -> int:
     """
     return the size of smaller pieces based on the computation function and tp
     :param start_length: a parameter sets the minimum length for the minimizer search
@@ -18,9 +15,9 @@ def optimize_size(original_table: np.array, start_length: int = 1) -> int:
     """
 
     if start_length == 1:
-        result = [time_with_optimization(original_table, x) for x in np.arange(start_length, original_table.size)]
+        result = [time_with_optimization(original_table, x, computation_speed) for x in np.arange(start_length, original_table.size)]
     else:
-        result = [time_with_optimization(original_table, x)
+        result = [time_with_optimization(original_table, x, computation_speed)
                   for x in np.arange(start_length, original_table.size, start_length)]
 
     max_improve = min(result)
@@ -28,7 +25,7 @@ def optimize_size(original_table: np.array, start_length: int = 1) -> int:
     return length
 
 
-def optimize_size2(original_table: np.array) -> int:
+def optimize_size2(original_table: np.array, computation_speed) -> int:
     """
     where i tried to add gradient descent
     :param original_table:
@@ -40,7 +37,7 @@ def optimize_size2(original_table: np.array) -> int:
     #     test_range = list(np.arange(1, 100)) + \
     #                  list(np.arange(100, original_table.size, 2*int(np.log10(np.size(original_table)))))
 
-    func = lambda x: time_with_optimization(original_table, x)
+    func = lambda x: time_with_optimization(original_table, x, computation_speed)
     result = optimize.minimize(func, np.array(np.size(original_table) / 2))
     print(result)
     result = int(result)
@@ -48,7 +45,7 @@ def optimize_size2(original_table: np.array) -> int:
     return result
 
 
-def time_with_optimization(original_table: np.array, length: int) -> float:
+def time_with_optimization(original_table: np.array, length: int, computation_speed) -> float:
     """
     calculated the total time spent if apply optimization, there are two conditions, 1, transmission of
     the msg takes more time, 2, computation takes more time.
@@ -58,7 +55,7 @@ def time_with_optimization(original_table: np.array, length: int) -> float:
     """
     n_pieces = int(np.size(original_table) / length) + 1
     trans = network.tran_time(msg_structure.size_sliced_msg(original_table.shape, length))
-    comp = computation_time(msg_structure.size_sliced_msg(original_table.shape, length))
+    comp = computation_time(msg_structure.size_sliced_msg(original_table.shape, length), computation_speed)
 
     if trans >= comp:
         # transmission takes more time
@@ -68,7 +65,7 @@ def time_with_optimization(original_table: np.array, length: int) -> float:
         return n_pieces * comp + trans
 
 
-def computation_time(sliced_size: int, clock_rate: int = 3 * 10 ** 9):
+def computation_time(sliced_size: int, computation_speed):
     """
     Calculate the estimated time spent
     :param sliced_size: size in int
