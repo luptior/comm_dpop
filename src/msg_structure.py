@@ -51,7 +51,7 @@ def slice_to_list(agent, original_table: np.array) -> list:
     """
 
     # optimization comes into play
-    length = optimization.optimize_size(original_table, agent.comp_speed)
+    length = optimization.optimize_size(agent, original_table)
 
     elements = {i: u for i, u in np.ndenumerate(original_table)}
     index = list(elements.keys())
