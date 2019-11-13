@@ -1,4 +1,11 @@
-"""Defines the class Agent which represents a node/agent in the DPOP algorithm."""
+"""
+Defines the class Agent which represents a node/agent in the DPOP algorithm.
+Agent: basic agent class
+ListAgent: use instead of ndarray as message
+SplitAgent: split message based on optimization
+PipelineAgent: do optimization at root and pipeline at non-leaf nodes
+
+"""
 
 from datetime import datetime as dt
 
