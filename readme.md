@@ -27,7 +27,4 @@ split the message into mutiple small packages then send
 
 
 ## To-Do-List
-1, working on the ability to process msg by parts\
-2, Pipeline Structure\
-    Since we can spend package in small parts, we  are able to do pipeline
     
