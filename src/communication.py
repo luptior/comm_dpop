@@ -5,7 +5,6 @@ import sys
 from datetime import datetime as dt
 
 from network import *
-import optimization
 
 
 def udp_send(a, title, data, dest_node_id):
@@ -79,7 +78,7 @@ def listen_func(msgs, unprocessed_util, sock, agent):
         the optimization comes into play
         """
 
-        if network_customization:
+        if agent.network_customization:
             size = sys.getsizeof(data)
             sleep(tran_time(size))
 
