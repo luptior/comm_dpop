@@ -16,31 +16,23 @@ timestamp() {
   date +%s
 }
 
-#for dom in 10; do
-#  for repo in 2; do
-#      for num in 5; do
-#             name=random_a${num}_d${dom}_r${repo}
-#             log=$logdir/${name}_split${split}_network${network}.log
-#             timestamp > $log &&
-#             echo "start running ${name} split ${split} network ${network}" &&
-#             python $script --input $datadir/${name}.xml --network $network --split $split --comp_speed 20 --net_speed 20 >> $log &&
-#             echo "finish running ${name}" &&
-#             timestamp >> $log &&
-#             python src/read_log.py $log
-#        done
-#    done
-#done
 
-split=True
+mode=pipeline
+comp_speed=20
+net_speed=20
 
 for dom in 10; do
-  for repo in 2; do
+  for repo in 1; do
       for num in 5; do
              name=random_a${num}_d${dom}_r${repo}
-             log=$logdir/${name}_split${split}_network${network}.log
+             log=$logdir/${name}_${mode}_network${network}.log
              timestamp > $log &&
-             echo "start running ${name} split ${split} network ${network}" &&
-             python $script --input $datadir/${name}.xml --network $network --split Split --comp_speed 20 --net_speed 20 >> $log &&
+             echo "start running ${name} mode ${mode} network ${network}" &&
+             python $script --input $datadir/${name}.xml \
+                            --network $network \
+                            --mode $mode \
+                            --comp_speed $comp_speed \
+                            --net_speed $net_speed >> $log &&
              echo "finish running ${name}" &&
              timestamp >> $log &&
              python src/read_log.py $log
