@@ -19,7 +19,7 @@ import utility
 
 
 class Agent:
-    def __init__(self, i, domain, relations, agents_file):
+    def __init__(self, i, domain, relations, agents_file, comp_speed, net_speed):
 
         """
         Constructor method
@@ -53,14 +53,23 @@ class Agent:
 
         self.table = None  # The table that will be stored
         self.table_ant = None  # The ANT of the table that will be stored, assignment-nodeid-tuples 'ants'.
-        self.IP = info[self.id]['IP']
-        self.PORT = eval(info[self.id]['PORT'])  # Listening Port
         self.is_root = False if 'is_root' not in info[self.i] else eval(info[self.i]['is_root'])
         self.root_id = eval(info[42]['root_id'])
 
         self.msgs = {}  # The dict where all the received messages are stored
         self.unprocessed_util = []  # The dict where all the received util_messages are stored,
         # added for split processing
+
+        self.split_processing = False
+
+        self.IP = info[self.id]['IP']
+        self.PORT = eval(info[self.id]['PORT'])  # Listening Port
+        self.comp_speed = comp_speed
+        if not net_speed:
+            self.network_customization = False
+        else:
+            self.network_customization = True
+            self.net_speed = net_speed
 
     def get_graph_nodes(self):
         info = self.agents_info
@@ -118,15 +127,12 @@ class Agent:
         print(dt.now(), str(self.id) + ': Started')
 
         pseudotree_creation.pseudotree_creation(self)
-        print(f"Split processing is {optimization.split_processing}, " +
-              f"computation speed is {optimization.computation_speed} " +
-              f"network customization is {network.network_customization} " +
-              f"network speed is {network.net_speed} ")
+        print(f"Split processing is {self.split_processing}\n" +
+              f"computation speed is {self.comp_speed} \n" +
+              f"network customization is {self.network_customization} \n" +
+              f"network speed is {self.net_speed} ")
 
-        if not optimization.split_processing:
-            util_msg_prop.util_msg_prop_list(self)
-        else:
-            util_msg_prop.util_msg_prop_split_pipeline(self)
+        util_msg_prop.util_msg_prop(self)
 
         if not self.is_root:
             value_msg_prop.value_msg_prop(self)
@@ -143,8 +149,9 @@ class Agent:
 
 
 class PipelineAgent(Agent):
-    def __init__(self, i, domain, relations, agents_file):
-        Agent.__init__(self, i, domain, relations, agents_file)
+    def __init__(self, i, domain, relations, agents_file, comp_speed, net_speed):
+        Agent.__init__(self, i, domain, relations, agents_file, comp_speed, net_speed)
+        self.split_processing = True
 
     def start(self):
         """
@@ -154,10 +161,10 @@ class PipelineAgent(Agent):
         print(dt.now(), str(self.id) + ': Started')
 
         pseudotree_creation.pseudotree_creation(self)
-        print(f"Split processing is {optimization.split_processing}, " +
-              f"computation speed is {optimization.computation_speed} " +
-              f"network customization is {network.network_customization} " +
-              f"network speed is {network.net_speed} ")
+        print(f"Split processing is {self.split_processing}\n" +
+              f"computation speed is {self.comp_speed} \n" +
+              f"network customization is {self.network_customization} \n" +
+              f"network speed is {self.net_speed} ")
 
         util_msg_prop.util_msg_prop_split_pipeline(self)
 
@@ -167,8 +174,9 @@ class PipelineAgent(Agent):
 
 
 class SplitAgent(Agent):
-    def __init__(self, i, domain, relations, agents_file):
-        Agent.__init__(self, i, domain, relations, agents_file)
+    def __init__(self, i, domain, relations, agents_file, comp_speed, net_speed):
+        Agent.__init__(self, i, domain, relations, agents_file, comp_speed, net_speed)
+        self.split_processing = True
 
     def start(self):
         """
@@ -178,10 +186,10 @@ class SplitAgent(Agent):
         print(dt.now(), str(self.id) + ': Started')
 
         pseudotree_creation.pseudotree_creation(self)
-        print(f"Split processing is {optimization.split_processing}, " +
-              f"computation speed is {optimization.computation_speed} " +
-              f"network customization is {network.network_customization} " +
-              f"network speed is {network.net_speed} ")
+        print(f"Split processing is {self.split_processing}\n" +
+              f"computation speed is {self.comp_speed} \n" +
+              f"network customization is {self.network_customization} \n" +
+              f"network speed is {self.net_speed} ")
 
         util_msg_prop.util_msg_prop_split(self)
 
@@ -191,8 +199,8 @@ class SplitAgent(Agent):
 
 
 class ListAgent(Agent):
-    def __init__(self, i, domain, relations, agents_file):
-        Agent.__init__(self, i, domain, relations, agents_file)
+    def __init__(self, i, domain, relations, agents_file, comp_speed, net_speed):
+        Agent.__init__(self, i, domain, relations, agents_file, comp_speed, net_speed)
 
     def start(self):
         """
@@ -202,10 +210,10 @@ class ListAgent(Agent):
         print(dt.now(), str(self.id) + ': Started')
 
         pseudotree_creation.pseudotree_creation(self)
-        print(f"Split processing is false, " +
-              f"computation speed is {optimization.computation_speed} " +
-              f"network customization is {network.network_customization} " +
-              f"network speed is {network.net_speed} ")
+        print(f"Split processing is {self.split_processing}\n" +
+              f"computation speed is {self.comp_speed} \n" +
+              f"network customization is {self.network_customization} \n" +
+              f"network speed is {self.net_speed} ")
 
         util_msg_prop.util_msg_prop_list(self)
 
