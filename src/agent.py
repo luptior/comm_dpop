@@ -13,8 +13,6 @@ import pseudotree_creation
 import util_msg_prop
 import value_msg_prop
 import communication
-import network
-import optimization
 import utility
 
 
