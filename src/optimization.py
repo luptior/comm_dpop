@@ -2,12 +2,10 @@ import numpy as np
 from scipy import optimize
 
 import network
-import util_msg_prop
 import msg_structure
-from agent import Agent
 
 
-def optimize_size(agent: Agent, original_table: np.array, start_length: int = 1) -> int:
+def optimize_size(agent, original_table: np.array, start_length: int = 1) -> int:
     """
     return the size of smaller pieces based on the computation function and tp
     :param agent:
@@ -17,9 +15,9 @@ def optimize_size(agent: Agent, original_table: np.array, start_length: int = 1)
     """
 
     if start_length == 1:
-        result = [time_with_optimization(original_table, x, agent.comp_speed) for x in np.arange(start_length, original_table.size)]
+        result = [time_with_optimization(agent, original_table, x) for x in np.arange(start_length, original_table.size)]
     else:
-        result = [time_with_optimization(original_table, x, agent.comp_speed)
+        result = [time_with_optimization(agent, original_table, x)
                   for x in np.arange(start_length, original_table.size, start_length)]
 
     max_improve = min(result)
@@ -27,7 +25,7 @@ def optimize_size(agent: Agent, original_table: np.array, start_length: int = 1)
     return length
 
 
-def optimize_size2(agent: Agent, original_table: np.array) -> int:
+def optimize_size2(agent, original_table: np.array) -> int:
     """
     where i tried to add gradient descent
     :param agent:
@@ -48,7 +46,7 @@ def optimize_size2(agent: Agent, original_table: np.array) -> int:
     return result
 
 
-def time_with_optimization(agent: Agent, original_table: np.array, length: int) -> float:
+def time_with_optimization(agent, original_table: np.array, length: int) -> float:
     """
     calculated the total time spent if apply optimization, there are two conditions, 1, transmission of
     the msg takes more time, 2, computation takes more time.
@@ -69,7 +67,7 @@ def time_with_optimization(agent: Agent, original_table: np.array, length: int) 
         return n_pieces * comp + trans
 
 
-def computation_time(agent: Agent, sliced_size: int):
+def computation_time(agent, sliced_size: int):
     """
     Calculate the estimated time spent
     :param agent:

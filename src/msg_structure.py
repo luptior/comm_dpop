@@ -9,10 +9,9 @@ import sys
 import pickle
 
 import optimization
-from agent import Agent
 
 
-def slice_to_list_pipeline(agent: Agent, original_table: np.array) -> list:
+def slice_to_list_pipeline(agent, original_table: np.array) -> list:
     """
     now add the minimum of length into consideration
 
@@ -25,7 +24,7 @@ def slice_to_list_pipeline(agent: Agent, original_table: np.array) -> list:
     step = original_table.shape[-1]  # use the last column which corresponds to the agent this message is sent to
 
     # optimization comes into play
-    length = optimization.optimize_size(original_table, agent.comp_speed, step)
+    length = optimization.optimize_size(agent, original_table, step)
 
     elements = {i: u for i, u in np.ndenumerate(original_table)}
     index = list(elements.keys())
@@ -42,7 +41,7 @@ def slice_to_list_pipeline(agent: Agent, original_table: np.array) -> list:
     return sliced_msgs
 
 
-def slice_to_list(agent: Agent, original_table: np.array) -> list:
+def slice_to_list(agent, original_table: np.array) -> list:
     """
     the method will slice the original table into smaller pieces for faster communication
     :param agent:

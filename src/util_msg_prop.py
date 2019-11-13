@@ -21,13 +21,13 @@ def swap(indices: tuple, location: int, dest: int = -1) -> tuple:
     return tuple(new_indices)
 
 
-def slow_process(msg, comp_speed):
+def slow_process(agent, msg):
     """
     sleep by a certain amount of time based on the size of msg
     :param comp_speed: computation speed
     :param msg: the msg extracted and waited to be processed
     """
-    time = optimization.computation_time(msg_structure.get_actual_size(msg), comp_speed)
+    time = optimization.computation_time(agent, msg_structure.get_actual_size(msg))
     sleep(time)
 
 
@@ -293,7 +293,7 @@ def util_msg_handler_split(agent):
                     msg = agent.unprocessed_util.pop(0)  # a piece of info
 
                     if agent.slow_processing:
-                        slow_process(msg, agent.comp_speed)
+                        slow_process(agent, msg)
 
                     title = msg[0]
                     # is a dict of format {(indices) : util}
@@ -355,7 +355,7 @@ def util_msg_handler_split(agent):
                     msg = agent.unprocessed_util.pop(0)  # a piece of info
 
                     if agent.slow_processing:
-                        slow_process(msg, agent.comp_speed)
+                        slow_process(agent, msg)
 
                     title = msg[0]
                     # is a dict of format {(indices) : util}
@@ -430,7 +430,7 @@ def util_msg_handler_split(agent):
 
         agent.send('pre_util_msg_' + str(agent.id), ant_to_send, agent.p)
 
-        sliced_msgs = msg_structure.slice_to_list(msg_to_send, agent.comp_speed)
+        sliced_msgs = msg_structure.slice_to_list(agent, msg_to_send)
         for sliced_msg in sliced_msgs:
             agent.send('util_msg_' + str(agent.id), sliced_msg, agent.p)
 
@@ -450,7 +450,7 @@ def util_msg_prop_split(agent):
 
         # Send 'util_msg_<ownid>'' to parent
 
-        sliced_msgs = msg_structure.slice_to_list(util_msg, agent.comp_speed)
+        sliced_msgs = msg_structure.slice_to_list(agent, util_msg)
         for sliced_msg in sliced_msgs:
             agent.send('util_msg_' + str(agent.id), sliced_msg, agent.p)
 
@@ -510,7 +510,7 @@ def util_msg_handler_list(agent):
                     # is a dict of format {(indices) : util}
 
                     if agent.slow_processing:
-                        slow_process(msg, agent.comp_speed)
+                        slow_process(agent, msg)
 
                     # add based on the children
                     if title.split("_")[-1] == str(sorted(agent.c)[0]):
@@ -573,7 +573,7 @@ def util_msg_handler_list(agent):
                     print(dt.now(), f"{agent.id}: start processing {title}")
 
                     if agent.slow_processing:
-                        slow_process(msg, agent.comp_speed)  # slow down processing
+                        slow_process(agent, msg)  # slow down processing
                     # is a dict of format {(indices) : util}
                     try:
                         sliced_msg = msg_structure.unfold_sliced_msg(msg[1],
@@ -721,7 +721,7 @@ def util_msg_handler_split_pipeline_root(agent):
                     msg = agent.unprocessed_util.pop(0)  # a piece of info
 
                     if agent.slow_processing:
-                        slow_process(msg, agent.comp_speed)
+                        slow_process(agent, msg)
 
                     title = msg[0]
                     # is a dict of format {(indices) : util}
@@ -770,7 +770,7 @@ def util_msg_handler_split_pipeline_root(agent):
                     msg = agent.unprocessed_util.pop(0)  # a piece of info
 
                     if agent.slow_processing:
-                        slow_process(msg, agent.comp_speed)
+                        slow_process(agent, msg)
 
                     [title, sliced_msg] = msg
                     # is a dict of format {(indices) : util}
@@ -838,7 +838,7 @@ def util_msg_handler_split_pipeline_root(agent):
 
         agent.send('pre_util_msg_' + str(agent.id), ant_to_send, agent.p)
 
-        sliced_msgs = msg_structure.slice_to_list(msg_to_send, agent.comp_speed)
+        sliced_msgs = msg_structure.slice_to_list(agent, msg_to_send)
         for sliced_msg in sliced_msgs:
             agent.send('util_msg_' + str(agent.id), sliced_msg, agent.p)
 
@@ -939,7 +939,7 @@ def util_msg_handler_split_pipeline(agent):
                     msg = agent.unprocessed_util.pop(0)  # a piece of info
 
                     if agent.slow_processing:
-                        slow_process(msg, agent.comp_speed)
+                        slow_process(agent, msg)
 
                     [_, value] = msg  # "util something" , [(indices), [list of value]]
 
@@ -1088,7 +1088,7 @@ def util_msg_handler_split_pipeline(agent):
                     msg = agent.unprocessed_util.pop(0)  # a piece of info
 
                     if agent.slow_processing:
-                        slow_process(msg, agent.comp_speed)
+                        slow_process(agent, msg)
 
                     [title, value] = msg  # "util something" , [(indices), [list of value]]
 
@@ -1195,7 +1195,7 @@ def util_msg_prop_split_pipeline(agent):
         agent.send('pre_util_msg_' + str(agent.id), list_ant, agent.p)
 
         # Send 'util_msg_<ownid>'' to parent
-        sliced_msgs = msg_structure.slice_to_list_pipeline(util_msg, agent.comp_speed)
+        sliced_msgs = msg_structure.slice_to_list_pipeline(agent, util_msg)
 
         for sliced_msg in sliced_msgs:
             agent.send('util_msg_' + str(agent.id), sliced_msg, agent.p)
