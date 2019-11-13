@@ -17,10 +17,54 @@ timestamp() {
 }
 
 
-mode=pipeline
-comp_speed=20
-net_speed=20
 
+comp_speed=1
+net_speed=1
+
+
+mode=list
+for dom in 10; do
+  for repo in 1; do
+      for num in 5; do
+             name=random_a${num}_d${dom}_r${repo}
+             log=$logdir/${name}_${mode}_network${network}.log
+             timestamp > $log &&
+             echo "start running ${name} mode ${mode} network ${network}" &&
+             python $script --input $datadir/${name}.xml \
+                            --network $network \
+                            --mode $mode \
+                            --computation True \
+                            --comp_speed ${comp_speed} \
+                            --net_speed ${net_speed} >> $log &&
+             echo "finish running ${name}" &&
+             timestamp >> $log &&
+             python src/read_log.py $log
+        done
+    done
+done
+
+mode=split
+for dom in 10; do
+  for repo in 1; do
+      for num in 5; do
+             name=random_a${num}_d${dom}_r${repo}
+             log=$logdir/${name}_${mode}_network${network}.log
+             timestamp > $log &&
+             echo "start running ${name} mode ${mode} network ${network}" &&
+             python $script --input $datadir/${name}.xml \
+                            --network $network \
+                            --mode $mode \
+                            --computation True \
+                            --comp_speed ${comp_speed} \
+                            --net_speed ${net_speed} >> $log &&
+             echo "finish running ${name}" &&
+             timestamp >> $log &&
+             python src/read_log.py $log
+        done
+    done
+done
+
+mode=pipeline
 for dom in 10; do
   for repo in 1; do
       for num in 5; do
