@@ -133,3 +133,75 @@ class Agent:
         :param dest_node_id: assigned agent id
         """
         communication.tcp_send(self.agents_info, title, data, self.id, dest_node_id)
+
+
+class PipelineAgent(Agent):
+    def __init__(self, i, domain, relations, agents_file):
+        Agent.__init__(self, i, domain, relations, agents_file)
+
+    def start(self):
+        """
+        begin the processing
+        """
+
+        print(dt.now(), str(self.id) + ': Started')
+
+        pseudotree_creation.pseudotree_creation(self)
+        print(f"Split processing is {optimization.split_processing}, " +
+              f"computation speed is {optimization.computation_speed} " +
+              f"network customization is {network.network_customization} " +
+              f"network speed is {network.net_speed} ")
+
+        util_msg_prop.util_msg_prop_split_pipeline(self)
+
+        if not self.is_root:
+            value_msg_prop.value_msg_prop(self)
+        print(dt.now(), str(self.id) + ': Finished')
+
+
+class SplitAgent(Agent):
+    def __init__(self, i, domain, relations, agents_file):
+        Agent.__init__(self, i, domain, relations, agents_file)
+
+    def start(self):
+        """
+        begin the processing
+        """
+
+        print(dt.now(), str(self.id) + ': Started')
+
+        pseudotree_creation.pseudotree_creation(self)
+        print(f"Split processing is {optimization.split_processing}, " +
+              f"computation speed is {optimization.computation_speed} " +
+              f"network customization is {network.network_customization} " +
+              f"network speed is {network.net_speed} ")
+
+        util_msg_prop.util_msg_prop_split(self)
+
+        if not self.is_root:
+            value_msg_prop.value_msg_prop(self)
+        print(dt.now(), str(self.id) + ': Finished')
+
+
+class ListAgent(Agent):
+    def __init__(self, i, domain, relations, agents_file):
+        Agent.__init__(self, i, domain, relations, agents_file)
+
+    def start(self):
+        """
+        begin the processing
+        """
+
+        print(dt.now(), str(self.id) + ': Started')
+
+        pseudotree_creation.pseudotree_creation(self)
+        print(f"Split processing is false, " +
+              f"computation speed is {optimization.computation_speed} " +
+              f"network customization is {network.network_customization} " +
+              f"network speed is {network.net_speed} ")
+
+        util_msg_prop.util_msg_prop_list(self)
+
+        if not self.is_root:
+            value_msg_prop.value_msg_prop(self)
+        print(dt.now(), str(self.id) + ': Finished')

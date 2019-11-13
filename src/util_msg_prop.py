@@ -850,6 +850,7 @@ def util_msg_handler_split_pipeline(agent):
     info[agent.i]['domain'] = agent.domain
 
     if agent.is_root:
+        print("This agent is root")
         # if agent is the root, it still needs to wait for all msg so no pipeline can be done
         # will si,ply use the old method
         util_msg_handler_split_pipeline_root(agent)
@@ -905,7 +906,15 @@ def util_msg_handler_split_pipeline(agent):
         trans = tuple([tmp_ant.index(x) for x in combine_ant])
         combine_w_util_cube = np.transpose(combine_w_util_cube, trans)
 
-        util_w_msg_cube = combine_w_util_cube
+        # print("combine_w_util_cube", np.sum(combine_w_util_cube))
+        # print("trans", trans)
+        # print("diff", diff)
+        # print("amax",amax)
+        # print("amin",amin)
+        # print("msg_tosend", msg_tosend, "\n")
+        # print(processed_keys)
+
+        util_w_msg_cube = np.copy(combine_w_util_cube)
         # print("combine_w_util_cube", combine_w_util_cube)
         """
         actual piece-wise msg
@@ -933,8 +942,8 @@ def util_msg_handler_split_pipeline(agent):
 
                     [_, value] = msg  # "util something" , [(indices), [list of value]]
 
-                    if agent.id == 1:
-                        print(value)
+                    # if agent.id == 1:
+                    #     print(value)
 
                     # unflod message to normal format
                     if type(value) == list:
@@ -1022,22 +1031,149 @@ def util_msg_handler_split_pipeline(agent):
         pre_msgs = [agent.msgs['pre_util_msg_' + str(child)] for child in sorted(agent.c)]  # a list of tuple
         merged_ant = utility.merge_ant(pre_msgs)  # the combined set of nodeids for the table sent from two children
         reorder_merged_ant = swap(merged_ant, merged_ant.index(agent.id))  # move this agent's id to the last
+        children_ant = swap(reorder_merged_ant, merged_ant.index(agent.p), -2)  # move this agent's p to the -2
 
-        # index of agent id in reorder_merged_ant
-
-        index_ant1 = [list(reorder_merged_ant).index(i) for i in pre_msgs[0]]
-        index_ant2 = [list(reorder_merged_ant).index(i) for i in pre_msgs[1]]
-
-        # the current problem is that it may only have domain info for neighbors, tmp fix
+        # [(agent.c 1 domain sizes), (agent.c domain sizes)]
         try:
-            l_domains = [info[x]['domain'] for x in merged_ant]
+            msg_shapes = [tuple(len(info[x]['domain']) for x in ant) for ant in pre_msgs]
         except KeyError:
-            l_domains = [agent.domain for _ in merged_ant]
+            msg_shapes = [tuple(len(agent.domain) for x in ant) for ant in pre_msgs]
 
-        domain_ranges = [tuple(range(len(x))) for x in l_domains]  # list of index tuples
-        combine_w_util_cube = {indices: [] for indices in itertools.product(*domain_ranges)}
+        # [other_ids, p_id, this agent.id]
+        combine_ant = set(children_ant) | set(util_cube_ant)
+        combine_ant = combine_ant - {agent.p, agent.id}
+        combine_ant = list(combine_ant) + [agent.p] + [agent.id]  # [tosend + p + itself]
 
-    # no more else as leaf-nodes will be dealt with different method
+        agent.send('pre_util_msg_' + str(agent.id), combine_ant[:-1], agent.p)
+        agent.table_ant = combine_ant[:-1]
+
+        # [domain_sizes for each in combine_ant]
+        try:
+            combine_domain_sizes = [len(info[x]['domain']) for x in combine_ant]
+        except KeyError:
+            combine_domain_sizes = [len(agent.domain) for _ in combine_ant]
+
+        ## storages
+        # ndarray initilize with 0 of shapecombine_domain_sizes
+        combine_w_util_cube = np.zeros(shape=tuple(combine_domain_sizes))
+
+        # put cube_util in
+        combine_w_util_cube, tmp_ant = utility.combine(combine_w_util_cube, util_cube, tuple(combine_ant),
+                                                       tuple(util_cube_ant))
+        trans = tuple([tmp_ant.index(x) for x in combine_ant])
+        combine_w_util_cube = np.transpose(combine_w_util_cube, trans)
+
+
+        util_w_msg_cubes = [np.copy(combine_w_util_cube), np.copy(combine_w_util_cube)] # for each
+
+
+        """
+        actual piece-wise msg
+        """
+        # print("msg_shape", msg_shape)
+        counter = sum([np.prod(msg_shape) for msg_shape in msg_shapes])  # how many values should be received
+        # print("counter", counter)
+        processed_keys = [] # processed keys for tosend, for keys after combination
+        msg_tosend_store = {}
+
+        while True:
+            all_children_msgs_arrived = True
+
+            if counter > 0:
+                # not all of the info are received
+                all_children_msgs_arrived = False
+
+                if len(agent.unprocessed_util) > 0:
+                    # actually do the processing
+
+                    msg = agent.unprocessed_util.pop(0)  # a piece of info
+
+                    if slow_process:
+                        slow_process(msg)
+
+                    [title, value] = msg  # "util something" , [(indices), [list of value]]
+
+                    which_child = agent.c.index(int(title.split("_")[-1])) # 0 if first child, 1 otherwise
+
+
+                    # unflod message to normal format
+                    if type(value) == list:
+                        counter -= len(value[1])  # minus the number of values get
+                        unfold_msg = msg_structure.unfold_sliced_msg(value, msg_shapes[which_child])
+                    elif type(value) == dict:
+                        counter -= len(value)  # minus the number of values get
+                        unfold_msg = value
+                    else:
+                        sys.exit("type not supported")
+
+                    # keys will be in natural format, put unfold_msg back to matrix format
+                    unfold_msg_array = np.zeros(shape=tuple(msg_shapes[which_child]))
+                    for k, v in unfold_msg.items():
+                        unfold_msg_array[k] += v
+
+                    # add child info to storage_combine
+                    util_w_msg_cubes[which_child], tmp_ant = \
+                        utility.combine(util_w_msg_cubes[which_child], unfold_msg_array,
+                                        combine_ant, pre_msgs[which_child])
+
+                    # projection from util_w_msg_cube to combine_cube
+                    trans = tuple([tmp_ant.index(x) for x in combine_ant])
+                    # reorder the axis according to combine_ant
+                    util_w_msg_cubes[which_child] = np.transpose(util_w_msg_cubes[which_child], trans)
+
+                    # the different in the value of new array and the util cube
+                    diff1 = util_w_msg_cubes[0] - combine_w_util_cube
+                    diff2 = util_w_msg_cubes[1] - combine_w_util_cube
+
+                    # the minimum value in this agent axis column,
+                    # if 0.0, indicates the information haven't been received
+                    amin1 = np.amin(diff1, axis=len(util_w_msg_cubes[0].shape) - 1)
+                    amin2 = np.amin(diff2, axis=len(util_w_msg_cubes[1].shape) - 1)
+
+                    # the maximum value in this agent axis column
+                    amax = np.amax(util_w_msg_cubes[0]+util_w_msg_cubes[1],
+                                   axis=len(util_w_msg_cubes[which_child].shape) - 1)
+
+                    # if the minimum in either diff is zero then not full info received
+                    msg_tosend = {k: v for k, v in np.ndenumerate(amax) if amin1[k] != 0.0
+                                                                        and amin2[k] != 0.0
+                                                                        and k not in processed_keys}
+                    # print("msg_tosend", msg_tosend)
+
+                    processed_keys += list(msg_tosend.keys())
+                    # print("processed_keys", processed_keys)
+
+                    # print("combine_w_util_cube", combine_w_util_cube)
+                    # print("util_w_msg_cube", np.sum(util_w_msg_cube))
+                    # print("diff", diff)
+                    # print("amax",amax)
+                    # print("amin",amin)
+                    # print("msg_tosend", msg_tosend, "\n")
+                    # print(processed_keys)
+
+                    if len(msg_tosend) > 0:
+                        agent.send('util_msg_' + str(agent.id), msg_tosend, agent.p)
+                        msg_tosend_store.update(msg_tosend)
+
+            if all_children_msgs_arrived:
+
+                L_ant = list(combine_ant)
+                ownid_index = L_ant.index(agent.id)
+
+                cc = util_w_msg_cubes[0] + util_w_msg_cubes[1] - combine_w_util_cube
+                table_shape = list(cc.shape[:])
+                del table_shape[ownid_index]
+                table_shape = tuple(table_shape)
+
+                table = np.zeros(table_shape, dtype=object)
+                cc_rolled = np.rollaxis(cc, ownid_index)
+                for i, abc in enumerate(cc_rolled):
+                    for index, _ in np.ndenumerate(abc):
+                        if abc[index] == msg_tosend_store[index]:
+                            table[index] = agent.domain[i]
+                agent.table = table
+
+                break
 
 
 def util_msg_prop_split_pipeline(agent):
