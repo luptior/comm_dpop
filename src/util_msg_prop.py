@@ -851,7 +851,6 @@ def util_msg_handler_split_pipeline(agent):
     info[agent.i]['domain'] = agent.domain
 
     if agent.is_root:
-        print("This agent is root")
         # if agent is the root, it still needs to wait for all msg so no pipeline can be done
         # will si,ply use the old method
         util_msg_handler_split_pipeline_root(agent)
@@ -987,7 +986,7 @@ def util_msg_handler_split_pipeline(agent):
                     # print("processed_keys", processed_keys)
 
                     # print("combine_w_util_cube", combine_w_util_cube)
-                    print("util_w_msg_cube", np.sum(util_w_msg_cube))
+                    # print("util_w_msg_cube", np.sum(util_w_msg_cube))
                     # print("diff", diff)
                     # print("amax",amax)
                     # print("amin",amin)
