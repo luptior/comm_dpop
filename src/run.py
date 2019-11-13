@@ -18,7 +18,7 @@ import network
 import optimization
 
 
-def main(f, mode):
+def main(f, mode, computation, network):
     if f.split(".")[-1] == "xml":
         agents, domains, variables, relations, constraints = dpop_parser.xml_parse(f)
     else:
@@ -56,13 +56,13 @@ def main(f, mode):
             f.write("\n\n")
 
     if mode == "default":
-        agents = [agent.Agent(i, d, agent_relations[i], "sim_jbs.tmp") for i in agent_ids]
+        agents = [agent.Agent(i, d, agent_relations[i], "sim_jbs.tmp", computation, network) for i in agent_ids]
     elif mode == "list":
-        agents = [agent.ListAgent(i, d, agent_relations[i], "sim_jbs.tmp") for i in agent_ids]
+        agents = [agent.ListAgent(i, d, agent_relations[i], "sim_jbs.tmp", computation, network) for i in agent_ids]
     elif mode == "split":
-        agents = [agent.SplitAgent(i, d, agent_relations[i], "sim_jbs.tmp") for i in agent_ids]
+        agents = [agent.SplitAgent(i, d, agent_relations[i], "sim_jbs.tmp", computation, network) for i in agent_ids]
     elif mode == "pipeline":
-        agents = [agent.PipelineAgent(i, d, agent_relations[i], "sim_jbs.tmp") for i in agent_ids]
+        agents = [agent.PipelineAgent(i, d, agent_relations[i], "sim_jbs.tmp", computation, network) for i in agent_ids]
     else:
         raise ModeError(mode)
 
@@ -99,18 +99,24 @@ if __name__ == '__main__':
     parser.add_argument("--network", help="# if network customization is turned on", type=str, default="False")
     parser.add_argument("--mode", help="# which mode this algorithm is on {default, list, split, pipeline} ",
                         type=str, default="default")
+    parser.add_argument("--computation", help="# whether to adjust the computation speed ", type=str, default="False")
     parser.add_argument("--comp_speed", help="# a parameter to adjust the computation speed ", type=float, default=10)
     parser.add_argument("--net_speed", help="# a parameter to adjust the network speed ", type=float, default=10)
     parser.add_argument("--pipeline", help="# a parameter wether pipeline is on ", type=str, default="False")
     # parser.add_argument("--output", help="# output file", type=str)
     args = parser.parse_args()
 
-    network.network_customization = eval(args.network)
-    network.net_speed = args.net_speed
-    optimization.split_processing = False if args.mode in ["default", "list"] else True
-    optimization.computation_speed = args.comp_speed
+    if eval(args.network):
+        network = args.net_speed
+    else:
+        network = False
 
-    main(f=args.input, mode=args.mode)
+    if eval(args.computation):
+        computation = args.comp_speed
+    else:
+        computation = False
+
+    main(f=args.input, mode=args.mode, computation=computation, network=network)
 
 
 class ModeError(Exception):

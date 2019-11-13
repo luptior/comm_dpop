@@ -13,8 +13,6 @@ import utility
 import optimization
 import msg_structure
 
-slow_processing = True
-
 
 def swap(indices: tuple, location: int, dest: int = -1) -> tuple:
     new_indices = list(indices)
@@ -169,6 +167,9 @@ def util_msg_handler(agent):
 
     combined_msg, combined_ant = utility.combine(*util_msgs)
 
+    if agent.slow_processing:
+        slow_process(util_msgs)
+
     info = agent.agents_info
 
     if agent.is_root:
@@ -290,7 +291,7 @@ def util_msg_handler_split(agent):
 
                     msg = agent.unprocessed_util.pop(0)  # a piece of info
 
-                    if slow_process:
+                    if agent.slow_processing:
                         slow_process(msg)
 
                     title = msg[0]
@@ -352,7 +353,7 @@ def util_msg_handler_split(agent):
 
                     msg = agent.unprocessed_util.pop(0)  # a piece of info
 
-                    if slow_process:
+                    if agent.slow_processing:
                         slow_process(msg)
 
                     title = msg[0]
@@ -507,7 +508,7 @@ def util_msg_handler_list(agent):
                     print(dt.now(), f" {agent.id}: start processing {title}")
                     # is a dict of format {(indices) : util}
 
-                    if slow_processing:
+                    if agent.slow_processing:
                         slow_process(msg)
 
                     # add based on the children
@@ -570,7 +571,7 @@ def util_msg_handler_list(agent):
 
                     print(dt.now(), f"{agent.id}: start processing {title}")
 
-                    if slow_processing:
+                    if agent.slow_processing:
                         slow_process(msg)  # slow down processing
                     # is a dict of format {(indices) : util}
                     try:
@@ -718,7 +719,7 @@ def util_msg_handler_split_pipeline_root(agent):
 
                     msg = agent.unprocessed_util.pop(0)  # a piece of info
 
-                    if slow_process:
+                    if agent.slow_processing:
                         slow_process(msg)
 
                     title = msg[0]
@@ -767,7 +768,7 @@ def util_msg_handler_split_pipeline_root(agent):
 
                     msg = agent.unprocessed_util.pop(0)  # a piece of info
 
-                    if slow_process:
+                    if agent.slow_processing:
                         slow_process(msg)
 
                     title = msg[0]
@@ -937,7 +938,7 @@ def util_msg_handler_split_pipeline(agent):
 
                     msg = agent.unprocessed_util.pop(0)  # a piece of info
 
-                    if slow_process:
+                    if agent.slow_processing:
                         slow_process(msg)
 
                     [_, value] = msg  # "util something" , [(indices), [list of value]]
@@ -1063,9 +1064,7 @@ def util_msg_handler_split_pipeline(agent):
         trans = tuple([tmp_ant.index(x) for x in combine_ant])
         combine_w_util_cube = np.transpose(combine_w_util_cube, trans)
 
-
-        util_w_msg_cubes = [np.copy(combine_w_util_cube), np.copy(combine_w_util_cube)] # for each
-
+        util_w_msg_cubes = [np.copy(combine_w_util_cube), np.copy(combine_w_util_cube)]  # for each
 
         """
         actual piece-wise msg
@@ -1073,7 +1072,7 @@ def util_msg_handler_split_pipeline(agent):
         # print("msg_shape", msg_shape)
         counter = sum([np.prod(msg_shape) for msg_shape in msg_shapes])  # how many values should be received
         # print("counter", counter)
-        processed_keys = [] # processed keys for tosend, for keys after combination
+        processed_keys = []  # processed keys for tosend, for keys after combination
         msg_tosend_store = {}
 
         while True:
@@ -1088,13 +1087,12 @@ def util_msg_handler_split_pipeline(agent):
 
                     msg = agent.unprocessed_util.pop(0)  # a piece of info
 
-                    if slow_process:
+                    if agent.slow_processing:
                         slow_process(msg)
 
                     [title, value] = msg  # "util something" , [(indices), [list of value]]
 
-                    which_child = agent.c.index(int(title.split("_")[-1])) # 0 if first child, 1 otherwise
-
+                    which_child = agent.c.index(int(title.split("_")[-1]))  # 0 if first child, 1 otherwise
 
                     # unflod message to normal format
                     if type(value) == list:
@@ -1131,13 +1129,13 @@ def util_msg_handler_split_pipeline(agent):
                     amin2 = np.amin(diff2, axis=len(util_w_msg_cubes[1].shape) - 1)
 
                     # the maximum value in this agent axis column
-                    amax = np.amax(util_w_msg_cubes[0]+util_w_msg_cubes[1],
+                    amax = np.amax(util_w_msg_cubes[0] + util_w_msg_cubes[1],
                                    axis=len(util_w_msg_cubes[which_child].shape) - 1)
 
                     # if the minimum in either diff is zero then not full info received
                     msg_tosend = {k: v for k, v in np.ndenumerate(amax) if amin1[k] != 0.0
-                                                                        and amin2[k] != 0.0
-                                                                        and k not in processed_keys}
+                                  and amin2[k] != 0.0
+                                  and k not in processed_keys}
                     # print("msg_tosend", msg_tosend)
 
                     processed_keys += list(msg_tosend.keys())

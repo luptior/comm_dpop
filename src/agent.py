@@ -64,12 +64,18 @@ class Agent:
 
         self.IP = info[self.id]['IP']
         self.PORT = eval(info[self.id]['PORT'])  # Listening Port
-        self.comp_speed = comp_speed
-        if not net_speed:
-            self.network_customization = False
+
+        if comp_speed:
+            self.slow_processing = True
+            self.comp_speed = comp_speed
         else:
+            self.slow_processing = False
+
+        if net_speed:
             self.network_customization = True
             self.net_speed = net_speed
+        else:
+            self.network_customization = False
 
     def get_graph_nodes(self):
         info = self.agents_info
