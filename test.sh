@@ -31,8 +31,9 @@ for dom in 10; do
              python $script --input $datadir/${name}.xml \
                             --network $network \
                             --mode $mode \
-                            --comp_speed $comp_speed \
-                            --net_speed $net_speed >> $log &&
+                            --computation True \
+                            --comp_speed ${comp_speed} \
+                            --net_speed ${net_speed} >> $log &&
              echo "finish running ${name}" &&
              timestamp >> $log &&
              python src/read_log.py $log

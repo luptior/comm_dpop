@@ -17,6 +17,7 @@ import utility
 
 
 class Agent:
+
     def __init__(self, i, domain, relations, agents_file, comp_speed, net_speed):
 
         """

@@ -4,20 +4,22 @@ from scipy import optimize
 import network
 import util_msg_prop
 import msg_structure
+from agent import Agent
 
 
-def optimize_size(original_table: np.array, computation_speed, start_length: int = 1) -> int:
+def optimize_size(agent: Agent, original_table: np.array, start_length: int = 1) -> int:
     """
     return the size of smaller pieces based on the computation function and tp
+    :param agent:
     :param start_length: a parameter sets the minimum length for the minimizer search
     :param original_table:
     :return: a tuple represents the shape
     """
 
     if start_length == 1:
-        result = [time_with_optimization(original_table, x, computation_speed) for x in np.arange(start_length, original_table.size)]
+        result = [time_with_optimization(original_table, x, agent.comp_speed) for x in np.arange(start_length, original_table.size)]
     else:
-        result = [time_with_optimization(original_table, x, computation_speed)
+        result = [time_with_optimization(original_table, x, agent.comp_speed)
                   for x in np.arange(start_length, original_table.size, start_length)]
 
     max_improve = min(result)
@@ -25,9 +27,10 @@ def optimize_size(original_table: np.array, computation_speed, start_length: int
     return length
 
 
-def optimize_size2(original_table: np.array, computation_speed) -> int:
+def optimize_size2(agent: Agent, original_table: np.array) -> int:
     """
     where i tried to add gradient descent
+    :param agent:
     :param original_table:
     :return: a tuple represents the shape
     """
@@ -37,7 +40,7 @@ def optimize_size2(original_table: np.array, computation_speed) -> int:
     #     test_range = list(np.arange(1, 100)) + \
     #                  list(np.arange(100, original_table.size, 2*int(np.log10(np.size(original_table)))))
 
-    func = lambda x: time_with_optimization(original_table, x, computation_speed)
+    func = lambda x: time_with_optimization(original_table, x, agent.comp_speed)
     result = optimize.minimize(func, np.array(np.size(original_table) / 2))
     print(result)
     result = int(result)
@@ -45,17 +48,18 @@ def optimize_size2(original_table: np.array, computation_speed) -> int:
     return result
 
 
-def time_with_optimization(original_table: np.array, length: int, computation_speed) -> float:
+def time_with_optimization(agent: Agent, original_table: np.array, length: int) -> float:
     """
     calculated the total time spent if apply optimization, there are two conditions, 1, transmission of
     the msg takes more time, 2, computation takes more time.
+    :param agent:
     :param original_table:
     :param length:
     :return: the total time calculated based on the shape of pieces
     """
     n_pieces = int(np.size(original_table) / length) + 1
     trans = network.tran_time(msg_structure.size_sliced_msg(original_table.shape, length))
-    comp = computation_time(msg_structure.size_sliced_msg(original_table.shape, length), computation_speed)
+    comp = computation_time(agent, msg_structure.size_sliced_msg(original_table.shape, length))
 
     if trans >= comp:
         # transmission takes more time
@@ -65,16 +69,16 @@ def time_with_optimization(original_table: np.array, length: int, computation_sp
         return n_pieces * comp + trans
 
 
-def computation_time(sliced_size: int, computation_speed):
+def computation_time(agent: Agent, sliced_size: int):
     """
     Calculate the estimated time spent
+    :param agent:
     :param sliced_size: size in int
-    :param clock_rate: need to be calculated based on local machine, currently not implemented
     :return:
     """
     # return np.product(table_dim) * length * 10 / clock_rate  # return unit in seconds
-    if util_msg_prop.slow_processing:
-        return (6.144387919188346e-06 * sliced_size + 0.017582085621144466) * computation_speed
+    if agent.comp_speed:
+        return (6.144387919188346e-06 * sliced_size + 0.017582085621144466) * agent.comp_speed
     else:
         return 6.144387919188346e-06 * sliced_size + 0.017582085621144466
 
