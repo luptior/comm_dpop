@@ -7,9 +7,9 @@ xml_parser can be change to other scripts to read different types of input.
 """
 
 import os
-import sys
 import numpy as np
 import argparse
+import sys
 
 # Package
 import agent
@@ -18,7 +18,7 @@ import network
 import optimization
 
 
-def main(f):
+def main(f, mode, computation, network):
     if f.split(".")[-1] == "xml":
         agents, domains, variables, relations, constraints = dpop_parser.xml_parse(f)
     else:
@@ -44,7 +44,7 @@ def main(f):
                 i_relation[(tu[1], tu[0])] = r_value
         agent_relations[i] = i_relation
 
-    with open("sim_jbs.txt", "w") as f:
+    with open("sim_jbs.tmp", "w") as f:
         f.write("id=42 root_id=" + str(root_id) + "\n\n")
         id = np.random.randint(1000)
         for u in agent_ids:
@@ -55,8 +55,16 @@ def main(f):
                 f.write("is_root=True" + " ")
             f.write("\n\n")
 
-    agents = [agent.Agent(i, d, agent_relations[i], "sim_jbs.txt")
-              for i in agent_ids]
+    if mode == "default":
+        agents = [agent.Agent(i, d, agent_relations[i], "sim_jbs.tmp", computation, network) for i in agent_ids]
+    elif mode == "list":
+        agents = [agent.ListAgent(i, d, agent_relations[i], "sim_jbs.tmp", computation, network) for i in agent_ids]
+    elif mode == "split":
+        agents = [agent.SplitAgent(i, d, agent_relations[i], "sim_jbs.tmp", computation, network) for i in agent_ids]
+    elif mode == "pipeline":
+        agents = [agent.PipelineAgent(i, d, agent_relations[i], "sim_jbs.tmp", computation, network) for i in agent_ids]
+    else:
+        raise ModeError(mode)
 
     # Running the agents
     pid = os.getpid()
@@ -65,9 +73,9 @@ def main(f):
     for a in agents:
         if not a.is_root:
             if pid == os.getpid():
-                childid = os.fork()
-                children.append(childid)
-                if childid == 0:
+                child_id = os.fork()
+                children.append(child_id)
+                if child_id == 0:
                     a.start()
                     print('agent' + str(a.id) + ': ' + str(a.value))
 
@@ -77,7 +85,7 @@ def main(f):
         root_agent.start()
         print('max_util: ' + str(root_agent.max_util))
         print('agent' + str(root_agent.id) + ': ' + str(root_agent.value))
-        for i in children:
+        for _ in children:
             os.wait()
 
 
@@ -89,12 +97,31 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", help="# input file", type=str)
     parser.add_argument("--network", help="# if network customization is turned on", type=str, default="False")
-    parser.add_argument("--split", help="# if network split processing is  turned on ", type=str, default="False")
+    parser.add_argument("--mode", help="# which mode this algorithm is on {default, list, split, pipeline} ",
+                        type=str, default="default")
+    parser.add_argument("--computation", help="# whether to adjust the computation speed ", type=str, default="False")
+    parser.add_argument("--comp_speed", help="# a parameter to adjust the computation speed ", type=float, default=10)
+    parser.add_argument("--net_speed", help="# a parameter to adjust the network speed ", type=float, default=10)
+    parser.add_argument("--pipeline", help="# a parameter wether pipeline is on ", type=str, default="False")
     # parser.add_argument("--output", help="# output file", type=str)
     args = parser.parse_args()
 
-    network.network_customization = eval(args.network)
-    optimization.split_processing = eval(args.split)
+    if eval(args.network):
+        network = args.net_speed
+    else:
+        network = False
 
-    main(f=args.input)
+    if eval(args.computation):
+        computation = args.comp_speed
+    else:
+        computation = False
 
+    main(f=args.input, mode=args.mode, computation=computation, network=network)
+
+
+class ModeError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)

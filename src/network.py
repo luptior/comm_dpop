@@ -15,6 +15,8 @@ from time import sleep
 import sys
 
 network_customization = True
+net_speed = 100
+
 
 # some constants for network communication
 
@@ -25,7 +27,7 @@ MAX_SEG = 1460.  # unit in bytes
 
 def throughput(q, rtt, s) -> float:
     # return unit in bytes / s
-    return 1.22 * s / (rtt * np.sqrt(q)) * 100
+    return 1.22 * s / (rtt * np.sqrt(q)) * net_speed
 
 
 tp = throughput(Q, RTT, MAX_SEG)

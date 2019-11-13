@@ -1,20 +1,33 @@
-"""Defines the class Agent which represents a node/agent in the DPOP algorithm."""
-import network
-import utility
+"""
+Defines the class Agent which represents a node/agent in the DPOP algorithm.
+Agent: basic agent class
+ListAgent: use instead of ndarray as message
+SplitAgent: split message based on optimization
+PipelineAgent: do optimization at root and pipeline at non-leaf nodes
+
+"""
+
 from datetime import datetime as dt
 
 import pseudotree_creation
 import util_msg_prop
 import value_msg_prop
 import communication
-
-import run
-import network
-import optimization
+import utility
 
 
 class Agent:
-    def __init__(self, i, domain, relations, agents_file):
+
+    def __init__(self, i, domain, relations, agents_file, comp_speed, net_speed):
+
+        """
+        Constructor method
+        :param i: agent id
+        :param domain: agent domain, a list of values
+        :param relations: A dict of functions, for each edge in the graph
+        :param agents_file:
+        """
+
         # Use utils.get_agents_info to initialize all the agents.
         # All the information from 'agents.txt' will be retrieved and stored in this dict 'agents_info'.
         # Also, the domains of some agents will be added to this dict later on.
@@ -28,28 +41,40 @@ class Agent:
         self.max_util = float("-inf")  # Will be initialized only for the root, in the end
         self.i = self.id = i
         self.domain = domain  # A list of values
-        self.relations = relations  # A dict of functions, for each edge in the
-        # graph
-        self.graph_nodes = self.get_graph_nodes()  # A list of all the nodes in
-        # the graph, except itself
-        self.neighbors = self.get_neighbors()  # A list of all the neighbors
-        # sorted by ids
+        self.relations = relations  # A dict of functions, for each edge in the graph
+        self.graph_nodes = self.get_graph_nodes()  # A list of all the nodes in the graph, except itself
+        self.neighbors = self.get_neighbors()  # A list of all the neighbors sorted by ids
+
         self.p = None  # The parent's id
         self.pp = None  # A list of the pseudo-parents' ids
-        self.c = None  # A list of the childrens' ids
-        self.pc = None  # A list of the pseudo-childrens' ids
+        self.c = None  # A list of the children's ids
+        self.pc = None  # A list of the pseudo-children's ids
+
         self.table = None  # The table that will be stored
         self.table_ant = None  # The ANT of the table that will be stored, assignment-nodeid-tuples 'ants'.
+        self.is_root = False if 'is_root' not in info[self.i] else eval(info[self.i]['is_root'])
+        self.root_id = eval(info[42]['root_id'])
+
+        self.msgs = {}  # The dict where all the received messages are stored
+        self.unprocessed_util = []  # The dict where all the received util_messages are stored,
+        # added for split processing
+
+        self.split_processing = False
+
         self.IP = info[self.id]['IP']
         self.PORT = eval(info[self.id]['PORT'])  # Listening Port
-        self.is_root = False
-        if 'is_root' in info[self.i]:
-            self.is_root = eval(info[self.i]['is_root'])
-        self.root_id = eval(info[42]['root_id'])
-        self.msgs = {}  # The dict where all the received messages are stored
 
-        # the foollowing are added for split processing
-        self.unprocessed_util = []  # The dict where all the received util_messages are stored
+        if comp_speed:
+            self.slow_processing = True
+            self.comp_speed = comp_speed
+        else:
+            self.slow_processing = False
+
+        if net_speed:
+            self.network_customization = True
+            self.net_speed = net_speed
+        else:
+            self.network_customization = False
 
     def get_graph_nodes(self):
         info = self.agents_info
@@ -90,7 +115,7 @@ class Agent:
 
     def is_leaf(self) -> bool:
         """
-        Return True if this node is a leaf node and False otherwise.
+        determine if it is a lead node
         """
         assert self.c is not None, 'self.c not yet initialized.'
 
@@ -100,20 +125,103 @@ class Agent:
             return False
 
     def start(self):
+        """
+        begin the processing
+        """
 
         print(dt.now(), str(self.id) + ': Started')
-        pseudotree_creation.pseudotree_creation(self)
 
-        if not optimization.split_processing:
-            print("Split is not enabled")
-            util_msg_prop.util_msg_prop_list(self)
-        else:
-            print("Split processing is enabled")
-            util_msg_prop.util_msg_prop_split(self)
+        pseudotree_creation.pseudotree_creation(self)
+        print(f"Split processing is {self.split_processing}\n" +
+              f"computation speed is {self.comp_speed} \n" +
+              f"network customization is {self.network_customization} \n" +
+              f"network speed is {self.net_speed} ")
+
+        util_msg_prop.util_msg_prop(self)
 
         if not self.is_root:
             value_msg_prop.value_msg_prop(self)
         print(dt.now(), str(self.id) + ': Finished')
 
     def send(self, title, data, dest_node_id):
+        """
+        a wrap of underlying TCP/UDP in communication
+        :param title: msg title
+        :param data: the actual data part
+        :param dest_node_id: assigned agent id
+        """
         communication.tcp_send(self.agents_info, title, data, self.id, dest_node_id)
+
+
+class PipelineAgent(Agent):
+    def __init__(self, i, domain, relations, agents_file, comp_speed, net_speed):
+        Agent.__init__(self, i, domain, relations, agents_file, comp_speed, net_speed)
+        self.split_processing = True
+
+    def start(self):
+        """
+        begin the processing
+        """
+
+        print(dt.now(), str(self.id) + ': Started')
+
+        pseudotree_creation.pseudotree_creation(self)
+        print(f"Split processing is {self.split_processing}\n" +
+              f"computation speed is {self.comp_speed} \n" +
+              f"network customization is {self.network_customization} \n" +
+              f"network speed is {self.net_speed} ")
+
+        util_msg_prop.util_msg_prop_split_pipeline(self)
+
+        if not self.is_root:
+            value_msg_prop.value_msg_prop(self)
+        print(dt.now(), str(self.id) + ': Finished')
+
+
+class SplitAgent(Agent):
+    def __init__(self, i, domain, relations, agents_file, comp_speed, net_speed):
+        Agent.__init__(self, i, domain, relations, agents_file, comp_speed, net_speed)
+        self.split_processing = True
+
+    def start(self):
+        """
+        begin the processing
+        """
+
+        print(dt.now(), str(self.id) + ': Started')
+
+        pseudotree_creation.pseudotree_creation(self)
+        print(f"Split processing is {self.split_processing}\n" +
+              f"computation speed is {self.comp_speed} \n" +
+              f"network customization is {self.network_customization} \n" +
+              f"network speed is {self.net_speed} ")
+
+        util_msg_prop.util_msg_prop_split(self)
+
+        if not self.is_root:
+            value_msg_prop.value_msg_prop(self)
+        print(dt.now(), str(self.id) + ': Finished')
+
+
+class ListAgent(Agent):
+    def __init__(self, i, domain, relations, agents_file, comp_speed, net_speed):
+        Agent.__init__(self, i, domain, relations, agents_file, comp_speed, net_speed)
+
+    def start(self):
+        """
+        begin the processing
+        """
+
+        print(dt.now(), str(self.id) + ': Started')
+
+        pseudotree_creation.pseudotree_creation(self)
+        print(f"Split processing is {self.split_processing}\n" +
+              f"computation speed is {self.comp_speed} \n" +
+              f"network customization is {self.network_customization} \n" +
+              f"network speed is {self.net_speed} ")
+
+        util_msg_prop.util_msg_prop_list(self)
+
+        if not self.is_root:
+            value_msg_prop.value_msg_prop(self)
+        print(dt.now(), str(self.id) + ': Finished')

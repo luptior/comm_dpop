@@ -6,7 +6,9 @@
 *.log
 *.tmp
 log
+*.tmp
 
 sim_jbs.txt
 test.sh
+
 
