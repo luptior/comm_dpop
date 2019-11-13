@@ -9,6 +9,7 @@ xml_parser can be change to other scripts to read different types of input.
 import os
 import numpy as np
 import argparse
+import sys
 
 # Package
 import agent
@@ -17,7 +18,7 @@ import network
 import optimization
 
 
-def main(f):
+def main(f, mode):
     if f.split(".")[-1] == "xml":
         agents, domains, variables, relations, constraints = dpop_parser.xml_parse(f)
     else:
@@ -54,8 +55,16 @@ def main(f):
                 f.write("is_root=True" + " ")
             f.write("\n\n")
 
-    agents = [agent.Agent(i, d, agent_relations[i], "sim_jbs.tmp")
-              for i in agent_ids]
+    if mode == "default":
+        agents = [agent.Agent(i, d, agent_relations[i], "sim_jbs.tmp") for i in agent_ids]
+    elif mode == "list":
+        agents = [agent.ListAgent(i, d, agent_relations[i], "sim_jbs.tmp") for i in agent_ids]
+    elif mode == "split":
+        agents = [agent.SplitAgent(i, d, agent_relations[i], "sim_jbs.tmp") for i in agent_ids]
+    elif mode == "pipeline":
+        agents = [agent.PipelineAgent(i, d, agent_relations[i], "sim_jbs.tmp") for i in agent_ids]
+    else:
+        raise ModeError(mode)
 
     # Running the agents
     pid = os.getpid()
@@ -88,16 +97,25 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", help="# input file", type=str)
     parser.add_argument("--network", help="# if network customization is turned on", type=str, default="False")
-    parser.add_argument("--split", help="# if network split processing is  turned on ", type=str, default="False")
+    parser.add_argument("--mode", help="# which mode this algorithm is on {default, list, split, pipeline} ",
+                        type=str, default="default")
     parser.add_argument("--comp_speed", help="# a parameter to adjust the computation speed ", type=float, default=10)
     parser.add_argument("--net_speed", help="# a parameter to adjust the network speed ", type=float, default=10)
+    parser.add_argument("--pipeline", help="# a parameter wether pipeline is on ", type=str, default="False")
     # parser.add_argument("--output", help="# output file", type=str)
     args = parser.parse_args()
 
     network.network_customization = eval(args.network)
     network.net_speed = args.net_speed
-    optimization.split_processing = eval(args.split)
+    optimization.split_processing = False if args.mode in ["default", "list"] else True
     optimization.computation_speed = args.comp_speed
 
-    main(f=args.input)
+    main(f=args.input, mode=args.mode)
 
+
+class ModeError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
