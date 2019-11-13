@@ -4,7 +4,6 @@ based, [(indedx of first element), [sequential values from ndarray]]
 
 """
 
-
 import numpy as np
 import sys
 import pickle
@@ -16,12 +15,13 @@ def slice_to_list_pipeline(original_table: np.array, computation_speed) -> list:
     """
     now add the minimum of length into consideration
 
+    :param computation_speed:
     :param original_table: np.ndarray
     :return: list of dict of length length, len(list[0])=length
             each element will have (index of first element), list of continuous
     """
 
-    step = original_table.shape[-1] # use the last column which corresponds to the agent this message is sent to
+    step = original_table.shape[-1]  # use the last column which corresponds to the agent this message is sent to
 
     # optimization comes into play
     length = optimization.optimize_size(original_table, computation_speed, step)
@@ -44,6 +44,7 @@ def slice_to_list_pipeline(original_table: np.array, computation_speed) -> list:
 def slice_to_list(original_table: np.array, computation_speed) -> list:
     """
     the method will slice the original table into smaller pieces for faster communication
+    :param computation_speed:
     :param original_table: np.ndarray
     :return: list of dict of length length, len(list[0])=length
             each element will have (index of first element), list of continuous
@@ -71,7 +72,6 @@ def table_to_list(original_table: np.array) -> list:
     """
     the method will slice the original table into smaller pieces for faster communication
 
-    :param length: the length for sliced list
     :param original_table: np.ndarray
     :return: list of dict of length length, len(list[0])=length
             each element will have (index of first element), list of continuous
