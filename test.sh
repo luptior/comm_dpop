@@ -20,7 +20,7 @@ timestamp() {
 
 comp_speed=10
 net_speed=20
-comp_set=False
+comp_set=True
 
 for net_speed in 1 10 50 100 200 500 1000; do
   for comp_speed in 1 0.5 0.1 0.05 0.025 0.01 0.005; do
