@@ -12,3 +12,6 @@ sim_jbs.txt
 test.sh
 
 
+read_summary.py
+csv2latex.py
+device_connectiontable.csv

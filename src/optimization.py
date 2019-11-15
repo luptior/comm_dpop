@@ -15,7 +15,8 @@ def optimize_size(agent, original_table: np.array, start_length: int = 1) -> int
     """
 
     if start_length == 1:
-        result = [time_with_optimization(agent, original_table, x) for x in np.arange(start_length, original_table.size)]
+        result = [time_with_optimization(agent, original_table, x) for x in
+                  np.arange(start_length, original_table.size)]
     else:
         result = [time_with_optimization(agent, original_table, x)
                   for x in np.arange(start_length, original_table.size, start_length)]
@@ -38,7 +39,7 @@ def optimize_size2(agent, original_table: np.array) -> int:
     #     test_range = list(np.arange(1, 100)) + \
     #                  list(np.arange(100, original_table.size, 2*int(np.log10(np.size(original_table)))))
 
-    func = lambda x: time_with_optimization(original_table, x, agent.comp_speed)
+    func = lambda x: time_with_optimization(agent, original_table, x)
     result = optimize.minimize(func, np.array(np.size(original_table) / 2))
     print(result)
     result = int(result)
@@ -56,7 +57,7 @@ def time_with_optimization(agent, original_table: np.array, length: int) -> floa
     :return: the total time calculated based on the shape of pieces
     """
     n_pieces = int(np.size(original_table) / length) + 1
-    trans = network.tran_time(msg_structure.size_sliced_msg(original_table.shape, length))
+    trans = network.tran_time(agent, msg_structure.size_sliced_msg(original_table.shape, length))
     comp = computation_time(agent, msg_structure.size_sliced_msg(original_table.shape, length))
 
     if trans >= comp:
@@ -76,22 +77,20 @@ def computation_time(agent, sliced_size: int):
     """
     # return np.product(table_dim) * length * 10 / clock_rate  # return unit in seconds
     if agent.comp_speed:
-        return (6.144387919188346e-06 * sliced_size + 0.017582085621144466) * agent.comp_speed
+        return (6.144387919188346e-06 * sliced_size + 0.017582085621144466) * 1 / agent.comp_speed
     else:
         return 6.144387919188346e-06 * sliced_size + 0.017582085621144466
 
 
-def gradient_descent(f, r, step) -> int:
-    """
-    TODO: be complete to speed up the minimizer finding of optimize size
-    :param f:
-    :param limit: the upper limit of the range, by default should be the np.size of original table
-    :param step:
-    :return:
-    """
-
-    size = 1
-
-
-
-    return size
+# def gradient_descent(f, r, step) -> int:
+#     """
+#     TODO: be complete to speed up the minimizer finding of optimize size
+#     :param f:
+#     :param limit: the upper limit of the range, by default should be the np.size of original table
+#     :param step:
+#     :return:
+#     """
+#
+#     size = 1
+#
+#     return size

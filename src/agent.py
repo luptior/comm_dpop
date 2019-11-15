@@ -69,12 +69,14 @@ class Agent:
             self.comp_speed = comp_speed
         else:
             self.slow_processing = False
+            self.comp_speed=False
 
         if net_speed:
             self.network_customization = True
             self.net_speed = net_speed
         else:
             self.network_customization = False
+            self.net_speed =False
 
     def get_graph_nodes(self):
         info = self.agents_info
