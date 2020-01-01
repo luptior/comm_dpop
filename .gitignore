@@ -4,6 +4,7 @@
 *.xml
 *.iml
 *.log
+*.tmp
 log
 *.tmp
 
