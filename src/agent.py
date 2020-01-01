@@ -14,7 +14,15 @@ import util_msg_prop
 import value_msg_prop
 import communication
 import utility
+import logging
 
+logger = logging.getLogger("AGENT")
+logger.setLevel(level=logging.INFO)
+handler = logging.FileHandler("log.txt")
+handler.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 class Agent:
 
@@ -78,6 +86,9 @@ class Agent:
             self.network_customization = False
             self.net_speed =False
 
+        self.logger = logging.getLogger(f"Agent {self.i}")
+        self.logger.info(f"{self.i} is initialized")
+
     def get_graph_nodes(self):
         info = self.agents_info
         graph_nodes = []
@@ -120,6 +131,7 @@ class Agent:
         determine if it is a lead node
         """
         assert self.c is not None, 'self.c not yet initialized.'
+        self.logger.info(f"{self.i} is leaf node")
 
         if not self.c:
             return True
