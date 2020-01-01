@@ -12,7 +12,7 @@ every additional dimension is 16 byte
 
 import numpy as np
 from time import sleep
-import sys
+
 
 # some constants for network communication
 
@@ -21,17 +21,14 @@ RTT = 100.  # unit in ms
 MAX_SEG = 1460.  # unit in bytes
 
 
-def throughput(q, rtt, s) -> float:
+def throughput(agent, q, rtt, s) -> float:
     # return unit in bytes / s
-    return 1.22 * s / (rtt * np.sqrt(q)) * 1000
+    return 1.22 * s / (rtt * np.sqrt(q)) * agent.net_speed
 
 
-tp = throughput(Q, RTT, MAX_SEG)
-
-
-def tran_time(size):
+def tran_time(agent, size):
     # return 0.1 + size / 100 , return unit in s
-    return size / tp
+    return size / throughput(agent,Q, RTT, MAX_SEG)
 
 
 def loss(s):

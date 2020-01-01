@@ -1,48 +1,64 @@
-"""
-const tp comes from network.py
-
-"""
-
-
-import sys
 import numpy as np
-import pickle
+from scipy import optimize
 
 import network
+import msg_structure
 
 
-def optimize_size(original_table: np.array, tp=network.tp) -> int:
+def optimize_size(agent, original_table: np.array, start_length: int = 1) -> int:
     """
     return the size of smaller pieces based on the computation function and tp
-    :param tp: the throughput from network
+    :param agent:
+    :param start_length: a parameter sets the minimum length for the minimizer search
     :param original_table:
     :return: a tuple represents the shape
     """
-    time_woOpt = get_actual_size(original_table) / tp + computation_time(original_table.shape, original_table.size)
 
-    def improvement(l: int):
-        time_wOpt = time_with_optimization(original_table, l)
-        return (time_woOpt - time_wOpt) / time_woOpt
+    if start_length == 1:
+        result = [time_with_optimization(agent, original_table, x) for x in
+                  np.arange(start_length, original_table.size)]
+    else:
+        result = [time_with_optimization(agent, original_table, x)
+                  for x in np.arange(start_length, original_table.size, start_length)]
 
-    result = [improvement(x) for x in np.arange(1, original_table.size)]
-
-    max_improve = max(result)
-    length = result.index(max_improve) + 1
-
+    max_improve = min(result)
+    length = np.arange(start_length, original_table.size, start_length)[result.index(max_improve)]
     return length
 
 
-def time_with_optimization(original_table: np.array, length: int) -> float:
+def optimize_size2(agent, original_table: np.array) -> int:
+    """
+    where i tried to add gradient descent
+    :param agent:
+    :param original_table:
+    :return: a tuple represents the shape
+    """
+    # if np.size(original_table) < 100:
+    #     test_range = np.arange(1, original_table.size)
+    # else:
+    #     test_range = list(np.arange(1, 100)) + \
+    #                  list(np.arange(100, original_table.size, 2*int(np.log10(np.size(original_table)))))
+
+    func = lambda x: time_with_optimization(agent, original_table, x)
+    result = optimize.minimize(func, np.array(np.size(original_table) / 2))
+    print(result)
+    result = int(result)
+
+    return result
+
+
+def time_with_optimization(agent, original_table: np.array, length: int) -> float:
     """
     calculated the total time spent if apply optimization, there are two conditions, 1, transmission of
     the msg takes more time, 2, computation takes more time.
+    :param agent:
     :param original_table:
     :param length:
     :return: the total time calculated based on the shape of pieces
     """
     n_pieces = int(np.size(original_table) / length) + 1
-    trans = size_sliced_msg(original_table.shape, length) / network.tp
-    comp = computation_time(original_table.shape, length)
+    trans = network.tran_time(agent, msg_structure.size_sliced_msg(original_table.shape, length))
+    comp = computation_time(agent, msg_structure.size_sliced_msg(original_table.shape, length))
 
     if trans >= comp:
         # transmission takes more time
@@ -52,94 +68,29 @@ def time_with_optimization(original_table: np.array, length: int) -> float:
         return n_pieces * comp + trans
 
 
-def computation_time(table_dim: tuple, length: int, clock_rate: int = 3 * 10 ** 9):
+def computation_time(agent, sliced_size: int):
     """
     Calculate the estimated time spent
-    :param table_dim:
-    :param length:
-    :param clock_rate:
+    :param agent:
+    :param sliced_size: size in int
     :return:
     """
-    return np.product(table_dim) * length * 10 / clock_rate  # return unit in seconds
+    # return np.product(table_dim) * length * 10 / clock_rate  # return unit in seconds
+    if agent.comp_speed:
+        return (6.144387919188346e-06 * sliced_size + 0.017582085621144466) * 1 / agent.comp_speed
+    else:
+        return 6.144387919188346e-06 * sliced_size + 0.017582085621144466
 
 
-def slice_1d(original_table: np.array) -> list:
-    """
-    the method will slice the original table into smaller pieces for faster communication
-
-    :param length: the length for sliced list
-    :param original_table: np.ndarray
-    :return: list of dict of length length, len(list[0])=length
-            each element will have (index of first element), list of continuous
-    """
-    length = optimize_size(original_table)
-
-    elements = {i: u for i, u in np.ndenumerate(original_table)}
-    index = list(elements.keys())
-    n_chunks = int(len(index) / length)
-
-    chunk_index = [index[x * length: (x + 1) * length] for x in range(n_chunks)]
-    if n_chunks * length != len(elements):
-        chunk_index.append(index[n_chunks * length:])
-
-    sliced_msgs = [{index: elements[index] for index in chunck} for chunck in chunk_index]
-
-    sliced_msgs = [[list(sliced_msg.keys())[0], list(sliced_msg.values())] for sliced_msg in sliced_msgs]
-
-    return sliced_msgs
-
-
-def unfold_msg(sliced_msg: list, shape: tuple) -> dict:
-    """
-    Unfold the sliced msg to be a dictionary where each entry is (index) : value
-    :param sliced_msg: an element in the output list from the slice_1d()
-    :param index_list: a list of index, result generated by generate_index()
-    :return: a dict {(index) : value}
-    """
-    index_list = generate_index(shape)
-
-    position = index_list.index(sliced_msg[0])  # the index of the first element of the sliced_msg
-    sub_index_list = index_list[position: position + len(sliced_msg[1])]
-    return dict(zip(sub_index_list, sliced_msg[1]))
-
-
-def generate_index(shape: tuple) -> list:
-    """
-    Given a shape, return the list of index of each element.
-    :param shape: (5,4,3)
-    :return: a list. such as [(0, 0, 0), (0, 0, 1), (0, 0, 2)...]
-    """
-    return [i for i, d in np.ndenumerate(np.zeros(shape))]
-
-
-def size_sliced_msg(table_dim: tuple, length: int) -> int:
-    """
-    gives the size in byte by the table dim, size of dim = tuple(a,b,c)
-    :param length: the length of how many elements it contains
-    :param table_dim: a tuple describe the shape of a table
-    :return: size in byte
-    """
-
-    example = [table_dim, list(np.random.randint(100, size=length))]
-
-    return get_actual_size(example)
-
-
-# For size calculation
-
-def get_actual_size(obj: object) -> int:
-    """
-    To get the actual size used used by a python object instead of pointers,
-    this function first transform the object into pickles form, then returns the size in bytes
-
-    :param obj: an python object
-    :return: size in bytes
-    """
-
-    return sys.getsizeof(pickle.dumps(obj))
-
-
-if __name__ == '__main__':
-    table = np.random.randint(100, size=(6, 5, 4))
-    # print(size_sliced_msg(table.shape, 10))
-    print(optimize_size(table))
+# def gradient_descent(f, r, step) -> int:
+#     """
+#     TODO: be complete to speed up the minimizer finding of optimize size
+#     :param f:
+#     :param limit: the upper limit of the range, by default should be the np.size of original table
+#     :param step:
+#     :return:
+#     """
+#
+#     size = 1
+#
+#     return size

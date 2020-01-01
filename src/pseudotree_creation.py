@@ -6,6 +6,7 @@ creation.
 import threading
 import socket
 import time
+from datetime import datetime as dt
 
 import utility
 import pseudotree
@@ -29,7 +30,7 @@ def bfs(tree, tree_node, procedure, *extra_procedure_args):
 
 def tell_relative(node_id, agent, graph, parents, pstree, depths):
     """
-    Send a UDP message titled 'ptinfo', which tells the agent with 'node_id'
+    Send a message titled 'ptinfo', which tells the agent with 'node_id'
     its (p, pp, c, pc). Only the root is supposed to call this procedure.
     Hence, if the 'node_id' is of the root itself, it simply sets the
     appropriate fields.
@@ -60,7 +61,7 @@ def tell_relative(node_id, agent, graph, parents, pstree, depths):
 
 
 def pseudotree_creation(agent):
-    print(str(agent.id) + ': Begin pseudotree_creation')
+    print(dt.now(), str(agent.id) + ': Begin pseudotree_creation')
     # The dict where all the messages are stored
     msgs = agent.msgs
     unprocessed_util = agent.unprocessed_util
@@ -73,34 +74,33 @@ def pseudotree_creation(agent):
     listening_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     listening_socket.bind((info[agent.id]['IP'], int(info[agent.id]['PORT'])))
     listening_socket.listen(20)
-    
+
     # Creating and starting the 'listen' thread
-    listen = threading.Thread(name='Listening-Thread-of-Agent-'+str(agent.id),
+    listen = threading.Thread(name='Listening-Thread-of-Agent-' + str(agent.id),
                               target=communication.listen_func,
                               args=(msgs, unprocessed_util, listening_socket),
                               kwargs={'agent': agent})
     listen.setDaemon(True)
     listen.start()
-    
+
     # Wait before all agents have started listening
-    print(str(agent.id) + ': Waiting ...')
+    print(dt.now(), str(agent.id) + ': Waiting ...')
     time.sleep(2)
-    print(str(agent.id) + ': Continuing')
+    print(dt.now(), str(agent.id) + ': Continuing')
 
     if agent.is_root:
         # Wait till the each agent sends its neighbors' list.
         while True:
             all_neighbor_msgs_arrived = True
             for node in agent.graph_nodes:
-                if ('neighbors_'+str(node)) not in msgs:
+                if ('neighbors_' + str(node)) not in msgs:
                     all_neighbor_msgs_arrived = False
                     break
-            if all_neighbor_msgs_arrived == True:
+            if all_neighbor_msgs_arrived:
                 break
 
         # Create the graph and use it to generate the pseudo-tree structure.
-        graph = {}
-        graph[agent.id] = agent.neighbors
+        graph = {agent.id: agent.neighbors}
         for key, value in msgs.items():
             if key[0:10] == 'neighbors_':
                 graph[int(key[10:])] = list(value)
@@ -109,24 +109,24 @@ def pseudotree_creation(agent):
 
         # Set own fields and tell (p, pp, c, pc) to all nodes
         parents = pseudotree.get_parents(pstree)
-        depths = pseudotree.assign_depths(pstree) 
+        depths = pseudotree.assign_depths(pstree)
         bfs(
             pstree,
             pstree['Nothing'][0],
             tell_relative,
             agent, graph, parents, pstree, depths
-            )
+        )
 
         # Send this node's (root's) domain to all children and pseudochildren
         # For example, if root's id is 1, the message is, in title:value form:
         # domain_1: <the set which is the domain of 1>
-        for child in agent.c+agent.pc:
+        for child in agent.c + agent.pc:
             # agent.udp_send('domain_'+str(agent.id), agent.domain, child)
             agent.send('domain_' + str(agent.id), agent.domain, child)
 
     # Procedure for agent other than root
     else:
-        agent.send('neighbors_'+str(agent.id), agent.neighbors, agent.root_id)
+        agent.send('neighbors_' + str(agent.id), agent.neighbors, agent.root_id)
         # agent.udp_send('neighbors_'+str(agent.id), agent.neighbors, agent.root_id)
 
         # Wait till the message (p, pp, c, pc) [has title: 'ptinfo'] arrives
@@ -141,7 +141,7 @@ def pseudotree_creation(agent):
         # For example, if this node's id is 7, the message is, in title:value
         # form would be:
         # domain_7: <the set which is the domain of 7>
-        for child in agent.c+agent.pc:
+        for child in agent.c + agent.pc:
             # agent.udp_send('domain_'+str(agent.id), agent.domain, child)
             agent.send('domain_' + str(agent.id), agent.domain, child)
 
@@ -150,16 +150,16 @@ def pseudotree_creation(agent):
         # 'domain_3': set(1, 23, 12, 41, 2, 122)
         while True:
             all_parents_msgs_arrived = True
-            for parent in [agent.p]+agent.pp:
-                if ('domain_'+str(parent)) not in msgs:
+            for parent in [agent.p] + agent.pp:
+                if ('domain_' + str(parent)) not in msgs:
                     all_parents_msgs_arrived = False
                     break
-            if all_parents_msgs_arrived == True:
+            if all_parents_msgs_arrived:
                 break
 
         # Store all these domains that have arrived as messages.
         info = agent.agents_info
-        for parent in [agent.p]+agent.pp:
-            info[parent]['domain'] = msgs['domain_'+str(parent)]
+        for parent in [agent.p] + agent.pp:
+            info[parent]['domain'] = msgs['domain_' + str(parent)]
 
-    print(str(agent.id) + ': End pseudotree_creation')
+    print(dt.now(), str(agent.id) + ': End pseudotree_creation')

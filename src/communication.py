@@ -1,10 +1,9 @@
-from utility import *
 import socket
 import pickle
 import sys
+from datetime import datetime as dt
+
 from network import *
-from run import network_customization
-import optimization
 
 
 def udp_send(a, title, data, dest_node_id):
@@ -22,7 +21,7 @@ def udp_send(a, title, data, dest_node_id):
 
 def tcp_send(info, title, data, ori_node_id, dest_node_id):
 
-    print(str(ori_node_id) + ': tcp_send, sending a message ...')
+    print(dt.now(), str(ori_node_id) + ': tcp_send, sending a message ...')
 
     # TCP
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -33,7 +32,7 @@ def tcp_send(info, title, data, ori_node_id, dest_node_id):
     sock.close()
 
     # print(str(ori_node_id) + ': Message sent to agent ' + str(dest_node_id) + ', ' + title + ": " + str(data))
-    print(str(ori_node_id) + ': Message sent to agent ' + str(dest_node_id) + ', ' + title)
+    print(dt.now(), str(ori_node_id) + ': Message sent to agent ' + str(dest_node_id) + ', ' + title)
 
 
 def listen_func(msgs, unprocessed_util, sock, agent):
@@ -49,7 +48,7 @@ def listen_func(msgs, unprocessed_util, sock, agent):
     else:
         agent_id = agent.id
 
-    print(str(agent_id) + ': Begin listen_func')
+    print(dt.now(), str(agent_id) + ': Begin listen_func')
 
     while True:
         # The 'data' which is received should be the pickled string representation of a tuple.
@@ -66,6 +65,7 @@ def listen_func(msgs, unprocessed_util, sock, agent):
 
         total_data = []
         while True:
+            # continuously receive packages
             data = connectionSocket.recv(4096)
             if not data:
                 break
@@ -77,9 +77,9 @@ def listen_func(msgs, unprocessed_util, sock, agent):
         the optimization comes into play
         """
 
-        if network_customization:
+        if agent.network_customization:
             size = sys.getsizeof(data)
-            sleep(tran_time(size))
+            sleep(tran_time(agent, size))
 
         udata = pickle.loads(data)  # Unpickled data
 
@@ -90,12 +90,17 @@ def listen_func(msgs, unprocessed_util, sock, agent):
         if udata[0][:4] == "util":
             unprocessed_util.append(udata)
 
-        print(
-           str(agent_id) + ': Msg received, size is ' + str(sys.getsizeof(data)) + " bytes\n" + udata[0] + ": " + str(udata[1]))
-        # print(str(agent_id) + ': Msg received, size is ' + str(len(data)) + " bytes " + udata[0])
+        # just some record printing
+        if len(str(udata[1])) < 100:
+            print(dt.now(), str(agent_id) +
+                  ': Msg received, size is ' + str(sys.getsizeof(data)) + " bytes\n"
+                  + udata[0] + ": " + str(udata[1]))
+        else:
+            print(dt.now(), str(agent_id) +
+                  ': Msg received, size is ' + str(sys.getsizeof(data)) + " bytes\n"
+                  + udata[0] + ": " + str(udata[1])[:100] + "...")
 
+        # exit only when exit is received
         if str(udata[1]) == "exit":
-            print(str(agent_id) + ': End listen_func')
+            print(dt.now(), str(agent_id) + ': End listen_func')
             return
-
-
