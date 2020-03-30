@@ -50,6 +50,7 @@ class Agent:
         self.pp = None  # A list of the pseudo-parents' ids
         self.c = None  # A list of the children's ids
         self.pc = None  # A list of the pseudo-children's ids
+        self.pstree = {}
 
         self.table = None  # The table that will be stored
         self.table_ant = None  # The ANT of the table that will be stored, assignment-nodeid-tuples 'ants'.
@@ -155,6 +156,23 @@ class Agent:
         """
         communication.tcp_send(self.agents_info, title, data, self.id, dest_node_id)
 
+
+    def tree_start(self):
+        """
+        begin the processing
+        """
+
+        print(dt.now(), str(self.id) + ': Started')
+
+        pseudotree_creation.pseudotree_creation(self)
+
+
+    def print(self):
+        s=f"AgentID:{self.id}:\n" \
+          f"    Type:{type(self).__name__}\n" \
+          f"    Parent:{self.p}, Children:{self.c}, PP:{self.pp}, PC:{self.pc}\n" \
+          f"    Computation Speed: {self.comp_speed}, Network Speed: {self.net_speed}"
+        print(s)
 
 class PipelineAgent(Agent):
     def __init__(self, i, domain, relations, agents_file, comp_speed, net_speed):

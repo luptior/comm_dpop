@@ -21,6 +21,7 @@ def optimize_size(agent, original_table: np.array, start_length: int = 1) -> int
         result = [time_with_optimization(agent, original_table, x)
                   for x in np.arange(start_length, original_table.size, start_length)]
 
+
     max_improve = min(result)
     length = np.arange(start_length, original_table.size, start_length)[result.index(max_improve)]
     return length
@@ -66,6 +67,14 @@ def time_with_optimization(agent, original_table: np.array, length: int) -> floa
     else:
         # computation takes more time
         return n_pieces * comp + trans
+
+
+def transmission_time(agent, table_shape: tuple, length:int) ->float:
+    """
+    return the transtime given agent and message size
+    """
+    trans = network.tran_time(agent, msg_structure.size_sliced_msg(table_shape, length))
+    return trans
 
 
 def computation_time(agent, sliced_size: int):

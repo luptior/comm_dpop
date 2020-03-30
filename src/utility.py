@@ -7,6 +7,9 @@ import sys
 import socket
 import numpy as np
 
+from anytree import Node, RenderTree
+
+
 Relatives = collections.namedtuple('Relatives', 'parent pseudoparents children pseudochildren')
 
 
@@ -57,7 +60,7 @@ def combine(*args):
 
     return merged_array, merged_ant
 
-
+2
 def merge_ant(ants) -> tuple:
     """
     :param ants: a list of two lists of p and pps from children
@@ -176,6 +179,5 @@ def element_projection(agent, ants:list,  new_entry):
         id2 = ants[2].index(shared_ax)
 
 
-
-
-
+def dict2tree(dict:dict):
+    nodes=[Node(x) for x in dict.keys()]

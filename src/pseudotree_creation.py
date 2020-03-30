@@ -14,7 +14,6 @@ import communication
 
 Relatives = utility.Relatives
 
-
 def bfs(tree, tree_node, procedure, *extra_procedure_args):
     """"
     Run a the 'procedure' recursively, in a breadth-first-search way, starting
@@ -51,6 +50,8 @@ def tell_relative(node_id, agent, graph, parents, pstree, depths):
         else:
             pp.append(relative)
 
+    agent.pstree[node_id] = Relatives(p, pp, c, pc)
+
     # Set appropriate the fields if node_id is same as root_id, or send the
     # 'ptinfo' message otherwise.
     if node_id == agent.root_id:
@@ -85,7 +86,7 @@ def pseudotree_creation(agent):
 
     # Wait before all agents have started listening
     print(dt.now(), str(agent.id) + ': Waiting ...')
-    time.sleep(2)
+    # time.sleep(2)
     print(dt.now(), str(agent.id) + ': Continuing')
 
     if agent.is_root:
@@ -107,6 +108,7 @@ def pseudotree_creation(agent):
         pstree = {}
         pstree = pseudotree.dfsTree(graph, agent.id)
 
+
         # Set own fields and tell (p, pp, c, pc) to all nodes
         parents = pseudotree.get_parents(pstree)
         depths = pseudotree.assign_depths(pstree)
@@ -123,6 +125,9 @@ def pseudotree_creation(agent):
         for child in agent.c + agent.pc:
             # agent.udp_send('domain_'+str(agent.id), agent.domain, child)
             agent.send('domain_' + str(agent.id), agent.domain, child)
+
+
+        print("*"*100, agent.pstree)
 
     # Procedure for agent other than root
     else:

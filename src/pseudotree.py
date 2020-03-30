@@ -17,7 +17,6 @@ def dfsTree(graph, startingVertex):
     for node in graph:
         if node not in tree:
             tree[node] = []
-
     return tree
 
 
