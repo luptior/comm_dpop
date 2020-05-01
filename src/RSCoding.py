@@ -41,9 +41,14 @@ def serilze(rsc: RSCodec, input_array: np.ndarray)->bytearray:
 if __name__ == '__main__':
     rsc = RSCodec(10)  # 10 ecc symbols\
     shape = [2,3,3,4]
-    input_array = np.random.random(size=shape)
 
+
+    input_array = np.random.randint(10, size=shape)
     comparison =  input_array == deserilze(rsc, serilze(rsc, input_array), shape)
     equal_arrays = comparison.all()
+    print(equal_arrays)
 
+    input_array = np.random.random(size=shape)
+    comparison =  input_array == deserilze(rsc, serilze(rsc, input_array), shape, "float")
+    equal_arrays = comparison.all()
     print(equal_arrays)
