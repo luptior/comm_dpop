@@ -9,6 +9,9 @@ import pseudotree_creation
 import util_msg_prop
 import value_msg_prop
 
+from reedsolo import RSCodec
+rsc = RSCodec(10)  # 10 ecc symbols
+
 
 class Agent:
     def __init__(self, i, domain, relations, agents_file):

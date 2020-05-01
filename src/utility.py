@@ -9,6 +9,9 @@ import numpy as np
 
 from network_optimize import *
 
+from reedsolo import RSCodec
+rsc = RSCodec(10)  # 10 ecc symbols
+
 Relatives = collections.namedtuple('Relatives', 'parent pseudoparents children pseudochildren')
 
 
