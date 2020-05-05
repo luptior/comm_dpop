@@ -10,7 +10,8 @@ import util_msg_prop
 import value_msg_prop
 
 from reedsolo import RSCodec
-rsc = RSCodec(10)  # 10 ecc symbols
+import RSCoding
+import properties as prop
 
 
 class Agent:
@@ -48,6 +49,8 @@ class Agent:
             self.is_root = eval(info[self.i]['is_root'])
         self.root_id = eval(info[42]['root_id'])
         self.msgs = {}  # The dict where all the received messages are stored
+        properties = prop.load_properties("properties.yaml")
+        self.network_protocol = properties["network_protocol"]
 
     def get_graph_nodes(self):
         info = self.agents_info
@@ -95,11 +98,31 @@ class Agent:
         else:
             return False
 
+    def send(self, title, data, dest_node_id):
+        if self.network_protocol == "UDP":
+            self.udp_send(title, data, dest_node_id)
+        elif self.network_protocol == "UDP_FEC":
+            self.udp_send_fec(title, data, dest_node_id)
+        elif self.network_protocol == "TCP":
+            self.tcp_send(title, data, dest_node_id)
+
     def udp_send(self, title, data, dest_node_id):
         print(str(self.id) + ': udp_send, sending a message ...')
 
         info = self.agents_info
         pdata = pickle.dumps((title, data))
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.sendto(pdata, (info[dest_node_id]['IP'], int(info[dest_node_id]['PORT'])))
+        sock.close()
+
+        print(str(self.id) + ': Message sent, ' + title + ": " + str(data))
+
+    def udp_send_fec(self, title, data, dest_node_id):
+        print(str(self.id) + ': udp_send, sending a message with FEC...')
+
+        info = self.agents_info
+
+        pdata = RSCoding.serialize(title, data)
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.sendto(pdata, (info[dest_node_id]['IP'], int(info[dest_node_id]['PORT'])))
         sock.close()
