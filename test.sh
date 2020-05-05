@@ -2,8 +2,8 @@
 PATH="/usr/local/bin/gdate:$PATH"
 
 #sudo sysctl -w net.inet.udp.maxdgram=65535
-script=/Users/luptior/Desktop/Research_3/dpop/src/run_w_parser.py
-simdir=/Users/luptior/Desktop/Research_3/simulation_data
+script=/Users/gx/Documents/Research_3/dpop/src/run_w_parser.py
+simdir=/Users/gx/Documents/Research_3/simulation_data
 logdir=$simdir/log
 mkdir -p $logdir
 
@@ -14,7 +14,7 @@ timestamp() {
 
 for repo in 0; do
     for num in 5; do
-         for dom in 20; do
+         for dom in 10; do
          # for dom in 55 60 65 70 75 80 85 90 95 100; do
              log=$logdir/random_${num}_rep_${repo}_d${dom}.log
              timestamp > $log &&
