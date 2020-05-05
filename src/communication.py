@@ -5,6 +5,8 @@ from datetime import datetime as dt
 
 from network import *
 
+import RSCoding
+import properties as prop
 
 def udp_send(a, title, data, dest_node_id):
     print(str(a.id) + ': udp_send, sending a message ...')
@@ -34,6 +36,18 @@ def tcp_send(info, title, data, ori_node_id, dest_node_id):
     # print(str(ori_node_id) + ': Message sent to agent ' + str(dest_node_id) + ', ' + title + ": " + str(data))
     print(dt.now(), str(ori_node_id) + ': Message sent to agent ' + str(dest_node_id) + ', ' + title)
 
+def udp_send_fec(a, title, data, dest_node_id):
+    print(str(a.id) + ': udp_send_fec, sending a message with FEC...')
+
+    info = a.agents_info
+
+    pdata = RSCoding.serialize(title, data)
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.sendto(pdata, (info[dest_node_id]['IP'], int(info[dest_node_id]['PORT'])))
+    sock.close()
+
+    print(str(a.id) + ': Message sent, ' + title + ": " + str(data))
+
 
 def listen_func(msgs, unprocessed_util, sock, agent):
     """
@@ -50,38 +64,36 @@ def listen_func(msgs, unprocessed_util, sock, agent):
 
     print(dt.now(), str(agent_id) + ': Begin listen_func')
 
+    properties = prop.load_properties("properties.yaml")
+
     while True:
         # The 'data' which is received should be the pickled string representation of a tuple.
         # The first element of the tuple should be the data title, a name given to describe
         # the data. This first element will become the key of the 'msgs' dict. The second
         # element should be the actual data to be passed. Loop ends when an exit message is sent.
+        mode = properties["network_protocol"]
+        if mode == "UDP":
+            data, addr = sock.recvfrom(65536)
+            udata = pickle.loads(data)  # Unpickled data
+        elif mode == "UDP_FEC":
+            data, addr = sock.recvfrom(65536)
+            udata = RSCoding.deserialize(data, "int64")
+        elif mode == "TCP":
+            connectionSocket, addr = sock.accept()
 
-        # UDP
-        # data, addr = sock.recvfrom(65536)
-        # udata = pickle.loads(data) # Unpickled data
+            total_data = []
+            while True:
+                data = connectionSocket.recv(4096)
+                if not data:
+                    break
+                total_data.append(data)
+            data = b''.join(total_data)
 
-        # TCP
-        connectionSocket, addr = sock.accept()
+            if agent.network_customization:
+                size = sys.getsizeof(data)
+                sleep(tran_time(agent, size))
 
-        total_data = []
-        while True:
-            # continuously receive packages
-            data = connectionSocket.recv(4096)
-            if not data:
-                break
-            total_data.append(data)
-
-        data = b''.join(total_data)
-
-        """
-        the optimization comes into play
-        """
-
-        if agent.network_customization:
-            size = sys.getsizeof(data)
-            sleep(tran_time(agent, size))
-
-        udata = pickle.loads(data)  # Unpickled data
+            udata = pickle.loads(data)  # Unpickled data
 
         # msgs entry example util_msg_1:[[...]]
         msgs[udata[0]] = udata[1]
