@@ -2,7 +2,8 @@ from datetime import datetime as dt
 
 
 def value_msg_prop(agent):
-    print(dt.now(), str(agent.id) + ': Begin value_msg_prop')
+    # print(dt.now(), str(agent.id) + ': Begin value_msg_prop')
+    agent.logger.info(f"{dt.now()}, {str(agent.id)} + : Begin value_msg_prop")
 
     # Wait till value_msg from parent has arrived.
     while True:
@@ -23,4 +24,4 @@ def value_msg_prop(agent):
     for child in agent.c:
         agent.send('value_msg_' + str(agent.id), D, child)
 
-    print(dt.now(), str(agent.id) + ': End value_msg_prop')
+    agent.logger.info(f"{dt.now()}, {str(agent.id)} + : End value_msg_prop")

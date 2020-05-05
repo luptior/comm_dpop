@@ -22,7 +22,7 @@ if __name__ == '__main__':
     properties = {}
 
     # "UDP", "TCP", "UDP_FEC"
-    properties['network_protocol'] = "UDP_FEC"
+    properties['network_protocol'] = "TCP"
     properties["agent_mode"] = "default"
     properties["slow_processing"] = "false"
     properties["comp_speed"] = 100

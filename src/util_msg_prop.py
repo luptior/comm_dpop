@@ -11,6 +11,7 @@ import logging
 from time import sleep
 from datetime import datetime as dt
 
+import agent
 import utility
 import optimization
 import msg_structure
@@ -141,7 +142,7 @@ def get_util_cube_pipeline(agent):
     return util_msg, dim_util_msg
 
 
-def util_msg_handler(agent):
+def util_msg_handler(agent: agent):
     """
     The util_msg_handler routine in the util_msg_prop part; this method
     is run for non-leaf nodes;
@@ -233,8 +234,8 @@ def util_msg_handler(agent):
         agent.send('util_msg_' + str(agent.id), msg_to_send, agent.p)
 
 
-def util_msg_prop(agent):
-    print(dt.now(), str(agent.id) + ': Begin util_msg_prop')
+def util_msg_prop(agent:agent):
+    agent.logger.info(f"{dt.now()} {str(agent.id)} : Begin util_msg_prop")
 
     if agent.is_leaf():
         # if agents is leaf, just send the utility messages needed
@@ -252,7 +253,7 @@ def util_msg_prop(agent):
     else:
         util_msg_handler(agent)
 
-    print(dt.now(), str(agent.id) + ': End util_msg_prop')
+    agent.logger.info(f"{dt.now()} {str(agent.id)} : End util_msg_prop")
 
 
 def util_msg_handler_split(agent):

@@ -8,10 +8,8 @@ import socket
 import numpy as np
 
 import properties as prop
-from network_optimize import *
-
-from reedsolo import RSCodec
-import RSCoding
+from network import *
+from optimization import *
 
 Relatives = collections.namedtuple('Relatives', 'parent pseudoparents children pseudochildren')
 

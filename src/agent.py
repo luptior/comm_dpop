@@ -74,9 +74,9 @@ class Agent:
         properties = prop.load_properties("properties.yaml")
         self.network_protocol = properties["network_protocol"]
         self.slow_processing = properties["slow_processing"]
-        self.comp_speed = properties["comp_speed"]
+        self.comp_speed = int(properties["comp_speed"])
         self.network_customization = properties["network_customization"]
-        self.net_speed = properties["net_speed"]
+        self.net_speed = int(properties["net_speed"])
 
         self.unprocessed_util = []  # The dict where all the received util_messages are stored,
         # added for split processing
@@ -141,21 +141,21 @@ class Agent:
 
     def send(self, title, data, dest_node_id):
         if self.network_protocol == "UDP":
-            communication.udp_send(self.agents_info, title, data, self.id, dest_node_id)
+            communication.udp_send(self, title, data, self.id, dest_node_id)
         elif self.network_protocol == "UDP_FEC":
-            communication.udp_send_fec(self.agents_info, title, data, self.id, dest_node_id)
+            communication.udp_send_fec(self, title, data, self.id, dest_node_id)
         elif self.network_protocol == "TCP":
-            communication.tcp_send(self.agents_info, title, data, self.id, dest_node_id)
+            communication.tcp_send(self, title, data, self.id, dest_node_id)
 
     def start(self):
         """
         begin the processing
         """
 
-        print(dt.now(), str(self.id) + ': Started')
+        self.logger.info(f"{dt.now()} {str(self.id)}: Started")
 
         pseudotree_creation.pseudotree_creation(self)
-        print(f"Split processing is {self.split_processing}\n" +
+        self.logger.info(f"Split processing is {self.split_processing}\n" +
               f"computation speed is {self.comp_speed} \n" +
               f"network customization is {self.network_customization} \n" +
               f"network speed is {self.net_speed} ")
@@ -164,7 +164,7 @@ class Agent:
 
         if not self.is_root:
             value_msg_prop.value_msg_prop(self)
-        print(dt.now(), str(self.id) + ': Finished')
+        self.logger.info(f"{dt.now()} {str(self.id)}: Finished")
 
     def send(self, title, data, dest_node_id):
         """
@@ -173,8 +173,12 @@ class Agent:
         :param data: the actual data part
         :param dest_node_id: assigned agent id
         """
-        communication.tcp_send(self.agents_info, title, data, self.id, dest_node_id)
-
+        if self.network_protocol == "UDP":
+            communication.udp_send(self, title, data, dest_node_id)
+        elif self.network_protocol == "UDP_FEC":
+            communication.udp_send_fec(self, title, data, dest_node_id)
+        elif self.network_protocol == "TCP":
+            communication.tcp_send(self, title, data, self.id, dest_node_id)
 
 class PipelineAgent(Agent):
     def __init__(self, i, domain, relations, agents_file, comp_speed, net_speed):
@@ -186,10 +190,10 @@ class PipelineAgent(Agent):
         begin the processing
         """
 
-        print(dt.now(), str(self.id) + ': Started')
+        self.logger.info(f"{dt.now()} {str(self.id)}: Started")
 
         pseudotree_creation.pseudotree_creation(self)
-        print(f"Split processing is {self.split_processing}\n" +
+        self.logger.info(f"Split processing is {self.split_processing}\n" +
               f"computation speed is {self.comp_speed} \n" +
               f"network customization is {self.network_customization} \n" +
               f"network speed is {self.net_speed} ")
@@ -198,7 +202,7 @@ class PipelineAgent(Agent):
 
         if not self.is_root:
             value_msg_prop.value_msg_prop(self)
-        print(dt.now(), str(self.id) + ': Finished')
+        self.logger.info(f"{dt.now()} {str(self.id)}: Finished")
 
 
 class SplitAgent(Agent):
@@ -211,10 +215,10 @@ class SplitAgent(Agent):
         begin the processing
         """
 
-        print(dt.now(), str(self.id) + ': Started')
+        self.logger.info(f"{dt.now()} {str(self.id)}: Started")
 
         pseudotree_creation.pseudotree_creation(self)
-        print(f"Split processing is {self.split_processing}\n" +
+        self.logger.info(f"Split processing is {self.split_processing}\n" +
               f"computation speed is {self.comp_speed} \n" +
               f"network customization is {self.network_customization} \n" +
               f"network speed is {self.net_speed} ")
@@ -223,7 +227,7 @@ class SplitAgent(Agent):
 
         if not self.is_root:
             value_msg_prop.value_msg_prop(self)
-        print(dt.now(), str(self.id) + ': Finished')
+        self.logger.info(f"{dt.now()} {str(self.id)}: Finished")
 
 
 class ListAgent(Agent):
@@ -235,10 +239,10 @@ class ListAgent(Agent):
         begin the processing
         """
 
-        print(dt.now(), str(self.id) + ': Started')
+        self.logger.info(f"{dt.now()} {str(self.id)}: Started")
 
         pseudotree_creation.pseudotree_creation(self)
-        print(f"Split processing is {self.split_processing}\n" +
+        self.logger.info(f"Split processing is {self.split_processing}\n" +
               f"computation speed is {self.comp_speed} \n" +
               f"network customization is {self.network_customization} \n" +
               f"network speed is {self.net_speed} ")
@@ -247,4 +251,4 @@ class ListAgent(Agent):
 
         if not self.is_root:
             value_msg_prop.value_msg_prop(self)
-        print(dt.now(), str(self.id) + ': Finished')
+        self.logger.info(f"{dt.now()} {str(self.id)}: Finished")

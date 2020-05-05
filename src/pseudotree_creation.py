@@ -63,7 +63,7 @@ def tell_relative(node_id, agent, graph, parents, pstree, depths):
 
 
 def pseudotree_creation(agent):
-    print(dt.now(), str(agent.id) + ': Begin pseudotree_creation')
+    agent.logger.info(f"{dt.now()} {str(agent.id)}: Begin pseudotree_creation")
     # The dict where all the messages are stored
     msgs = agent.msgs
     unprocessed_util = agent.unprocessed_util
@@ -170,4 +170,5 @@ def pseudotree_creation(agent):
         for parent in [agent.p] + agent.pp:
             info[parent]['domain'] = msgs['domain_' + str(parent)]
 
-    print(dt.now(), str(agent.id) + ': End pseudotree_creation')
+    agent.logger.info(f"{dt.now()} {str(agent.id)} : Begin pseudotree_creation")
+    # print(dt.now(), str(agent.id) + ': Begin pseudotree_creation')
