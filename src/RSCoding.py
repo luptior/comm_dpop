@@ -2,7 +2,7 @@ from reedsolo import RSCodec, ReedSolomonError
 
 import numpy as np
 
-1,502.07
+# Supoorts Reed Soloomon codes
 
 def example():
     # Encoding
@@ -29,26 +29,59 @@ def long_coding():
     print(len(rsc.decode(table_rs)))
 
 
-def deserilze(rsc: RSCodec, input: bytearray, shape, type = "int64")-> np.ndarray:
+# for the combined messages
+def deserialize(input: bytearray, rsc: RSCodec = RSCodec(10), datatype = "int64"):
+    combined = rsc.decode(input)[0]
     # symbol
-    return np.frombuffer(rsc.decode(input)[0], dtype=type).reshape(shape)
+    combined_decoded= combined.split(b";")
+    # [title, shape, actual data]
+    title = combined_decoded[0].decode()
+    shape = np.frombuffer(combined_decoded[1], "int64")
+    # shape = np.frombuffer(combined_decoded[1].encode(), "int64")
+    data = np.frombuffer(combined_decoded[2], datatype)
 
-def serilze(rsc: RSCodec, input_array: np.ndarray)->bytearray:
+    return title, data.reshape(shape)
 
-    return rsc.encode(input_array.tobytes())
+def serialize(title: str,  input_array, rsc: RSCodec = RSCodec(10))->bytearray:
+
+    if isinstance(input_array, np.ndarray):
+        shape = np.asarray(input_array.shape)
+        b = input_array.tobytes()
+    elif isinstance(input_array, list):
+        shape = np.asarray(len(input_array))
+        b = np.asarray(input_array).tobytes()
+    combined_str = title.encode() + b";" + shape.tobytes() + b";" + b
+
+    return rsc.encode(combined_str)
+
+
 
 
 if __name__ == '__main__':
     rsc = RSCodec(10)  # 10 ecc symbols\
-    shape = [2,3,3,4]
-
-
+    # rsc2 = RSCodec(10) # another
+    shape = [2,3, 4]
+    #
+    #
     input_array = np.random.randint(10, size=shape)
-    comparison =  input_array == deserilze(rsc, serilze(rsc, input_array), shape)
-    equal_arrays = comparison.all()
-    print(equal_arrays)
+    # comparison =  input_array == deserilze(rsc, serilze(rsc, input_array), shape)
+    # equal_arrays = comparison.all()
+    # print(equal_arrays)
+    #
+    # comparison = input_array == deserilze(rsc2, serilze(rsc, input_array), shape)
+    # print(equal_arrays)
+    #
+    # input_array = np.random.random(size=shape)
+    # comparison =  input_array == deserilze(rsc, serilze(rsc, input_array), shape, "float")
+    # equal_arrays = comparison.all()
+    # print(equal_arrays)
 
-    input_array = np.random.random(size=shape)
-    comparison =  input_array == deserilze(rsc, serilze(rsc, input_array), shape, "float")
+    # serialized = serialize( title="ssss", input_array = input_array)
+    serialized = serialize(title="ssss", input_array=shape)
+    deserialized = deserialize(serialized)
+
+    print(deserialized[0])
+    # comparison = input_array == deserialized[1]
+    comparison = np.asarray(shape) == deserialized[1]
     equal_arrays = comparison.all()
     print(equal_arrays)
