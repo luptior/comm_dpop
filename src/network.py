@@ -1,21 +1,34 @@
+"""
+Size and calculation:
+
+for ndarray
+
+title = 96
+every single element is 8 byte
+every additional dimension is 16 byte
+
+
+"""
+
 import numpy as np
 from time import sleep
+
 
 # some constants for network communication
 
 Q = 0.01
-RTT = 1000.
-MAX_SEG = 576.
-
-throughput = 1.22 * MAX_SEG / (RTT * np.sqrt(Q))
-
-def throughPut(q, rtt, s):
-    return 1.22 * s / (rtt & np.sqrt(q))
+RTT = 100.  # unit in ms
+MAX_SEG = 1460.  # unit in bytes
 
 
-def tran_time(size):
-    # return 0.1 + size / 100
-    return size / throughput
+def throughput(agent, q, rtt, s) -> float:
+    # return unit in bytes / s
+    return 1.22 * s / (rtt * np.sqrt(q)) * agent.net_speed
+
+
+def tran_time(agent, size):
+    # return 0.1 + size / 100 , return unit in s
+    return size / throughput(agent,Q, RTT, MAX_SEG)
 
 
 def loss(s):
@@ -57,3 +70,6 @@ def proactive(size):
                 sleep(5)
             else:
                 sleep(tran_time(last))
+
+
+

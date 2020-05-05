@@ -1,24 +1,47 @@
-"Defines the class Agent which represents a node/agent in the DPOP algorithm."
+"""
+Defines the class Agent which represents a node/agent in the DPOP algorithm.
+Agent: basic agent class
+ListAgent: use instead of ndarray as message
+SplitAgent: split message based on optimization
+PipelineAgent: do optimization at root and pipeline at non-leaf nodes
 
-import utility
-import pickle
-import socket
-import sys
+"""
+
+from datetime import datetime as dt
 
 import pseudotree_creation
 import util_msg_prop
 import value_msg_prop
+import communication
+import utility
+import logging
 
 from reedsolo import RSCodec
 import RSCoding
 import properties as prop
 
+logger = logging.getLogger("AGENT")
+logger.setLevel(level=logging.INFO)
+handler = logging.FileHandler("log.txt")
+handler.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 class Agent:
+
     def __init__(self, i, domain, relations, agents_file):
+
+        """
+        Constructor method
+        :param i: agent id
+        :param domain: agent domain, a list of values
+        :param relations: A dict of functions, for each edge in the graph
+        :param agents_file:
+        """
+
         # Use utils.get_agents_info to initialize all the agents.
-        # All the information from 'agents.txt' will be retrieved and stored in
-        # this dict 'agents_info'.
+        # All the information from 'agents.txt' will be retrieved and stored in this dict 'agents_info'.
         # Also, the domains of some agents will be added to this dict later on.
         # You can access a value as:
         # agent.agents_info[<agent_id>]['field_required']
@@ -30,27 +53,42 @@ class Agent:
         self.max_util = float("-inf")  # Will be initialized only for the root, in the end
         self.i = self.id = i
         self.domain = domain  # A list of values
-        self.relations = relations  # A dict of functions, for each edge in the
-        # graph
-        self.graph_nodes = self.get_graph_nodes()  # A list of all the nodes in
-        # the graph, except itself
-        self.neighbors = self.get_neighbors()  # A list of all the neighbors
-        # sorted by ids
+        self.relations = relations  # A dict of functions, for each edge in the graph
+        self.graph_nodes = self.get_graph_nodes()  # A list of all the nodes in the graph, except itself
+        self.neighbors = self.get_neighbors()  # A list of all the neighbors sorted by ids
+
         self.p = None  # The parent's id
         self.pp = None  # A list of the pseudo-parents' ids
-        self.c = None  # A list of the childrens' ids
-        self.pc = None  # A list of the pseudo-childrens' ids
+        self.c = None  # A list of the children's ids
+        self.pc = None  # A list of the pseudo-children's ids
+
         self.table = None  # The table that will be stored
-        self.table_ant = None  # The ANT of the table that will be stored
-        self.IP = info[self.id]['IP']
-        self.PORT = eval(info[self.id]['PORT'])  # Listening Port
-        self.is_root = False
-        if 'is_root' in info[self.i]:
-            self.is_root = eval(info[self.i]['is_root'])
+        self.table_ant = None  # The ANT of the table that will be stored, assignment-nodeid-tuples 'ants'.
+        self.is_root = False if 'is_root' not in info[self.i] else eval(info[self.i]['is_root'])
         self.root_id = eval(info[42]['root_id'])
+
         self.msgs = {}  # The dict where all the received messages are stored
+
+        # properties
         properties = prop.load_properties("properties.yaml")
         self.network_protocol = properties["network_protocol"]
+        self.slow_processing = properties["slow_processing"]
+        self.comp_speed = properties["comp_speed"]
+        self.network_customization = properties["network_customization"]
+        self.net_speed = properties["net_speed"]
+
+
+        self.unprocessed_util = []  # The dict where all the received util_messages are stored,
+        # added for split processing
+
+        self.split_processing = False
+
+        self.IP = info[self.id]['IP']
+        self.PORT = eval(info[self.id]['PORT'])  # Listening Port
+
+        # logger initialize
+        self.logger = logging.getLogger(f"Agent {self.i}")
+        self.logger.info(f"{self.i} is initialized")
 
     def get_graph_nodes(self):
         info = self.agents_info
@@ -61,22 +99,22 @@ class Agent:
         return graph_nodes
 
     def get_neighbors(self):
-        L = []
+        neighbors = []
         for first, second in self.relations.keys():
             if first == self.i:
-                L.append(second)
+                neighbors.append(second)
             else:
-                L.append(first)
-        return sorted(L)
+                neighbors.append(first)
+        return sorted(neighbors)
 
     def calculate_util(self, tup, xi):
         """
         Calculates the util; given a tuple 'tup' which has the assignments of
         values of parent and pseudo-parent nodes, in order; given a value 'xi'
         of this agent.
-        """
 
-        # Assumed that utilities are combined by adding to each other
+        Assumed that utilities are combined by adding to each other
+        """
         try:
             util = self.relations[self.id, self.p][xi, tup[0]]
         except KeyError:
@@ -89,65 +127,124 @@ class Agent:
                 continue
         return util
 
-    def is_leaf(self):
-        "Return True if this node is a leaf node and False otherwise."
+    def is_leaf(self) -> bool:
+        """
+        determine if it is a lead node
+        """
+        assert self.c is not None, 'self.c not yet initialized.'
+        self.logger.info(f"{self.i} is leaf node")
 
-        assert self.c != None, 'self.c not yet initialized.'
-        if self.c == []:
+        if not self.c:
             return True
         else:
             return False
 
     def send(self, title, data, dest_node_id):
         if self.network_protocol == "UDP":
-            self.udp_send(title, data, dest_node_id)
+            communication.udp_send(self.agents_info, title, data, self.id, dest_node_id)
         elif self.network_protocol == "UDP_FEC":
-            self.udp_send_fec(title, data, dest_node_id)
+            communication.udp_send_fec(self.agents_info, title, data, self.id, dest_node_id)
         elif self.network_protocol == "TCP":
-            self.tcp_send(title, data, dest_node_id)
-
-    def udp_send(self, title, data, dest_node_id):
-        print(str(self.id) + ': udp_send, sending a message ...')
-
-        info = self.agents_info
-        pdata = pickle.dumps((title, data))
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.sendto(pdata, (info[dest_node_id]['IP'], int(info[dest_node_id]['PORT'])))
-        sock.close()
-
-        print(str(self.id) + ': Message sent, ' + title + ": " + str(data))
-
-    def udp_send_fec(self, title, data, dest_node_id):
-        print(str(self.id) + ': udp_send, sending a message with FEC...')
-
-        info = self.agents_info
-
-        pdata = RSCoding.serialize(title, data)
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.sendto(pdata, (info[dest_node_id]['IP'], int(info[dest_node_id]['PORT'])))
-        sock.close()
-
-        print(str(self.id) + ': Message sent, ' + title + ": " + str(data))
-
-    def tcp_send(self, title, data, dest_node_id):
-        print(str(self.id) + ': tcp_send, sending a message ...')
-        info = self.agents_info
-        pdata = pickle.dumps((title, data))
-
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-        # TCP
-        sock.connect((info[dest_node_id]['IP'], int(info[dest_node_id]['PORT'])))
-        sock.send(pdata)
-
-        sock.close()
-
-        print(str(self.id) + ': Message sent to agent ' + str(dest_node_id) + ', ' + title + ": " + str(data))
+            communication.tcp_send(self.agents_info, title, data, self.id, dest_node_id)
 
     def start(self):
-        print(str(self.id) + ': Started')
+        """
+        begin the processing
+        """
+
+        print(dt.now(), str(self.id) + ': Started')
+
         pseudotree_creation.pseudotree_creation(self)
+        print(f"Split processing is {self.split_processing}\n" +
+              f"computation speed is {self.comp_speed} \n" +
+              f"network customization is {self.network_customization} \n" +
+              f"network speed is {self.net_speed} ")
+
         util_msg_prop.util_msg_prop(self)
+
         if not self.is_root:
             value_msg_prop.value_msg_prop(self)
-        print(str(self.id) + ': Finished')
+        print(dt.now(), str(self.id) + ': Finished')
+
+    def send(self, title, data, dest_node_id):
+        """
+        a wrap of underlying TCP/UDP in communication
+        :param title: msg title
+        :param data: the actual data part
+        :param dest_node_id: assigned agent id
+        """
+        communication.tcp_send(self.agents_info, title, data, self.id, dest_node_id)
+
+
+class PipelineAgent(Agent):
+    def __init__(self, i, domain, relations, agents_file, comp_speed, net_speed):
+        Agent.__init__(self, i, domain, relations, agents_file, comp_speed, net_speed)
+        self.split_processing = True
+
+    def start(self):
+        """
+        begin the processing
+        """
+
+        print(dt.now(), str(self.id) + ': Started')
+
+        pseudotree_creation.pseudotree_creation(self)
+        print(f"Split processing is {self.split_processing}\n" +
+              f"computation speed is {self.comp_speed} \n" +
+              f"network customization is {self.network_customization} \n" +
+              f"network speed is {self.net_speed} ")
+
+        util_msg_prop.util_msg_prop_split_pipeline(self)
+
+        if not self.is_root:
+            value_msg_prop.value_msg_prop(self)
+        print(dt.now(), str(self.id) + ': Finished')
+
+
+class SplitAgent(Agent):
+    def __init__(self, i, domain, relations, agents_file, comp_speed, net_speed):
+        Agent.__init__(self, i, domain, relations, agents_file, comp_speed, net_speed)
+        self.split_processing = True
+
+    def start(self):
+        """
+        begin the processing
+        """
+
+        print(dt.now(), str(self.id) + ': Started')
+
+        pseudotree_creation.pseudotree_creation(self)
+        print(f"Split processing is {self.split_processing}\n" +
+              f"computation speed is {self.comp_speed} \n" +
+              f"network customization is {self.network_customization} \n" +
+              f"network speed is {self.net_speed} ")
+
+        util_msg_prop.util_msg_prop_split(self)
+
+        if not self.is_root:
+            value_msg_prop.value_msg_prop(self)
+        print(dt.now(), str(self.id) + ': Finished')
+
+
+class ListAgent(Agent):
+    def __init__(self, i, domain, relations, agents_file, comp_speed, net_speed):
+        Agent.__init__(self, i, domain, relations, agents_file, comp_speed, net_speed)
+
+    def start(self):
+        """
+        begin the processing
+        """
+
+        print(dt.now(), str(self.id) + ': Started')
+
+        pseudotree_creation.pseudotree_creation(self)
+        print(f"Split processing is {self.split_processing}\n" +
+              f"computation speed is {self.comp_speed} \n" +
+              f"network customization is {self.network_customization} \n" +
+              f"network speed is {self.net_speed} ")
+
+        util_msg_prop.util_msg_prop_list(self)
+
+        if not self.is_root:
+            value_msg_prop.value_msg_prop(self)
+        print(dt.now(), str(self.id) + ': Finished')
