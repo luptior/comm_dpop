@@ -23,5 +23,10 @@ if __name__ == '__main__':
 
     # "UDP", "TCP", "UDP_FEC"
     properties['network_protocol'] = "UDP_FEC"
+    properties["agent_mode"] = "default"
+    properties["slow_processing"] = "false"
+    properties["comp_speed"] = 100
+    properties["network_customization"] = "false"
+    properties["net_speed"] = 100
 
     store_properties(properties)

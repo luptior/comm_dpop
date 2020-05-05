@@ -1,1 +1,6 @@
-network_protocol: UDP
+agent_mode: default
+comp_speed: 100
+net_speed: 100
+network_customization: 'false'
+network_protocol: UDP_FEC
+slow_processing: 'false'
