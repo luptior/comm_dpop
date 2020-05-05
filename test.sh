@@ -29,12 +29,7 @@ for repo in 1; do
           log=$logdir/${name}_${mode}_network${net_speed}_comp${comp_speed}.log
           timestamp >$log &&
             echo "start running ${name} mode ${mode}_network${net_speed}_comp${comp_speed}" &&
-            python $script --input $datadir/${name}.xml \
-              --network $network \
-              --mode $mode \
-              --computation ${comp_set} \
-              --comp_speed ${comp_speed} \
-              --net_speed ${net_speed} >>$log &&
+            python $script --input $datadir/${name}.xml >>$log &&
             #             echo "finish running ${name}" &&
             timestamp >>$log &&
             python src/read_log.py $log
