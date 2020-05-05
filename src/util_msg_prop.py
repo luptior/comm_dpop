@@ -122,7 +122,8 @@ def util_msg_handler(agent):
         D[agent.id] = ind        
         for node in agent.c:
             # agent.udp_send('value_msg_'+str(agent.id), D, node)
-            agent.tcp_send('value_msg_' + str(agent.id), D, node)
+            # agent.tcp_send('value_msg_' + str(agent.id), D, node)
+            agent.send('value_msg_' + str(agent.id), D, node)
     else:
         util_cube, _ = get_util_cube(agent)
 
@@ -157,9 +158,11 @@ def util_msg_handler(agent):
         # Send the assignment-nodeid-tuple
         # agent.udp_send('pre_util_msg_'+str(agent.id), ant_to_send, agent.p)
         # agent.udp_send('util_msg_'+str(agent.id), msg_to_send, agent.p)
+        agent.send('pre_util_msg_'+str(agent.id), ant_to_send, agent.p)
+        agent.send('util_msg_'+str(agent.id), msg_to_send, agent.p)
 
-        agent.tcp_send('pre_util_msg_'+str(agent.id), ant_to_send, agent.p)
-        agent.tcp_send('util_msg_'+str(agent.id), msg_to_send, agent.p)
+        # agent.tcp_send('pre_util_msg_'+str(agent.id), ant_to_send, agent.p)
+        # agent.tcp_send('util_msg_'+str(agent.id), msg_to_send, agent.p)
 
 
 def util_msg_prop(agent):
@@ -171,11 +174,13 @@ def util_msg_prop(agent):
 
         # Send the assignment-nodeid-tuple
         # agent.udp_send('pre_util_msg_'+str(agent.id), tuple([agent.p]+agent.pp), agent.p)
-        agent.tcp_send('pre_util_msg_'+str(agent.id), tuple([agent.p]+agent.pp), agent.p)
+        agent.send('pre_util_msg_' + str(agent.id), tuple([agent.p] + agent.pp), agent.p)
+        # agent.tcp_send('pre_util_msg_'+str(agent.id), tuple([agent.p]+agent.pp), agent.p)
 
         # Send 'util_msg_<ownid>'' to parent
         # agent.udp_send('util_msg_'+str(agent.id), util_msg, agent.p)
-        agent.tcp_send('util_msg_'+str(agent.id), util_msg, agent.p)
+        agent.send('util_msg_' + str(agent.id), util_msg, agent.p)
+        # agent.tcp_send('util_msg_'+str(agent.id), util_msg, agent.p)
 
     else:
         util_msg_handler(agent)

@@ -7,10 +7,11 @@ import sys
 import socket
 import numpy as np
 
+import properties as prop
 from network_optimize import *
 
 from reedsolo import RSCodec
-rsc = RSCodec(10)  # 10 ecc symbols
+import RSCoding
 
 Relatives = collections.namedtuple('Relatives', 'parent pseudoparents children pseudochildren')
 
@@ -51,6 +52,9 @@ def listen_func(msgs, sock, agent):
         agent_id = agent.id
     print(str(agent_id) + ': Begin listen_func')
 
+    properties = prop.load_properties("properties.yaml")
+
+
     while True:
         # The 'data' which is received should be the pickled string
         # representation of a tuple.
@@ -60,29 +64,32 @@ def listen_func(msgs, sock, agent):
         # The second element should be the actual data to be passed.
         # Loop ends when an exit message is sent.
 
-        # UDP
-        # data, addr = sock.recvfrom(65536)
-        # udata = pickle.loads(data) # Unpickled data
+        mode = properties["network_protocol"]
 
-        # TCP
-        connectionSocket, addr = sock.accept()
+        if mode == "UDP":
+            data, addr = sock.recvfrom(65536)
+            udata = pickle.loads(data)  # Unpickled data
+        elif mode == "UDP_FEC":
+            data, addr = sock.recvfrom(65536)
+            udata = RSCoding.deserialize(data, "int64")
+        elif mode == "TCP":
+            connectionSocket, addr = sock.accept()
 
-        total_data = []
-        while True:
-            data = connectionSocket.recv(4096)
-            if not data:
-                break
-            total_data.append(data)
-        data = b''.join(total_data)
+            total_data = []
+            while True:
+                data = connectionSocket.recv(4096)
+                if not data:
+                    break
+                total_data.append(data)
+            data = b''.join(total_data)
 
-        """
-        the optimization comes into play
-        """
-        size = sys.getsizeof(data)
-
-        sleep(tran_time(size)/1000.)
-
-        udata = pickle.loads(data)  # Unpickled data
+            """
+            the optimization comes into play
+            """
+            # size = sys.getsizeof(data)
+            #
+            # sleep(tran_time(size)/1000.)
+            udata = pickle.loads(data)  # Unpickled data
 
 
 

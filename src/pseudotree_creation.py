@@ -9,6 +9,7 @@ import time
 
 import utility
 import pseudotree
+import properties as prop
 
 Relatives = utility.Relatives
 
@@ -55,7 +56,8 @@ def tell_relative(node_id, agent, graph, parents, pstree, depths):
         agent.p, agent.pp, agent.c, agent.pc = p, pp, c, pc
     else:
         # agent.udp_send('ptinfo', Relatives(p, pp, c, pc), node_id)
-        agent.tcp_send('ptinfo', Relatives(p, pp, c, pc), node_id)
+        agent.send('ptinfo', Relatives(p, pp, c, pc), node_id)
+        # agent.tcp_send('ptinfo', Relatives(p, pp, c, pc), node_id)
 
 
 def pseudotree_creation(agent):
@@ -63,14 +65,18 @@ def pseudotree_creation(agent):
     # The dict where all the messages are stored
     msgs = agent.msgs
 
-    info = agent.agents_info
-    # UDP
-    # listening_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    properties = prop.load_properties("properties.yaml")
+    network_protocol = properties["network_protocol"]
 
-    # TCP
-    listening_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    listening_socket.bind((info[agent.id]['IP'], int(info[agent.id]['PORT'])))
-    listening_socket.listen(20)
+    info = agent.agents_info
+
+    if network_protocol in ['UDP', "UDP_FEC"] :
+        # UDP
+        listening_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    elif network_protocol in ["TCP"]:
+        listening_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        listening_socket.bind((info[agent.id]['IP'], int(info[agent.id]['PORT'])))
+        listening_socket.listen(20)
     
     # Creating and starting the 'listen' thread
     listen = threading.Thread(name='Listening-Thread-of-Agent-'+str(agent.id),
@@ -120,12 +126,14 @@ def pseudotree_creation(agent):
         # domain_1: <the set which is the domain of 1>
         for child in agent.c+agent.pc:
             # agent.udp_send('domain_'+str(agent.id), agent.domain, child)
-            agent.tcp_send('domain_' + str(agent.id), agent.domain, child)
+            agent.send('domain_'+str(agent.id), agent.domain, child)
+            # agent.tcp_send('domain_' + str(agent.id), agent.domain, child)
 
     # Procedure for agent other than root
     else:
-        agent.tcp_send('neighbors_'+str(agent.id), agent.neighbors, agent.root_id)
         # agent.udp_send('neighbors_'+str(agent.id), agent.neighbors, agent.root_id)
+        agent.send('neighbors_' + str(agent.id), agent.neighbors, agent.root_id)
+        # agent.tcp_send('neighbors_'+str(agent.id), agent.neighbors, agent.root_id)
 
         # Wait till the message (p, pp, c, pc) [has title: 'ptinfo'] arrives
         # from the root.
@@ -141,7 +149,8 @@ def pseudotree_creation(agent):
         # domain_7: <the set which is the domain of 7>
         for child in agent.c+agent.pc:
             # agent.udp_send('domain_'+str(agent.id), agent.domain, child)
-            agent.tcp_send('domain_' + str(agent.id), agent.domain, child)
+            agent.send('domain_' + str(agent.id), agent.domain, child)
+            # agent.tcp_send('domain_' + str(agent.id), agent.domain, child)
 
         # Wait for the 'domain' message from all parents and pseudoparents.
         # These messages sent will have the form:
