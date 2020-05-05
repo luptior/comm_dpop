@@ -3,13 +3,12 @@ import yaml
 import yaml as yaml
 
 
-
-def store_properties(properties: dict, file: str ="../properties.yaml" ):
+def store_properties(properties: dict, file: str = "../properties.yaml"):
     with open(file, "w") as f:
         yaml.dump(properties, f)
 
 
-def load_properties(file: str ="../properties.yaml" ):
+def load_properties(file: str = "../properties.yaml"):
     properties = {}
     with open(file, "r") as f:
         docs = yaml.load_all(f, Loader=yaml.FullLoader)

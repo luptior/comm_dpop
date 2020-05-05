@@ -104,12 +104,11 @@ if __name__ == '__main__':
     handler.setFormatter(formatter)
     logger.addHandler(handler)
 
-
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", help="# input file", type=str)
     parser.add_argument("--network", help="# if network customization is turned on", type=str, default="False")
     parser.add_argument("--mode", help="# which mode this algorithm is on {default, list, split, pipeline} ",
-                                                                                        type=str, default="default")
+                        type=str, default="default")
     parser.add_argument("--computation", help="# whether to adjust the computation speed ", type=str, default="False")
     parser.add_argument("--comp_speed", help="# a parameter to adjust the computation speed ", type=float, default=10)
     parser.add_argument("--net_speed", help="# a parameter to adjust the network speed ", type=float, default=10)

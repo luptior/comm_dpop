@@ -16,7 +16,7 @@ import RSCoding
 Relatives = collections.namedtuple('Relatives', 'parent pseudoparents children pseudochildren')
 
 
-def get_agents_info(filepath:str) -> dict:
+def get_agents_info(filepath: str) -> dict:
     """
     Return a dict with that has all the information extracted from a file like
     'agents.txt'.
@@ -39,8 +39,8 @@ def combine(*args):
     n assignment-nodeid-tuples ('ants')."""
 
     largs = len(args)
-    arrays = args[:int(largs / 2)] # list of actual util tables
-    ants = args[int(largs / 2):] # list of [p, pps]
+    arrays = args[:int(largs / 2)]  # list of actual util tables
+    ants = args[int(largs / 2):]  # list of [p, pps]
 
     # Calculate the new shape
     D = {}
@@ -165,23 +165,18 @@ def prod(S):
     return np.product(S)
 
 
-def element_projection(agent, ants:list,  new_entry):
+def element_projection(agent, ants: list, new_entry):
     """
     :param ants:  The ants for the two data entry
     :param new_entry:
     :return:
     """
 
-    merged_ant=merge_ant(ants)
+    merged_ant = merge_ant(ants)
 
-    if len(ants) == 2 :
+    if len(ants) == 2:
         # this projection involves array from 2 children
         shared_ax = (set(ants[0]) & set(ants[1]))[0]
         shared_id = list(merged_ant).index(shared_ax)
         id1 = ants[0].index(shared_ax)
         id2 = ants[2].index(shared_ax)
-
-
-
-
-

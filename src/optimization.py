@@ -81,7 +81,6 @@ def computation_time(agent, sliced_size: int):
     else:
         return 6.144387919188346e-06 * sliced_size + 0.017582085621144466
 
-
 # def gradient_descent(f, r, step) -> int:
 #     """
 #     TODO: be complete to speed up the minimizer finding of optimize size

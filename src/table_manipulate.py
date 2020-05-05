@@ -5,8 +5,6 @@ import msg_structure
 import optimization
 
 
-
-
 def reorder_list(entry_1, entry_2):
     """
     :param entry_1: ( )
@@ -15,12 +13,6 @@ def reorder_list(entry_1, entry_2):
     """
 
     [(0, 0), ]
-
-
-
-
-
-
 
 
 def reorder_table(pre_1: list, pre_2: list, pre_util_1: list, pre_util_2: list, t1: np.ndarray, t2: np.ndarray):
@@ -78,4 +70,3 @@ if __name__ == '__main__':
     # print(reordered_pre_util_2)
     # for x in msg_structure.slice_to_list(reordered_t2):
     #     print(x)
-

@@ -32,6 +32,7 @@ def slow_process(agent, msg):
     time = optimization.computation_time(agent, msg_structure.get_actual_size(msg))
     sleep(time)
 
+
 logging.basicConfig(level=logging.INFO)
 
 

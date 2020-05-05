@@ -8,6 +8,7 @@ from network import *
 import RSCoding
 import properties as prop
 
+
 def udp_send(a, title, data, dest_node_id):
     print(str(a.id) + ': udp_send, sending a message ...')
 
@@ -22,7 +23,6 @@ def udp_send(a, title, data, dest_node_id):
 
 
 def tcp_send(info, title, data, ori_node_id, dest_node_id):
-
     print(dt.now(), str(ori_node_id) + ': tcp_send, sending a message ...')
 
     # TCP
@@ -35,6 +35,7 @@ def tcp_send(info, title, data, ori_node_id, dest_node_id):
 
     # print(str(ori_node_id) + ': Message sent to agent ' + str(dest_node_id) + ', ' + title + ": " + str(data))
     print(dt.now(), str(ori_node_id) + ': Message sent to agent ' + str(dest_node_id) + ', ' + title)
+
 
 def udp_send_fec(a, title, data, dest_node_id):
     print(str(a.id) + ': udp_send_fec, sending a message with FEC...')

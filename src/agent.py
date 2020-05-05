@@ -28,6 +28,7 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
+
 class Agent:
 
     def __init__(self, i, domain, relations, agents_file):
@@ -76,7 +77,6 @@ class Agent:
         self.comp_speed = properties["comp_speed"]
         self.network_customization = properties["network_customization"]
         self.net_speed = properties["net_speed"]
-
 
         self.unprocessed_util = []  # The dict where all the received util_messages are stored,
         # added for split processing

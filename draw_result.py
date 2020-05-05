@@ -7,7 +7,6 @@ from matplotlib.ticker import LinearLocator, FormatStrFormatter
 import numpy as np
 import pandas as pd
 
-
 fig = plt.figure()
 ax = fig.gca(projection='3d')
 
@@ -19,7 +18,7 @@ Y = list(df["Unnamed: 0"])
 
 df.set_index("Unnamed: 0")
 X, Y = np.meshgrid(X, Y)
-R = np.sqrt(X**2 + Y**2)
+R = np.sqrt(X ** 2 + Y ** 2)
 Z = np.sin(R)
 
 # Plot the surface.

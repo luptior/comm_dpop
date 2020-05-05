@@ -2,6 +2,7 @@ from reedsolo import RSCodec, ReedSolomonError
 
 import numpy as np
 
+
 # Supoorts Reed Soloomon codes
 
 def example():
@@ -23,17 +24,18 @@ def example():
     except ReedSolomonError:
         print("error happened")
 
+
 def long_coding():
-    table = np.random.randint(10, size=[5,5,5,5])
+    table = np.random.randint(10, size=[5, 5, 5, 5])
     table_rs = rsc.encode(table.tobytes())
     print(len(rsc.decode(table_rs)))
 
 
 # for the combined messages
-def deserialize(input: bytearray, rsc: RSCodec = RSCodec(10), datatype = "int64"):
+def deserialize(input: bytearray, rsc: RSCodec = RSCodec(10), datatype="int64"):
     combined = rsc.decode(input)[0]
     # symbol
-    combined_decoded= combined.split(b";")
+    combined_decoded = combined.split(b";")
     # [title, shape, actual data]
     title = combined_decoded[0].decode()
     shape = np.frombuffer(combined_decoded[1], "int64")
@@ -42,8 +44,8 @@ def deserialize(input: bytearray, rsc: RSCodec = RSCodec(10), datatype = "int64"
 
     return title, data.reshape(shape)
 
-def serialize(title: str,  input_array, rsc: RSCodec = RSCodec(10))->bytearray:
 
+def serialize(title: str, input_array, rsc: RSCodec = RSCodec(10)) -> bytearray:
     if isinstance(input_array, np.ndarray):
         shape = np.asarray(input_array.shape)
         b = input_array.tobytes()
@@ -55,12 +57,10 @@ def serialize(title: str,  input_array, rsc: RSCodec = RSCodec(10))->bytearray:
     return rsc.encode(combined_str)
 
 
-
-
 if __name__ == '__main__':
     rsc = RSCodec(10)  # 10 ecc symbols\
     # rsc2 = RSCodec(10) # another
-    shape = [2,3, 4]
+    shape = [2, 3, 4]
     #
     #
     input_array = np.random.randint(10, size=shape)

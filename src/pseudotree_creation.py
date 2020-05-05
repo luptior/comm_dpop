@@ -73,14 +73,14 @@ def pseudotree_creation(agent):
 
     info = agent.agents_info
 
-    if network_protocol in ['UDP', "UDP_FEC"] :
+    if network_protocol in ['UDP', "UDP_FEC"]:
         # UDP
         listening_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     elif network_protocol in ["TCP"]:
         listening_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         listening_socket.bind((info[agent.id]['IP'], int(info[agent.id]['PORT'])))
         listening_socket.listen(20)
-    
+
     # Creating and starting the 'listen' thread
     listen = threading.Thread(name='Listening-Thread-of-Agent-' + str(agent.id),
                               target=communication.listen_func,

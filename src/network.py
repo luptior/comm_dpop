@@ -13,7 +13,6 @@ every additional dimension is 16 byte
 import numpy as np
 from time import sleep
 
-
 # some constants for network communication
 
 Q = 0.01
@@ -28,7 +27,7 @@ def throughput(agent, q, rtt, s) -> float:
 
 def tran_time(agent, size):
     # return 0.1 + size / 100 , return unit in s
-    return size / throughput(agent,Q, RTT, MAX_SEG)
+    return size / throughput(agent, Q, RTT, MAX_SEG)
 
 
 def loss(s):
@@ -70,6 +69,3 @@ def proactive(size):
                 sleep(5)
             else:
                 sleep(tran_time(last))
-
-
-

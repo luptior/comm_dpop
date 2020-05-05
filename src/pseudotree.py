@@ -1,4 +1,6 @@
 "This module constructs the DFS-tree of a graph, which is a pseudotree."
+
+
 # Assumptions:
 # 1. There are no 'isolated' parts of the graph. All vertices are
 # connected to every other vertex through some path or the other.
@@ -9,10 +11,10 @@ def dfsTree(graph, startingVertex):
     # Note that the tree that is returned has a different format.
     # It list the children for every node rather than the neighbors.
     # The root node can be found by the 'Nothing' node.
-    
-    added = {} # The collection of nodes already considered
+
+    added = {}  # The collection of nodes already considered
     tree = dfsTreeHelper(graph, startingVertex, 'Nothing', {}, added)
-    
+
     # Create empty lists as children of leaf nodes
     for node in graph:
         if node not in tree:
@@ -22,7 +24,7 @@ def dfsTree(graph, startingVertex):
 
 
 def dfsTreeHelper(graph, node, parent, tree, added):
-    if not node in added: # Consider this node only if not already considered
+    if not node in added:  # Consider this node only if not already considered
         if parent in tree:
             tree[parent].append(node)
             added[node] = True
@@ -61,7 +63,7 @@ def assign_depths_helper(depths, pstree, node, value):
     except KeyError:
         return depths
     for child in children:
-        assign_depths_helper(depths, pstree, child, value+1)
+        assign_depths_helper(depths, pstree, child, value + 1)
     return depths
 
 
