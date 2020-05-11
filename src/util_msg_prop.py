@@ -443,7 +443,7 @@ def util_msg_handler_split(agent):
 
 
 def util_msg_prop_split(agent):
-    print(dt.now(), str(agent.id) + ': Begin util_msg_prop_split')
+    agent.logger.info(f"{dt.now()} {str(agent.id)} : Begin util_msg_prop_split")
 
     if agent.is_leaf():
         # if agents is leaf, just send the utility messages needed
@@ -464,7 +464,7 @@ def util_msg_prop_split(agent):
     else:
         util_msg_handler_split(agent)
 
-    print(dt.now(), str(agent.id) + ': End util_msg_prop_split')
+    agent.logger.info(f"{dt.now()} {str(agent.id)} :End util_msg_prop_split")
 
 
 def util_msg_handler_list(agent):
@@ -482,7 +482,7 @@ def util_msg_handler_list(agent):
         if all_children_pre_msgs_arrived:
             break
 
-    print(dt.now(), str(agent.id) + f" Start processing util message ALL")
+    agent.logger.info(f"{dt.now()} {str(agent.id)} : Start processing util message ALL")
 
     pre_msgs = [agent.msgs['pre_util_msg_' + str(child)] for child in sorted(agent.c)]
     merged_ant = utility.merge_ant(pre_msgs)  # the combined set of nodeids for the table sent from two children
@@ -513,7 +513,7 @@ def util_msg_handler_list(agent):
                     msg = agent.unprocessed_util.pop(0)  # a piece of info
                     title = msg[0]
 
-                    print(dt.now(), f" {agent.id}: start processing {title}")
+                    agent.logger.info(f"{dt.now()} {str(agent.id)} : start processing {title}")
                     # is a dict of format {(indices) : util}
 
                     if agent.slow_processing:
