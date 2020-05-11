@@ -180,8 +180,8 @@ class Agent:
             communication.tcp_send(self, title, data, self.id, dest_node_id)
 
 class PipelineAgent(Agent):
-    def __init__(self, i, domain, relations, agents_file, comp_speed, net_speed):
-        Agent.__init__(self, i, domain, relations, agents_file, comp_speed, net_speed)
+    def __init__(self, i, domain, relations, agents_file):
+        Agent.__init__(self, i, domain, relations, agents_file)
         self.split_processing = True
 
     def start(self):
@@ -205,8 +205,8 @@ class PipelineAgent(Agent):
 
 
 class SplitAgent(Agent):
-    def __init__(self, i, domain, relations, agents_file, comp_speed, net_speed):
-        Agent.__init__(self, i, domain, relations, agents_file, comp_speed, net_speed)
+    def __init__(self, i, domain, relations, agents_file):
+        Agent.__init__(self, i, domain, relations, agents_file)
         self.split_processing = True
 
     def start(self):
@@ -230,8 +230,8 @@ class SplitAgent(Agent):
 
 
 class ListAgent(Agent):
-    def __init__(self, i, domain, relations, agents_file, comp_speed, net_speed):
-        Agent.__init__(self, i, domain, relations, agents_file, comp_speed, net_speed)
+    def __init__(self, i, domain, relations, agents_file):
+        Agent.__init__(self, i, domain, relations, agents_file)
 
     def start(self):
         """
