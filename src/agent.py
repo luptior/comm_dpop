@@ -88,7 +88,7 @@ class Agent:
 
         # logger initialize
         self.logger = logging.getLogger(f"Agent {self.i}")
-        self.logger.info(f"{self.i} is initialized")
+        self.logger.info(f" is initialized")
 
     def get_graph_nodes(self):
         info = self.agents_info
