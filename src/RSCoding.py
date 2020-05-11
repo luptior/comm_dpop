@@ -45,7 +45,7 @@ def deserialize(input: bytearray, rsc: RSCodec = RSCodec(10), datatype="int64"):
     data = np.frombuffer(combined_decoded[2], datatype)
 
     if title == "ptinfo":
-        return title, load_relatiives(data)
+        return title, load_relatives(data)
     elif "domain_" in title:
         return title, list(data)
     elif "pre_util_msg_'" in title:
@@ -101,7 +101,7 @@ def dump_dict(d: dict) -> list:
     return l
 
 
-def load_relatiives(l) -> utility.Relatives:
+def load_relatives(l) -> utility.Relatives:
     if not isinstance(l, list):
         l = list(l)
     index = l[:3]
