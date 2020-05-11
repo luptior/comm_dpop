@@ -45,21 +45,24 @@ def deserialize(input: bytearray, rsc: RSCodec = RSCodec(10), datatype="int64"):
     data = np.frombuffer(combined_decoded[2], datatype)
 
 
-
     if title == "ptinfo":
         return title, load_relatives(data)
-    elif "domain_" in title:
+    elif "domain_" in title or "neighbors_" in title:
         return title, list(data)
     elif "pre_util_msg_'" in title:
         return title, tuple(data)
     elif "value_msg_" in title:
         return title, load_dict(data)
-    else:
+    elif "util_msg_" in title:
         return title, data.reshape(shape)
+    else:
+        logger.error(f"not supportd input: {title}  {type(data)}")
+        raise Exception(f"not supportd input {type(data)}")
 
 
 def serialize(title: str, input_array, rsc: RSCodec = RSCodec(10)) -> bytearray:
-    if isinstance(input_array, np.ndarray):
+    if "util_msg_" in title and isinstance(input_array, np.ndarray):
+        input_array = input_array.astype(int)
         shape = np.asarray(input_array.shape)
         b = input_array.tobytes()
     elif isinstance(input_array, list) or \
@@ -134,7 +137,7 @@ def dump_relatives(relatives: utility.Relatives) -> list:
 def test_serialize():
     rsc = RSCodec(10)  # 10 ecc symbols\
     # rsc2 = RSCodec(10) # another
-    shape = [10, 10, 10]
+    shape = (10, 10, 10)
     #
     #
     input_array = np.random.randint(1000, size=shape)
@@ -151,11 +154,11 @@ def test_serialize():
     # print(equal_arrays)
 
     # serialized = serialize( title="ssss", input_array = input_array)
-    serialized = serialize(title="ssss", input_array=input_array)
+    serialized = serialize(title="util_msg_1", input_array=input_array)
     deserialized = deserialize(serialized)
 
-    print(deserialized[0])
-    print(input_array)
+    print(deserialized[1])
+    # print(input_array)
     # comparison = input_array == deserialized[1]
     comparison = input_array == deserialized[1]
     equal_arrays = comparison.all()
@@ -163,8 +166,4 @@ def test_serialize():
 
 
 if __name__ == '__main__':
-    d = {}
-    d["222"] = 2
-    d["sss"] = 5
-
-    print(dump_dict(d))
+    test_serialize()
