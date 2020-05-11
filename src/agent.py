@@ -87,7 +87,7 @@ class Agent:
         self.PORT = eval(info[self.id]['PORT'])  # Listening Port
 
         # logger initialize
-        self.logger = logging.getLogger(f"Agent {self.i}")
+        self.logger = logging.getLogger(f"Agent_{self.i}")
         self.logger.info(f" is initialized")
 
     def get_graph_nodes(self):
