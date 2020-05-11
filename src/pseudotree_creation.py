@@ -76,6 +76,7 @@ def pseudotree_creation(agent):
     if network_protocol in ['UDP', "UDP_FEC"]:
         # UDP
         listening_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        listening_socket.bind((info[agent.id]['IP'], int(info[agent.id]['PORT'])))
     elif network_protocol in ["TCP"]:
         listening_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         listening_socket.bind((info[agent.id]['IP'], int(info[agent.id]['PORT'])))
@@ -160,9 +161,11 @@ def pseudotree_creation(agent):
             all_parents_msgs_arrived = True
             for parent in [agent.p] + agent.pp:
                 if ('domain_' + str(parent)) not in msgs:
+                    # agent.logger.info(f"{('domain_' + str(parent))} not in {msgs.keys()}")
                     all_parents_msgs_arrived = False
                     break
             if all_parents_msgs_arrived:
+                agent.logger.info(f": all_parents_msgs_arrived")
                 break
 
         # Store all these domains that have arrived as messages.
@@ -170,5 +173,5 @@ def pseudotree_creation(agent):
         for parent in [agent.p] + agent.pp:
             info[parent]['domain'] = msgs['domain_' + str(parent)]
 
-    agent.logger.info(f"{dt.now()} {str(agent.id)} : Begin pseudotree_creation")
+    agent.logger.info(f"{dt.now()} : End pseudotree_creation")
     # print(dt.now(), str(agent.id) + ': Begin pseudotree_creation')
