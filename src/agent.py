@@ -131,8 +131,7 @@ class Agent:
         """
         determine if it is a lead node
         """
-        assert self.c is not None, 'self.c not yet initialized.'
-        self.logger.info(f"{self.i} is leaf node")
+        assert self.c is not None, logger.error('self.c not yet initialized.')
 
         if not self.c:
             return True
