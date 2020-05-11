@@ -44,12 +44,16 @@ def deserialize(input: bytearray, rsc: RSCodec = RSCodec(10), datatype="int64"):
     # shape = np.frombuffer(combined_decoded[1].encode(), "int64")
     data = np.frombuffer(combined_decoded[2], datatype)
 
+
+
     if title == "ptinfo":
         return title, load_relatives(data)
     elif "domain_" in title:
         return title, list(data)
     elif "pre_util_msg_'" in title:
         return title, tuple(data)
+    elif "value_msg_" in title:
+        return title, load_dict(data)
     else:
         return title, data.reshape(shape)
 
@@ -79,9 +83,9 @@ def serialize(title: str, input_array, rsc: RSCodec = RSCodec(10)) -> bytearray:
     return rsc.encode(combined_str)
 
 
-def load_dict(l : list) -> dict:
-    if len(l)%2 == 0:
-        d = { l[2*i]:l[2*i+1] for i in range(len(l)//2)}
+def load_dict(l: list) -> dict:
+    if len(l) % 2 == 0:
+        d = {int(l[2 * i]): int(l[2 * i + 1]) for i in range(len(l) // 2)}
     else:
         logger.error(f"list input l is not with correct length: {len(l)}")
         raise Exception(f"list input l is not with correct length: {len(l)}")
@@ -96,8 +100,8 @@ def dump_dict(d: dict) -> list:
     # b = b[:-1]  # minus the last b";"
 
     l = []
-    for k, v in enumerate(d):
-        l += [k,v]
+    for k, v in d.items():
+        l += [k, v]
     return l
 
 
