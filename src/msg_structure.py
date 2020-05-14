@@ -10,6 +10,7 @@ import sys
 import pickle
 
 import optimization
+import agent
 
 logger = logging.getLogger("msg_structure")
 
@@ -44,17 +45,25 @@ def slice_to_list_pipeline(agent, original_table: np.array) -> list:
     return sliced_msgs
 
 
-def slice_to_list(agent, original_table: np.array) -> list:
+def slice_to_list(a:agent, original_table: np.array) -> list:
     """
     the method will slice the original table into smaller pieces for faster communication
-    :param agent:
+    :param a:
     :param original_table: np.ndarray
     :return: list of dict of length length, len(list[0])=length
             each element will have (index of first element), list of continuous
     """
 
     # optimization comes into play
-    length = optimization.optimize_size(agent, original_table)
+    if a.network_protocol == "UDP_FEC" and isinstance(a, agent.SplitAgent) or isinstance(a, agent.PipelineAgent):
+        # split is necessary but no need for optimization
+        # serialized = serialize(title, np.random.randint(0, 100, size=(7500,)))
+        # get_actual_size(serialized)
+        # 62545
+        # TODO: better calculation for this number
+        length = 1100
+    else:
+        length = optimization.optimize_size(a, original_table)
 
     elements = {i: u for i, u in np.ndenumerate(original_table)}
     index = list(elements.keys())
