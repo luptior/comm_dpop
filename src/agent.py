@@ -70,11 +70,11 @@ class Agent:
 
         self.msgs = {}  # The dict where all the received messages are stored
 
-        # properties
+        # properties, the part reads from properties
         properties = prop.load_properties("properties.yaml")
-        self.network_protocol = properties["network_protocol"]
-        self.slow_processing = properties["slow_processing"]
-        self.comp_speed = int(properties["comp_speed"])
+        self.network_protocol = properties["network_protocol"] # TCP/UDP/UDP_FEC
+        self.slow_processing = properties["slow_processing"] # whether slowing down is applied
+        self.comp_speed = int(properties["comp_speed"]) # c
         self.network_customization = properties["network_customization"]
         self.net_speed = int(properties["net_speed"])
 
@@ -138,14 +138,6 @@ class Agent:
         else:
             return False
 
-    def send(self, title, data, dest_node_id):
-        if self.network_protocol == "UDP":
-            communication.udp_send(self, title, data, self.id, dest_node_id)
-        elif self.network_protocol == "UDP_FEC":
-            communication.udp_send_fec(self, title, data, self.id, dest_node_id)
-        elif self.network_protocol == "TCP":
-            communication.tcp_send(self, title, data, self.id, dest_node_id)
-
     def start(self):
         """
         begin the processing
@@ -154,10 +146,8 @@ class Agent:
         self.logger.info(f"{dt.now()} {str(self.id)}: Started")
 
         pseudotree_creation.pseudotree_creation(self)
-        self.logger.info(f"Split processing is {self.split_processing}\n" +
-              f"computation speed is {self.comp_speed} \n" +
-              f"network customization is {self.network_customization} \n" +
-              f"network speed is {self.net_speed} ")
+        self.logger.info(f"Split processing is {self.split_processing}, computation speed is {self.comp_speed} \n "
+                         f"network customization is {self.network_customization}, network speed is {self.net_speed} ")
 
         util_msg_prop.util_msg_prop(self)
 
@@ -179,6 +169,7 @@ class Agent:
         elif self.network_protocol == "TCP":
             communication.tcp_send(self, title, data, self.id, dest_node_id)
 
+
 class PipelineAgent(Agent):
     def __init__(self, i, domain, relations, agents_file):
         Agent.__init__(self, i, domain, relations, agents_file)
@@ -192,10 +183,8 @@ class PipelineAgent(Agent):
         self.logger.info(f"{dt.now()} {str(self.id)}: Started")
 
         pseudotree_creation.pseudotree_creation(self)
-        self.logger.info(f"Split processing is {self.split_processing}\n" +
-              f"computation speed is {self.comp_speed} \n" +
-              f"network customization is {self.network_customization} \n" +
-              f"network speed is {self.net_speed} ")
+        self.logger.info(f"Split processing is {self.split_processing}, computation speed is {self.comp_speed} \n "
+                         f"network customization is {self.network_customization}, network speed is {self.net_speed} ")
 
         util_msg_prop.util_msg_prop_split_pipeline(self)
 
@@ -217,10 +206,8 @@ class SplitAgent(Agent):
         self.logger.info(f"{dt.now()} {str(self.id)}: Started")
 
         pseudotree_creation.pseudotree_creation(self)
-        self.logger.info(f"Split processing is {self.split_processing}\n" +
-              f"computation speed is {self.comp_speed} \n" +
-              f"network customization is {self.network_customization} \n" +
-              f"network speed is {self.net_speed} ")
+        self.logger.info(f"Split processing is {self.split_processing}, computation speed is {self.comp_speed} \n "
+                         f"network customization is {self.network_customization}, network speed is {self.net_speed} ")
 
         util_msg_prop.util_msg_prop_split(self)
 
@@ -241,10 +228,8 @@ class ListAgent(Agent):
         self.logger.info(f"{dt.now()} {str(self.id)}: Started")
 
         pseudotree_creation.pseudotree_creation(self)
-        self.logger.info(f"Split processing is {self.split_processing}\n" +
-              f"computation speed is {self.comp_speed} \n" +
-              f"network customization is {self.network_customization} \n" +
-              f"network speed is {self.net_speed} ")
+        self.logger.info(f"Split processing is {self.split_processing}, computation speed is {self.comp_speed} \n "
+                         f"network customization is {self.network_customization}, network speed is {self.net_speed} ")
 
         util_msg_prop.util_msg_prop_list(self)
 
