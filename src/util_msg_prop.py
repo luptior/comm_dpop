@@ -577,7 +577,7 @@ def util_msg_handler_list(agent):
 
                     title = msg[0]
 
-                    print(dt.now(), f"{agent.id}: start processing {title}")
+                    agent.logger.info(f"{dt.now()} :  start processing {title}")
 
                     if agent.slow_processing:
                         slow_process(agent, msg)  # slow down processing
@@ -596,7 +596,7 @@ def util_msg_handler_list(agent):
 
     combined_msg = np.zeros([len(x) for x in l_domains])
 
-    print(dt.now(), str(agent.id) + f" finish processing util message")
+    agent.logger.info(f"{dt.now()} :  finish processing util message")
 
     for k, v in new_array.items():
         combined_msg[k] = sum(v)
@@ -660,7 +660,7 @@ def util_msg_handler_list(agent):
 
 
 def util_msg_prop_list(agent):
-    print(dt.now(), str(agent.id) + ': Begin util_msg_prop_split_original')
+    agent.logger.info(f"{dt.now()} : Begin util_msg_prop_split_original")
 
     if agent.is_leaf():
         # if agents is leaf, just send the utility messages needed
@@ -681,7 +681,7 @@ def util_msg_prop_list(agent):
     else:
         util_msg_handler_list(agent)
 
-    print(dt.now(), str(agent.id) + ': End util_msg_prop_split')
+    agent.logger.info(f"{dt.now()} : End util_msg_prop_split")
 
 
 def util_msg_handler_split_pipeline_root(agent):

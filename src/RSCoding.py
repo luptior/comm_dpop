@@ -44,42 +44,58 @@ def deserialize(input: bytearray, rsc: RSCodec = RSCodec(10), datatype="int64"):
     # shape = np.frombuffer(combined_decoded[1].encode(), "int64")
     data = np.frombuffer(combined_decoded[2], datatype)
 
-
     if title == "ptinfo":
         return title, load_relatives(data)
     elif "domain_" in title or "neighbors_" in title:
         return title, list(data)
-    elif "pre_util_msg_'" in title:
+    elif "pre_util_msg_" in title:
         return title, tuple(data)
     elif "value_msg_" in title:
         return title, load_dict(data)
-    elif "util_msg_" in title:
-        return title, data.reshape(shape)
+    elif "util_msg_" == title[:9]:
+        # TODO: a more robust way to distinguish these 2
+        if np.prod(shape) == len(data):
+            # pure list no split
+            return title, data.reshape(shape)
+        else:
+            # plit list
+            # k = data[:np.prod(shape)]
+            return title, [tuple(shape), list(data)]
     else:
         logger.error(f"not supportd input: {title}  {type(data)}")
-        raise Exception(f"not supportd input {type(data)}")
+        raise Exception(f"not supportd input {title}  {type(data)}")
 
 
-def serialize(title: str, input_array, rsc: RSCodec = RSCodec(10)) -> bytearray:
-    if "util_msg_" in title and isinstance(input_array, np.ndarray):
-        input_array = input_array.astype(int)
-        shape = np.asarray(input_array.shape)
-        b = input_array.tobytes()
-    elif isinstance(input_array, list) or \
-            (isinstance(input_array, tuple) and not isinstance(input_array, utility.Relatives)):
-        shape = np.asarray(len(input_array))
-        b = np.asarray(input_array).tobytes()
-    elif isinstance(input_array, utility.Relatives):
-        data = dump_relatives(input_array)
+def serialize(title: str, message, rsc: RSCodec = RSCodec(10)) -> bytearray:
+    if "util_msg_" == title[:9] and isinstance(message, np.ndarray):
+        # original version of util message
+        message = message.astype(int)
+        shape = np.asarray(message.shape)
+        b = message.tobytes()
+    elif "util_msg_" == title[:9] and isinstance(message[0], tuple):
+        # list version of the util message
+        k = list(message[0])
+        v = list(message[1])
+        shape = np.asarray(k)
+        b = np.asarray(v).tobytes()
+    elif "pre_util_msg_" == title[:13] or "neighbors_" in title or "domain_" in title and \
+            (isinstance(message, list) or isinstance(message, tuple)):
+        # for the pre_util_msg_, contain should either be list or tuple
+        shape = np.asarray(len(message))
+        b = np.asarray(message).tobytes()
+    elif title == "ptinfo" and isinstance(message, utility.Relatives):
+        # ptinfo
+        data = dump_relatives(message)
         shape = np.asarray(len(data))
         b = np.asarray(data).tobytes()
-    elif isinstance(input_array, dict):
-        data = dump_dict(input_array)
+    elif "value_msg_" in title and isinstance(message, dict):
+        # for value msg
+        data = dump_dict(message)
         shape = np.asarray(len(data))
         b = np.asarray(data).tobytes()
     else:
-        logger.error(f"not supportd input: {title}  {input_array} {type(input_array)}")
-        raise Exception(f"not supportd input {type(input_array)}")
+        logger.error(f"not supportd input: {title}  {message} {type(message)}")
+        raise Exception(f"not supportd input {title} {type(message)} {message}")
 
     combined_str = title.encode() + b"\tab" + shape.tobytes() + b"\tab" + b
 
@@ -154,7 +170,7 @@ def test_serialize():
     # print(equal_arrays)
 
     # serialized = serialize( title="ssss", input_array = input_array)
-    serialized = serialize(title="util_msg_1", input_array=input_array)
+    serialized = serialize(title="util_msg_1", message=input_array)
     deserialized = deserialize(serialized)
 
     print(deserialized[1])

@@ -3,12 +3,15 @@ Date structure for DPOP message, original implementation used multidimensional a
 based, [(indedx of first element), [sequential values from ndarray]]
 
 """
+import logging
 
 import numpy as np
 import sys
 import pickle
 
 import optimization
+
+logger = logging.getLogger("msg_structure")
 
 
 def slice_to_list_pipeline(agent, original_table: np.array) -> list:
@@ -77,7 +80,7 @@ def table_to_list(original_table: np.array) -> list:
             each element will have (index of first element), list of continuous
     """
 
-    elements = {i: u for i, u in np.ndenumerate(original_table)}
+    elements = {i: int(u) for i, u in np.ndenumerate(original_table)}
 
     return [list(elements.keys())[0], list(elements.values())]
 
@@ -95,7 +98,11 @@ def unfold_sliced_msg(sliced_msg: list, shape: tuple) -> dict:
         position = index_list.index(sliced_msg[0])  # the index of the first element of the sliced_msg
     except ValueError:
         sliced_msg = sliced_msg[0]
-        position = index_list.index(sliced_msg[0])
+        try:
+            position = index_list.index(sliced_msg[0])
+        except IndexError:
+            logger.error(sliced_msg)
+            return
     sub_index_list = index_list[position: position + len(sliced_msg[1])]
     return dict(zip(sub_index_list, sliced_msg[1]))
 
