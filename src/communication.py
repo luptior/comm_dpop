@@ -7,24 +7,29 @@ from network import *
 
 import RSCoding
 import properties as prop
+import agent
+import msg_structure
 
 
-def udp_send(a, title, data, dest_node_id):
+def udp_send(a: agent, title, data, dest_node_id):
     # print(str(a.id) + ': udp_send, sending a message ...')
     a.logger.info('Udp_send, sending a message ...')
 
     info = a.agents_info
     pdata = pickle.dumps((title, data))
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-    sock.sendto(pdata, (info[dest_node_id]['IP'], int(info[dest_node_id]['PORT'])))
+    try:
+        sock.sendto(pdata, (info[dest_node_id]['IP'], int(info[dest_node_id]['PORT'])))
+    except OSError:
+        a.logger.error(f"Message too long {msg_structure.get_actual_size(pdata)}")
+        raise
     sock.close()
 
     a.logger.info('Message sent, ' + title + ": " + str(data))
     # print(str(a.id) + ': Message sent, ' + title + ": " + str(data))
 
 
-def tcp_send(a, title, data, ori_node_id, dest_node_id):
+def tcp_send(a: agent, title: str, data, ori_node_id, dest_node_id):
     info = a.agents_info
     # print(dt.now(), str(ori_node_id) + ': tcp_send, sending a message ...')
     a.logger.info(f"{dt.now()} : tcp_send, sending a message ...")
@@ -42,14 +47,18 @@ def tcp_send(a, title, data, ori_node_id, dest_node_id):
     a.logger.info(f"{dt.now()}: Message sent to agent {str(dest_node_id)}, {title}")
 
 
-def udp_send_fec(a, title, data, dest_node_id):
+def udp_send_fec(a: agent, title: str, data, dest_node_id):
     a.logger.info(f"udp_send_fec, sending a message with FEC...")
 
     info = a.agents_info
 
     pdata = RSCoding.serialize(title, data)
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.sendto(pdata, (info[dest_node_id]['IP'], int(info[dest_node_id]['PORT'])))
+    try:
+        sock.sendto(pdata, (info[dest_node_id]['IP'], int(info[dest_node_id]['PORT'])))
+    except OSError:
+        a.logger.error(f"Message too long {msg_structure.get_actual_size(pdata)}")
+        raise
     sock.close()
 
     a.logger.info(f" Message sent, {title} : {str(data)[:100]} ...")
