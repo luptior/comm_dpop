@@ -1,9 +1,8 @@
 #!/bin/bash
-PATH="/usr/local/bin/gdate:$PATH"
 
 #sudo sysctl -w net.inet.udp.maxdgram=65535
-script=/Users/gx/Documents/Research_3/dpop/src/run.py
-datadir=/Users/gx/Documents/Research_3/python_generator/data
+script=/home/era/Projects/dpop/src/run.py
+datadir=/home/era/Projects/python_generator/data
 logdir=./log
 mkdir -p $logdir
 
@@ -29,17 +28,17 @@ for repo in 1; do
           log=$logdir/${name}_${mode}_network${net_speed}_comp${comp_speed}.log
           timestamp >$log &&
             echo "start running ${name} mode ${mode}_network${net_speed}_comp${comp_speed}" &&
-            python $script --input $datadir/${name}.xml >>$log &&
+            python3 $script --input $datadir/${name}.xml >>$log &&
             #             echo "finish running ${name}" &&
             timestamp >>$log &&
-            python src/read_log.py $log
+            python3 src/read_log.py $log
 
           #                 mode=split
           #                 name=random_a${num}_d${dom}_r${repo}
           #                 log=$logdir/${name}_${mode}_network${net_speed}_comp${comp_speed}.log
           #                 timestamp > $log &&
           #                 echo "start running ${name} mode ${mode}_network${net_speed}_comp${comp_speed}" &&
-          #                 python $script --input $datadir/${name}.xml \
+          #                 python3 $script --input $datadir/${name}.xml \
           #                                --network $network \
           #                                --mode $mode \
           #                                --computation ${comp_set} \
@@ -47,14 +46,14 @@ for repo in 1; do
           #                                --net_speed ${net_speed} >> $log &&
           #    #             echo "finish running ${name}" &&
           #                 timestamp >> $log &&
-          #                 python src/read_log.py $log
+          #                 python3 src/read_log.py $log
           #
           #                 mode=pipeline
           #                 name=random_a${num}_d${dom}_r${repo}
           #                 log=$logdir/${name}_${mode}_network${net_speed}_comp${comp_speed}.log
           #                 timestamp > $log &&
           #                 echo "start running ${name} mode ${mode}_network${net_speed}_comp${comp_speed}" &&
-          #                 python $script --input $datadir/${name}.xml \
+          #                 python3 $script --input $datadir/${name}.xml \
           #                                --network $network \
           #                                --mode $mode \
           #                                --computation ${comp_set} \
@@ -62,7 +61,7 @@ for repo in 1; do
           #                                --net_speed ${net_speed} >> $log &&
           #                 echo "finish running ${name}" &&
           #                 timestamp >> $log &&
-          #                 python src/read_log.py $log
+          #                 python3 src/read_log.py $log
         done
       done
     done
