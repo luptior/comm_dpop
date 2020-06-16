@@ -36,15 +36,20 @@ def main(f):
 
     # dict keys are agent id and values are (agent_id, neighbor_id):{(val1, val2):util}
     agent_relations = {}
-    for i in agent_ids:
-        i_relation = {tu: relations[tu] for tu in relations.keys() if i in tu}
-        keys = i_relation.keys()
-        for tu in keys:
-            if i != tu[0]:
-                r_value = {(v_tu[1], v_tu[0]): i_relation[tu][v_tu] for v_tu in i_relation[tu].keys()}
-                del i_relation[tu]
-                i_relation[(tu[1], tu[0])] = r_value
-        agent_relations[i] = i_relation
+
+    for agent_id in agent_ids:
+        # id_pair: (agent_id, neighbor_id), agent_relation: (this_agent_id, neighbor_id):{(val1, val2):util}
+        # select entrys with this agent_id in it
+        agent_relation = {id_pair: relations[id_pair] for id_pair in relations.keys() if agent_id in id_pair}
+        agent_relation2 = {} # updated with this agent_id always at (*, other )
+        id_pairs = agent_relation.keys()
+        for id_pair in id_pairs:
+            if agent_id != id_pair[0]:
+                r_value = {(v_tu[1], v_tu[0]): agent_relation[id_pair][v_tu] for v_tu in agent_relation[id_pair].keys()}
+                agent_relation2[(id_pair[1], id_pair[0])] = r_value
+            else:
+                agent_relation2[id_pair] = agent_relation[id_pair]
+        agent_relations[agent_id] = agent_relation2
 
     with open("sim_jbs.tmp", "w") as f:
         f.write("id=42 root_id=" + str(root_id) + "\n\n")
