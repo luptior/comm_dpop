@@ -6,10 +6,10 @@ basedir=$(pwd -L)
 popd > /dev/null
 
 #sudo sysctl -w net.inet.udp.maxdgram=65535
-script=${basedir}/dpop/src/run.py
-datadir=${basedir}/python_generator/data
-configure=${basedir}/dpop/configure
-logdir=${basedir}/dpop/log
+script=${basedir}/src/run.py
+datadir=${basedir}/../python_generator/data
+configure=${basedir}/configure
+logdir=${basedir}/log
 mkdir -p $logdir
 
 
