@@ -1,10 +1,15 @@
 #!/bin/bash
 
+# read this script path
+pushd $(dirname "${0}") > /dev/null
+basedir=$(pwd -L)
+popd > /dev/null
+
 #sudo sysctl -w net.inet.udp.maxdgram=65535
-script=/Users/gx/Documents/Research_3/dpop/src/run.py
-datadir=/Users/gx/Documents/Research_3/python_generator/data
-configure=/Users/gx/Documents/Research_3/dpop/configure
-logdir=./log
+script=${basedir}/dpop/src/run.py
+datadir=${basedir}/python_generator/data
+configure=${basedir}/dpop/configure
+logdir=${basedir}/dpop/log
 mkdir -p $logdir
 
 
