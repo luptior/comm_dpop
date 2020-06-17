@@ -16,5 +16,5 @@ test.sh
 read_summary.py
 csv2latex.py
 device_connectiontable.csv
-properties.yaml
+configure/properties.yaml
 src/test.py
