@@ -87,9 +87,28 @@ def listen_func(msgs, unprocessed_util, sock, agent):
         if network_protocol == "UDP":
             data, addr = sock.recvfrom(65536)
             udata = pickle.loads(data)  # Unpickled data
+
+            if agent.network_customization:
+                size = msg_structure.get_actual_size(data)
+                sleep(tran_time(agent, size))
         elif network_protocol == "UDP_FEC":
             data, addr = sock.recvfrom(65535)
+            n = len(data)
+            s = 10 # should bee changed to variable
+            ber = 10**-6
             udata = RSCoding.deserialize(data)
+
+            if True: # where there is error happen
+                size = msg_structure.get_actual_size(data)
+                waste_time = tcp_rtt(agent, size)
+                print("there is an error " + str(waste_time))
+                if sum(np.random.random(size=n) <= ber) > s:
+                    sleep(waste_time)
+
+            if agent.network_customization:
+                size = msg_structure.get_actual_size(data)
+                sleep(tran_time(agent, size))
+
         elif network_protocol == "TCP":
             connectionSocket, addr = sock.accept()
 
@@ -102,14 +121,14 @@ def listen_func(msgs, unprocessed_util, sock, agent):
             data = b''.join(total_data)
 
             if agent.network_customization:
-                size = sys.getsizeof(data)
+                size = msg_structure.get_actual_size(data)
                 sleep(tran_time(agent, size))
 
             if True: # where there is error happen
-                size = sys.getsizeof(data)
+                size = msg_structure.get_actual_size(data)
                 waste_time = tcp_rtt(agent, size)
                 print("there is an error " + str(waste_time))
-                if np.random.random() <= 1/1100:
+                if np.random.random() <= 1/110:
                     sleep(waste_time)
 
             udata = pickle.loads(data)  # Unpickled data
