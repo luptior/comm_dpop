@@ -355,6 +355,7 @@ def util_msg_handler_split(agent):
         while True:
             all_children_msgs_arrived = True
             if sum([len(x) for x in new_array.values()]) < len(new_array):
+                agent.logger.info(f"{sum([len(x) for x in new_array.values()])} is < {len(new_array)}")
                 all_children_msgs_arrived = False
                 if len(agent.unprocessed_util) > 0:
                     # actually do the processing
@@ -438,8 +439,17 @@ def util_msg_handler_split(agent):
         agent.send('pre_util_msg_' + str(agent.id), ant_to_send, agent.p)
 
         sliced_msgs = msg_structure.slice_to_list(agent, msg_to_send)
-        for sliced_msg in sliced_msgs:
-            agent.send('util_msg_' + str(agent.id), sliced_msg, agent.p)
+        # if len(sliced_msgs) > 150 and "UDP" in agent.network_protocol :
+        if False:
+            for sliced_msg in sliced_msgs[:100]:
+                agent.send('util_msg_' + str(agent.id), sliced_msg, agent.p)
+                sleep(0.05)
+            for sliced_msg in sliced_msgs[150:]:
+                agent.send('util_msg_' + str(agent.id), sliced_msg, agent.p)
+                sleep(0.15)
+        else:
+            for sliced_msg in sliced_msgs:
+                agent.send('util_msg_' + str(agent.id), sliced_msg, agent.p)
 
 
 def util_msg_prop_split(agent):
@@ -913,14 +923,6 @@ def util_msg_handler_split_pipeline(agent):
         trans = tuple([tmp_ant.index(x) for x in combine_ant])
         combine_w_util_cube = np.transpose(combine_w_util_cube, trans)
 
-        # print("combine_w_util_cube", np.sum(combine_w_util_cube))
-        # print("trans", trans)
-        # print("diff", diff)
-        # print("amax",amax)
-        # print("amin",amin)
-        # print("msg_tosend", msg_tosend, "\n")
-        # print(processed_keys)
-
         util_w_msg_cube = np.copy(combine_w_util_cube)
         # print("combine_w_util_cube", combine_w_util_cube)
         """
@@ -1185,7 +1187,7 @@ def util_msg_prop_split_pipeline(agent):
     for pipeline, the current naive implementation is do optimization at leaf then send them all
 
     """
-    print(dt.now(), str(agent.id) + ': Begin util_msg_prop_split_pipeline')
+    agent.logger.info(f"{dt.now()} {str(agent.id)} : Begin util_msg_prop_split_pipeline")
 
     if agent.is_leaf():
         # if agents is leaf, just send the utility messages needed
@@ -1209,4 +1211,4 @@ def util_msg_prop_split_pipeline(agent):
     else:
         util_msg_handler_split_pipeline(agent)
 
-    print(dt.now(), str(agent.id) + ': End util_msg_prop_split')
+    agent.logger.info(f"{dt.now()} {str(agent.id)} : End util_msg_prop_split")
