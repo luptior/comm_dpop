@@ -29,6 +29,9 @@ def tran_time(agent, size):
     # return 0.1 + size / 100 , return unit in s
     return size / throughput(agent, Q, RTT, MAX_SEG)
 
+def tcp_rtt(agent, size):
+    return size / agent.net_speed * 2
+
 
 def loss(s):
     # return a loss rate based on size
