@@ -69,3 +69,13 @@ def proactive(size):
                 sleep(5)
             else:
                 sleep(tran_time(last))
+
+
+def tcp_time_ber(ber: float, bitlength: int) -> float:
+    # to simulate the time spent for tcp with a certain percentage of ber
+    # The TCP checksum is two bytes long
+    # Traces of Internet packets from the past two years show that between 1 packet in 1,100 and 1 packet in 32,000 fails the TCP checksum
+    if float(ber) == 0:
+        return 0
+    else:
+        return 0
