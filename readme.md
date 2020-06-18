@@ -1,6 +1,12 @@
 # DPOP
 ![PyPI - Python Version](https://img.shields.io/badge/python-≥3-blue.svg)
 
+##Dependency
+```yaml
+pip install numpy
+pip install pandas
+pip install 
+```
 
 ## Running the program
 ```sh
