@@ -106,10 +106,11 @@ def listen_func(msgs, unprocessed_util, sock, agent):
                 sleep(tran_time(agent, size))
 
             if True: # where there is error happen
-                logger
+                size = sys.getsizeof(data)
+                waste_time = tcp_rtt(agent, size)
+                print("there is an error " + str(waste_time))
                 if np.random.random() <= 1/1100:
-                    size = sys.getsizeof(data)
-                    sleep(tran_time(agent, size))
+                    sleep(waste_time)
 
             udata = pickle.loads(data)  # Unpickled data
 
