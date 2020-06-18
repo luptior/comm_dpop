@@ -12,7 +12,7 @@ import msg_structure
 
 
 def udp_send(a: agent, title, data, dest_node_id):
-    # print(str(a.id) + ': udp_send, sending a message ...')
+
     a.logger.info('Udp_send, sending a message ...')
 
     info = a.agents_info
@@ -26,12 +26,10 @@ def udp_send(a: agent, title, data, dest_node_id):
     sock.close()
 
     a.logger.info('Message sent, ' + title + ": " + str(data))
-    # print(str(a.id) + ': Message sent, ' + title + ": " + str(data))
 
 
 def tcp_send(a: agent, title: str, data, ori_node_id, dest_node_id):
     info = a.agents_info
-    # print(dt.now(), str(ori_node_id) + ': tcp_send, sending a message ...')
     a.logger.info(f"{dt.now()} : tcp_send, sending a message ...")
 
     # TCP
@@ -42,8 +40,6 @@ def tcp_send(a: agent, title: str, data, ori_node_id, dest_node_id):
     sock.send(pdata)
     sock.close()
 
-    # print(str(ori_node_id) + ': Message sent to agent ' + str(dest_node_id) + ', ' + title + ": " + str(data))
-    # print(dt.now(), str(ori_node_id) + ': Message sent to agent ' + str(dest_node_id) + ', ' + title)
     a.logger.info(f"{dt.now()}: Message sent to agent {str(dest_node_id)}, {title}")
 
 
