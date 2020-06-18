@@ -92,7 +92,7 @@ def listen_func(msgs, unprocessed_util, sock, agent):
             data, addr = sock.recvfrom(65536)
             udata = pickle.loads(data)  # Unpickled data
         elif network_protocol == "UDP_FEC":
-            data, addr = sock.recvfrom(786896)
+            data, addr = sock.recvfrom(65535)
             udata = RSCoding.deserialize(data)
         elif network_protocol == "TCP":
             connectionSocket, addr = sock.accept()
@@ -108,6 +108,12 @@ def listen_func(msgs, unprocessed_util, sock, agent):
             if agent.network_customization:
                 size = sys.getsizeof(data)
                 sleep(tran_time(agent, size))
+
+            if True: # where there is error happen
+                logger
+                if np.random.random() <= 1/1100:
+                    size = sys.getsizeof(data)
+                    sleep(tran_time(agent, size))
 
             udata = pickle.loads(data)  # Unpickled data
 
