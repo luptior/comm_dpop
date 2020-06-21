@@ -3,6 +3,7 @@ import pickle
 import sys
 from datetime import datetime as dt
 
+import network
 from network import *
 
 import RSCoding
@@ -68,6 +69,8 @@ def listen_func(msgs, unprocessed_util, sock, agent):
     Used in pseudotree_creation
     """
 
+    ber = 10 ** -4
+
     if agent is None:
         agent_id = 'No agent'
     else:
@@ -93,17 +96,14 @@ def listen_func(msgs, unprocessed_util, sock, agent):
                 sleep(tran_time(agent, size))
         elif network_protocol == "UDP_FEC":
             data, addr = sock.recvfrom(65535)
-            n = len(data)
+            n = size = msg_structure.get_actual_size(data)
             s = 10 # should bee changed to variable
-            ber = 10**-6
             udata = RSCoding.deserialize(data)
 
-            if True: # where there is error happen
+            if np.random.random() <= network.rs_rej_prop(size, s, ber): # where there is error happen
+                print("there is an error sleep" + str(2*tran_time(agent, size)))
                 size = msg_structure.get_actual_size(data)
-                waste_time = tcp_rtt(agent, size)
-                print("there is an error " + str(waste_time))
-                if sum(np.random.random(size=n) <= ber) > s:
-                    sleep(waste_time)
+                sleep(2*tran_time(agent, size))
 
             if agent.network_customization:
                 size = msg_structure.get_actual_size(data)
@@ -120,16 +120,14 @@ def listen_func(msgs, unprocessed_util, sock, agent):
                 total_data.append(data)
             data = b''.join(total_data)
 
+            size = msg_structure.get_actual_size(data)
+
             if agent.network_customization:
-                size = msg_structure.get_actual_size(data)
                 sleep(tran_time(agent, size))
 
-            if True: # where there is error happen
-                size = msg_structure.get_actual_size(data)
-                waste_time = tcp_rtt(agent, size)
-                print("there is an error " + str(waste_time))
-                if np.random.random() <= 1/110:
-                    sleep(waste_time)
+            if np.random.random() <= 1-np.power(1-ber, msg_structure.get_actual_size(data)): # where there is error happen
+                sleep(2*tran_time(agent, size))
+                print("there is an error , delay" + str(2*tran_time(agent, size)))
 
             udata = pickle.loads(data)  # Unpickled data
 
