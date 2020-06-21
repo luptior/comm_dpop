@@ -11,6 +11,8 @@ every additional dimension is 16 byte
 """
 
 import numpy as np
+from numpy import double
+from scipy.special import comb, perm
 from time import sleep
 
 # some constants for network communication
@@ -82,3 +84,19 @@ def tcp_time_ber(ber: float, bitlength: int) -> float:
         return 0
     else:
         return 0
+
+
+def rs_rej_prop(msg_len:int, rs_k: int, ber: float) -> float:
+    # calculate the possibility that a rs coded string to be unrecoverable
+    # msg_len:int, the length of the total message length(original info + RS overhead
+    # rs_k: int, the k vaalue of RS code
+    # ber: float, bit error rate
+    result = sum([comb(msg_len, k) * ber ** k * (1 - ber) ** (msg_len - k) for k in range(0, rs_k+1)])
+    if result > 1 :
+        return 0
+    else:
+        return 1-result
+
+
+def checksum_rej_prop(msg_len:int,  ber: float) -> float:
+    return 1-(1-ber)**msg_len
