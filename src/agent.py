@@ -31,14 +31,14 @@ logger.addHandler(handler)
 
 class Agent:
 
-    def __init__(self, i, domain, relations, agents_file):
+    def __init__(self, i, domain, relations, network_properties):
 
         """
         Constructor method
         :param i: agent id
         :param domain: agent domain, a list of values
         :param relations: A dict of functions, for each edge in the graph
-        :param agents_file:
+        :param network_properties:
         """
 
         # Use utils.get_agents_info to initialize all the agents.
@@ -47,7 +47,7 @@ class Agent:
         # You can access a value as:
         # agent.agents_info[<agent_id>]['field_required']
         # Some miscellaneous information will be stored with id=42.
-        self.agents_info = utility.get_agents_info(agents_file)
+        self.agents_info = utility.get_agents_info(network_properties)
         info = self.agents_info
 
         self.value = -1  # The value that will be selected for this agent
@@ -171,8 +171,8 @@ class Agent:
 
 
 class PipelineAgent(Agent):
-    def __init__(self, i, domain, relations, agents_file):
-        Agent.__init__(self, i, domain, relations, agents_file)
+    def __init__(self, i, domain, relations, network_properties):
+        Agent.__init__(self, i, domain, relations, network_properties)
         self.split_processing = True
 
     def start(self):
@@ -194,8 +194,8 @@ class PipelineAgent(Agent):
 
 
 class SplitAgent(Agent):
-    def __init__(self, i, domain, relations, agents_file):
-        Agent.__init__(self, i, domain, relations, agents_file)
+    def __init__(self, i, domain, relations, network_properties):
+        Agent.__init__(self, i, domain, relations, network_properties)
         self.split_processing = True
 
     def start(self):
@@ -217,8 +217,8 @@ class SplitAgent(Agent):
 
 
 class ListAgent(Agent):
-    def __init__(self, i, domain, relations, agents_file):
-        Agent.__init__(self, i, domain, relations, agents_file)
+    def __init__(self, i, domain, relations, network_properties):
+        Agent.__init__(self, i, domain, relations, network_properties)
 
     def start(self):
         """
