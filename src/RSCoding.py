@@ -1,3 +1,5 @@
+"""This module contains utility functions that supports Reed Solomon Coding."""
+
 import logging
 
 from reedsolo import RSCodec, ReedSolomonError
