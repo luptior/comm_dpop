@@ -14,6 +14,16 @@ import numpy as np
 from numpy import double
 from scipy.special import comb, perm
 from time import sleep
+import socket
+from contextlib import closing
+
+
+# a function to find free port on local host
+def find_free_port():
+    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
+        s.bind(('localhost', 0))
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        return s.getsockname()[1]
 
 # some constants for network communication
 
