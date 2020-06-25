@@ -11,6 +11,7 @@ import numpy as np
 import argparse
 import sys
 import logging
+import pickle
 
 # Package
 import agent
@@ -51,16 +52,15 @@ def main(f):
                 agent_relation2[id_pair] = agent_relation[id_pair]
         agent_relations[agent_id] = agent_relation2
 
-    with open("sim_jbs.tmp", "w") as f:
-        f.write("id=42 root_id=" + str(root_id) + "\n\n")
-        id = np.random.randint(1000)
-        for u in agent_ids:
-            f.write("id=" + str(u) + " ")
-            f.write("IP=127.0.0.1" + " ")
-            f.write("PORT=" + str(5000 + id + u) + " ")
-            if u == root_id:
-                f.write("is_root=True" + " ")
-            f.write("\n\n")
+    # {42: {'root_id': '2'}, 0: {'IP': '127.0.0.1', 'PORT': '5446'}, 1: {'IP': '127.0.0.1', 'PORT': '5447'},
+    #  2: {'IP': '127.0.0.1', 'PORT': '5448', 'is_root': 'True'}, 3: {'IP': '127.0.0.1', 'PORT': '5449'},
+    #  4: {'IP': '127.0.0.1', 'PORT': '5450'}}
+
+    agents_info = {"root": {'root_id': root_id}}
+    for id in agent_ids:
+        agents_info[id] = {'IP': '127.0.0.1', 'PORT': network.find_free_port()}
+    agents_info[root_id]['is_root']=True
+
 
     properties = prop.load_properties("properties.yaml")
     mode = properties["agent_mode"]
