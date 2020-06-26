@@ -31,7 +31,7 @@ logger.addHandler(handler)
 
 class Agent:
 
-    def __init__(self, i, domain, relations, network_properties):
+    def __init__(self, i, domain, relations: dict, network_properties: dict):
 
         """
         Constructor method
@@ -46,8 +46,8 @@ class Agent:
         # Also, the domains of some agents will be added to this dict later on.
         # You can access a value as:
         # agent.agents_info[<agent_id>]['field_required']
-        # Some miscellaneous information will be stored with id=42.
-        self.agents_info = utility.get_agents_info(network_properties)
+        # Some miscellaneous information will be stored with id='root'.
+        self.agents_info = network_properties
         info = self.agents_info
 
         self.value = -1  # The value that will be selected for this agent
@@ -65,8 +65,8 @@ class Agent:
 
         self.table = None  # The table that will be stored
         self.table_ant = None  # The ANT of the table that will be stored, assignment-nodeid-tuples 'ants'.
-        self.is_root = False if 'is_root' not in info[self.i] else eval(info[self.i]['is_root'])
-        self.root_id = eval(info[42]['root_id'])
+        self.is_root = False if 'is_root' not in info[self.i] else info[self.i]['is_root']
+        self.root_id = int(info['root']['root_id'])
 
         self.msgs = {}  # The dict where all the received messages are stored
 
@@ -84,17 +84,16 @@ class Agent:
         self.split_processing = False
 
         self.IP = info[self.id]['IP']
-        self.PORT = eval(info[self.id]['PORT'])  # Listening Port
+        self.PORT = int(info[self.id]['PORT'])  # Listening Port
 
         # logger initialize
         self.logger = logging.getLogger(f"Agent_{self.i}")
-        self.logger.info(f" is initialized")
+        self.logger.info(f" is initialized IP: {self.IP} Port: {self.PORT}")
 
     def get_graph_nodes(self):
-        info = self.agents_info
         graph_nodes = []
-        for key in info:
-            if key != 42 and key != self.id:
+        for key in self.agents_info:
+            if key != 'root' and key != self.id:
                 graph_nodes.append(key)
         return graph_nodes
 

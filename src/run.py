@@ -52,7 +52,7 @@ def main(f):
                 agent_relation2[id_pair] = agent_relation[id_pair]
         agent_relations[agent_id] = agent_relation2
 
-    # {42: {'root_id': '2'}, 0: {'IP': '127.0.0.1', 'PORT': '5446'}, 1: {'IP': '127.0.0.1', 'PORT': '5447'},
+    # {'root': {'root_id': '2'}, 0: {'IP': '127.0.0.1', 'PORT': '5446'}, 1: {'IP': '127.0.0.1', 'PORT': '5447'},
     #  2: {'IP': '127.0.0.1', 'PORT': '5448', 'is_root': 'True'}, 3: {'IP': '127.0.0.1', 'PORT': '5449'},
     #  4: {'IP': '127.0.0.1', 'PORT': '5450'}}
 
@@ -67,13 +67,13 @@ def main(f):
 
 
     if mode == "default":
-        agents = [agent.Agent(i, d, agent_relations[i], "sim_jbs.tmp") for i in agent_ids]
+        agents = [agent.Agent(i, d, agent_relations[i], agents_info) for i in agent_ids]
     elif mode == "list":
-        agents = [agent.ListAgent(i, d, agent_relations[i], "sim_jbs.tmp") for i in agent_ids]
+        agents = [agent.ListAgent(i, d, agent_relations[i], agents_info) for i in agent_ids]
     elif mode == "split":
-        agents = [agent.SplitAgent(i, d, agent_relations[i], "sim_jbs.tmp") for i in agent_ids]
+        agents = [agent.SplitAgent(i, d, agent_relations[i], agents_info) for i in agent_ids]
     elif mode == "pipeline":
-        agents = [agent.PipelineAgent(i, d, agent_relations[i], "sim_jbs.tmp") for i in agent_ids]
+        agents = [agent.PipelineAgent(i, d, agent_relations[i], agents_info) for i in agent_ids]
     else:
         raise ModeError(mode)
 
