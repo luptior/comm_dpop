@@ -1,7 +1,6 @@
 import socket
 import pickle
 import sys
-from datetime import datetime as dt
 
 import network
 from network import *
@@ -31,7 +30,7 @@ def udp_send(a: agent, title, data, dest_node_id):
 
 def tcp_send(a: agent, title: str, data, ori_node_id, dest_node_id):
     info = a.agents_info
-    a.logger.info(f"{dt.now()} : tcp_send, sending a message ...")
+    a.logger.info(f"tcp_send, sending a message ...")
 
     # TCP
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -41,7 +40,7 @@ def tcp_send(a: agent, title: str, data, ori_node_id, dest_node_id):
     sock.send(pdata)
     sock.close()
 
-    a.logger.info(f"{dt.now()}: Message sent to agent {str(dest_node_id)}, {title}")
+    a.logger.info(f"Message sent to agent {str(dest_node_id)}, {title}")
 
 
 def udp_send_fec(a: agent, title: str, data, dest_node_id):
@@ -56,6 +55,7 @@ def udp_send_fec(a: agent, title: str, data, dest_node_id):
     except OSError:
         a.logger.error(f"Message too long {msg_structure.get_actual_size(pdata)}")
         raise
+
     sock.close()
 
     a.logger.info(f" Message sent, {title} : {str(data)[:100]} ...")
@@ -76,7 +76,7 @@ def listen_func(msgs, unprocessed_util, sock, agent):
     else:
         agent_id = agent.id
 
-    agent.logger.info(f"{dt.now()}  Begin listen_func")
+    agent.logger.info(f"Begin listen_func")
 
     properties = prop.load_properties("properties.yaml")
     network_protocol = properties["network_protocol"]
@@ -140,11 +140,11 @@ def listen_func(msgs, unprocessed_util, sock, agent):
 
         # just some record printing
         if len(str(udata[1])) < 100:
-            agent.logger.info(f"{dt.now()} : Msg received, size is {str(sys.getsizeof(data)) } bytes\n {udata[0]} : {str(udata[1])}")
+            agent.logger.info(f"Msg received, size is {str(sys.getsizeof(data)) } bytes\n {udata[0]} : {str(udata[1])}")
         else:
-            agent.logger.info(f"{dt.now()} : Msg received, size is {str(sys.getsizeof(data)) } bytes\n {udata[0]} : {str(udata[1])[:100]} ...")
+            agent.logger.info(f"Msg received, size is {str(sys.getsizeof(data)) } bytes\n {udata[0]} : {str(udata[1])[:100]} ...")
 
         # exit only when exit is received
         if str(udata[1]) == "exit":
-            agent.logger.info(f"{dt.now()} : End listen_func")
+            agent.logger.info(f"End listen_func")
             return
