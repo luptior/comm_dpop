@@ -20,14 +20,6 @@ from reedsolo import RSCodec
 import RSCoding
 import properties as prop
 
-logger = logging.getLogger("AGENT")
-logger.setLevel(level=logging.INFO)
-handler = logging.FileHandler("log.txt")
-handler.setLevel(logging.INFO)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-
 
 class Agent:
 
@@ -87,7 +79,22 @@ class Agent:
         self.PORT = int(info[self.id]['PORT'])  # Listening Port
 
         # logger initialize
-        self.logger = logging.getLogger(f"Agent_{self.i}")
+        self.logger = logging.getLogger(f"Agent.{self.i}")
+        self.logger.setLevel(level=logging.DEBUG)
+        # create file handler which logs even debug messages
+        fh = logging.FileHandler(properties["log_file"])
+        fh.setLevel(logging.INFO)
+        # create console handler with a higher log level
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.ERROR)
+        # create formatter and add it to the handlers
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        fh.setFormatter(formatter)
+        ch.setFormatter(formatter)
+
+        self.logger.addHandler(fh)
+        self.logger.addHandler(ch)
+
         self.logger.info(f" is initialized IP: {self.IP} Port: {self.PORT}")
 
     def get_graph_nodes(self):
