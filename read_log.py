@@ -14,7 +14,7 @@ comp_speed=100
 dir="data"
 
 domain_range=[5, 10, 20, 30, 40, 50]
-repo_range=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+repo_range=range(1,11)
 frames = {}
 
 for network_protocol in ["TCP", "UDP_FEC"]:
