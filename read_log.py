@@ -5,20 +5,20 @@ df = pd.DataFrame(columns=[1,2,3,4,5,6,7,8,9,10])
 
 
 num_agent = 5
-agent_type="split"
+agent_type="list"
 network_customization=True
 network_speed=10
 comp_customization=False
 comp_speed=100
 
-dir="data"
+dir="log"
 
-domain_range=[5, 10, 20, 30, 40, 50]
-repo_range=range(1,11)
+# domain_range=[5, 10, 20, 30, 40, 50]
+domain_range=[5]
+repo_range=range(1,2)
 frames = {}
 
-for network_protocol in ["TCP", "UDP_FEC"]:
-    # for domain_size in [5, 10, 20, 30, 40, 50]:
+for network_protocol in ["TCP"]:
     frames[network_protocol] = pd.DataFrame(columns=domain_range)
     for domain_size in domain_range:
         # for repo_id in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]:
@@ -29,8 +29,11 @@ for network_protocol in ["TCP", "UDP_FEC"]:
                 with open(f, "r") as log:
                     lines = log.readlines()
                     if len(lines) > 2:
-                        read_list.append(int(lines[-1].strip()))
+                        # read_list.append(int(lines[-1].strip()))
+                        # print(lines[-1])
+                        read_list.append(float(lines[-1].split(" ")[1]))
             except FileNotFoundError:
+                continue
                 print(f"FileNotFoundError: {f}")
         # print(read_list)
         average = np.average(read_list)
