@@ -12,6 +12,7 @@ import argparse
 import sys
 import logging
 import pickle
+import time
 
 # Package
 import agent
@@ -106,6 +107,7 @@ def get_relatives(num_agents, constrains) -> dict:
 
 if __name__ == '__main__':
 
+    start_time = time.time()
     logger = logging.getLogger("MAIN")
     logger.setLevel(level=logging.INFO)
     handler = logging.FileHandler("log.txt")
@@ -121,6 +123,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     main(f=args.input)
+
+    print(f"--- {(time.time() - start_time)} seconds ---")
 
 
 class ModeError(Exception):
