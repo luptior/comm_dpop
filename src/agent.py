@@ -7,8 +7,6 @@ PipelineAgent: do optimization at root and pipeline at non-leaf nodes
 
 """
 
-from datetime import datetime as dt
-
 import pseudotree_creation
 import util_msg_prop
 import value_msg_prop
@@ -137,7 +135,7 @@ class Agent:
         """
         determine if it is a lead node
         """
-        assert self.c is not None, logger.error('self.c not yet initialized.')
+        assert self.c is not None, self.logger.error(f'{self.c} not yet initialized.')
 
         if not self.c:
             return True
@@ -149,7 +147,7 @@ class Agent:
         begin the processing
         """
 
-        self.logger.info(f"{dt.now()} {str(self.id)}: Started")
+        self.logger.info(f"Started")
 
         pseudotree_creation.pseudotree_creation(self)
         self.logger.info(f"Split processing is {self.split_processing}, computation speed is {self.comp_speed} \n "
@@ -159,7 +157,7 @@ class Agent:
 
         if not self.is_root:
             value_msg_prop.value_msg_prop(self)
-        self.logger.info(f"{dt.now()} {str(self.id)}: Finished")
+        self.logger.info(f"Finished")
 
     def send(self, title, data, dest_node_id):
         """
@@ -186,7 +184,7 @@ class PipelineAgent(Agent):
         begin the processing
         """
 
-        self.logger.info(f"{dt.now()} {str(self.id)}: Started")
+        self.logger.info(f" Started")
 
         pseudotree_creation.pseudotree_creation(self)
         self.logger.info(f"Split processing is {self.split_processing}, computation speed is {self.comp_speed} \n "
@@ -196,7 +194,7 @@ class PipelineAgent(Agent):
 
         if not self.is_root:
             value_msg_prop.value_msg_prop(self)
-        self.logger.info(f"{dt.now()} {str(self.id)}: Finished")
+        self.logger.info(f" Finished")
 
 
 class SplitAgent(Agent):
@@ -209,7 +207,7 @@ class SplitAgent(Agent):
         begin the processing
         """
 
-        self.logger.info(f"{dt.now()} {str(self.id)}: Started")
+        self.logger.info(f"Started")
 
         pseudotree_creation.pseudotree_creation(self)
         self.logger.info(f"Split processing is {self.split_processing}, computation speed is {self.comp_speed} \n "
@@ -219,7 +217,7 @@ class SplitAgent(Agent):
 
         if not self.is_root:
             value_msg_prop.value_msg_prop(self)
-        self.logger.info(f"{dt.now()} {str(self.id)}: Finished")
+        self.logger.info(f"Finished")
 
 
 class ListAgent(Agent):
@@ -231,7 +229,7 @@ class ListAgent(Agent):
         begin the processing
         """
 
-        self.logger.info(f"{dt.now()} {str(self.id)}: Started")
+        self.logger.info(f"Started")
 
         pseudotree_creation.pseudotree_creation(self)
         self.logger.info(f"Split processing is {self.split_processing}, computation speed is {self.comp_speed} \n "
@@ -241,4 +239,4 @@ class ListAgent(Agent):
 
         if not self.is_root:
             value_msg_prop.value_msg_prop(self)
-        self.logger.info(f"{dt.now()} {str(self.id)}: Finished")
+        self.logger.info(f"Finished")

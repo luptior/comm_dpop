@@ -9,7 +9,6 @@ import itertools
 import sys
 import logging
 from time import sleep
-from datetime import datetime as dt
 
 import agent
 import utility
@@ -235,7 +234,7 @@ def util_msg_handler(agent: agent):
 
 
 def util_msg_prop(agent:agent):
-    agent.logger.info(f"{dt.now()} {str(agent.id)} : Begin util_msg_prop")
+    agent.logger.info(f"Begin util_msg_prop")
 
     if agent.is_leaf():
         # if agents is leaf, just send the utility messages needed
@@ -253,7 +252,7 @@ def util_msg_prop(agent:agent):
     else:
         util_msg_handler(agent)
 
-    agent.logger.info(f"{dt.now()} {str(agent.id)} : End util_msg_prop")
+    agent.logger.info(f"End util_msg_prop")
 
 
 def util_msg_handler_split(agent):
@@ -453,7 +452,7 @@ def util_msg_handler_split(agent):
 
 
 def util_msg_prop_split(agent):
-    agent.logger.info(f"{dt.now()} {str(agent.id)} : Begin util_msg_prop_split")
+    agent.logger.info(f"Begin util_msg_prop_split")
 
     if agent.is_leaf():
         # if agents is leaf, just send the utility messages needed
@@ -474,7 +473,7 @@ def util_msg_prop_split(agent):
     else:
         util_msg_handler_split(agent)
 
-    agent.logger.info(f"{dt.now()} {str(agent.id)} :End util_msg_prop_split")
+    agent.logger.info(f"End util_msg_prop_split")
 
 
 def util_msg_handler_list(agent):
@@ -492,7 +491,7 @@ def util_msg_handler_list(agent):
         if all_children_pre_msgs_arrived:
             break
 
-    agent.logger.info(f"{dt.now()} {str(agent.id)} : Start processing util message ALL")
+    agent.logger.info(f"Start processing util message ALL")
 
     pre_msgs = [agent.msgs['pre_util_msg_' + str(child)] for child in sorted(agent.c)]
     merged_ant = utility.merge_ant(pre_msgs)  # the combined set of nodeids for the table sent from two children
@@ -523,7 +522,7 @@ def util_msg_handler_list(agent):
                     msg = agent.unprocessed_util.pop(0)  # a piece of info
                     title = msg[0]
 
-                    agent.logger.info(f"{dt.now()} {str(agent.id)} : start processing {title}")
+                    agent.logger.info(f"Start processing {title}")
                     # is a dict of format {(indices) : util}
 
                     if agent.slow_processing:
@@ -587,7 +586,7 @@ def util_msg_handler_list(agent):
 
                     title = msg[0]
 
-                    agent.logger.info(f"{dt.now()} :  start processing {title}")
+                    agent.logger.info(f"Start processing {title}")
 
                     if agent.slow_processing:
                         slow_process(agent, msg)  # slow down processing
@@ -606,7 +605,7 @@ def util_msg_handler_list(agent):
 
     combined_msg = np.zeros([len(x) for x in l_domains])
 
-    agent.logger.info(f"{dt.now()} :  finish processing util message")
+    agent.logger.info(f"Finish processing util message")
 
     for k, v in new_array.items():
         combined_msg[k] = sum(v)
@@ -670,7 +669,7 @@ def util_msg_handler_list(agent):
 
 
 def util_msg_prop_list(agent):
-    agent.logger.info(f"{dt.now()} : Begin util_msg_prop_split_original")
+    agent.logger.info(f"Begin util_msg_prop_split_original")
 
     if agent.is_leaf():
         # if agents is leaf, just send the utility messages needed
@@ -691,7 +690,7 @@ def util_msg_prop_list(agent):
     else:
         util_msg_handler_list(agent)
 
-    agent.logger.info(f"{dt.now()} : End util_msg_prop_split")
+    agent.logger.info(f"End util_msg_prop_split")
 
 
 def util_msg_handler_split_pipeline_root(agent):
@@ -1177,7 +1176,7 @@ def util_msg_prop_split_pipeline(agent):
     for pipeline, the current naive implementation is do optimization at leaf then send them all
 
     """
-    agent.logger.info(f"{dt.now()} {str(agent.id)} : Begin util_msg_prop_split_pipeline")
+    agent.logger.info(f"Begin util_msg_prop_split_pipeline")
 
     if agent.is_leaf():
         # if agents is leaf, just send the utility messages needed
@@ -1201,4 +1200,4 @@ def util_msg_prop_split_pipeline(agent):
     else:
         util_msg_handler_split_pipeline(agent)
 
-    agent.logger.info(f"{dt.now()} {str(agent.id)} : End util_msg_prop_split")
+    agent.logger.info(f"End util_msg_prop_split")

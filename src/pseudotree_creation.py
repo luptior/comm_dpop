@@ -6,7 +6,6 @@ creation.
 import threading
 import socket
 import time
-from datetime import datetime as dt
 
 import utility
 import pseudotree
@@ -63,7 +62,7 @@ def tell_relative(node_id, agent, graph, parents, pstree, depths):
 
 
 def pseudotree_creation(agent):
-    agent.logger.info(f"{dt.now()} {str(agent.id)}: Begin pseudotree_creation")
+    agent.logger.info(f"Begin pseudotree_creation")
     # The dict where all the messages are stored
     msgs = agent.msgs
     unprocessed_util = agent.unprocessed_util
@@ -91,9 +90,7 @@ def pseudotree_creation(agent):
     listen.start()
 
     # Wait before all agents have started listening
-    print(dt.now(), str(agent.id) + ': Waiting ...')
     time.sleep(2)
-    print(dt.now(), str(agent.id) + ': Continuing')
 
     if agent.is_root:
         # Wait till the each agent sends its neighbors' list.
@@ -173,5 +170,4 @@ def pseudotree_creation(agent):
         for parent in [agent.p] + agent.pp:
             info[parent]['domain'] = msgs['domain_' + str(parent)]
 
-    agent.logger.info(f"{dt.now()} : End pseudotree_creation")
-    # print(dt.now(), str(agent.id) + ': Begin pseudotree_creation')
+    agent.logger.info(f"End pseudotree_creation")
