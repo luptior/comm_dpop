@@ -1,6 +1,9 @@
 """
-script parsing simulated XML file for DCOP
+A script parsing simulated files for DCOP running
 
+A generator https://github.com/luptior/dcop_generator
+
+@auther gan.xu
 """
 
 import re

@@ -16,7 +16,7 @@ import time
 
 # Package
 import agent
-import dpop_parser
+import parser
 import network
 import optimization
 
@@ -24,9 +24,9 @@ import properties as prop
 
 def main(f):
     if f.split(".")[-1] == "xml":
-        agents, domains, variables, relations, constraints = dpop_parser.xml_parse(f)
+        agents, domains, variables, relations, constraints = parser.xml_parse(f)
     else:
-        agents, domains, variables, relations, constraints = dpop_parser.parse(f)
+        agents, domains, variables, relations, constraints = parser.parse(f)
 
     agent_ids = list(range(len(agents)))
     root_id = int(len(agent_ids) / 2)
