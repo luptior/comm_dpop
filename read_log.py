@@ -1,21 +1,20 @@
 import numpy as np
 import pandas as pd
 
-df = pd.DataFrame(columns=[1,2,3,4,5,6,7,8,9,10])
-
+df = pd.DataFrame(columns=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 
 num_agent = 5
-agent_type="list"
-network_customization=True
-network_speed=10
-comp_customization=False
-comp_speed=100
+agent_type = "list"
+network_customization = True
+network_speed = 10
+comp_customization = False
+comp_speed = 100
 
-dir="log"
+dir = "log"
 
 # domain_range=[5, 10, 20, 30, 40, 50]
-domain_range=[5]
-repo_range=range(1,2)
+domain_range = [5]
+repo_range = range(1, 2)
 frames = {}
 
 for network_protocol in ["TCP"]:
@@ -33,7 +32,6 @@ for network_protocol in ["TCP"]:
                         # print(lines[-1])
                         read_list.append(float(lines[-1].split(" - ")[-2]))
             except FileNotFoundError:
-                continue
                 print(f"FileNotFoundError: {f}")
         # print(read_list)
         average = np.average(read_list)
