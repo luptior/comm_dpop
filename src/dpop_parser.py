@@ -8,7 +8,7 @@ import sys
 import xml.etree.ElementTree as ET
 
 
-def parse(file="/Users/luptior/Desktop/Research_3/simulation_data/random_5_d3/rep_0_random_5_d3.xml"):
+def parse(file: str):
     def line_parser(l):
         # parse a line and return its name and rest info dict
         line_dict = {x.split("=")[0]: x.split("=")[1].strip().strip(">").strip("/").strip("\"")
@@ -69,7 +69,7 @@ def parse(file="/Users/luptior/Desktop/Research_3/simulation_data/random_5_d3/re
     return agents, domains, variables, relations, constraints
 
 
-def xml_parse(f="/Users/luptior/Desktop/Research_3/python_generator/data/a5_d100_r4.xml"):
+def xml_parse(f: str):
     tree = ET.parse(f)
     root = tree.getroot()
 
@@ -108,9 +108,3 @@ def xml_parse(f="/Users/luptior/Desktop/Research_3/python_generator/data/a5_d100
         constraints[c.attrib['name']]['scope'] = constraints[c.attrib['name']]['scope'].split()
 
     return agents, domains, variables, relations, constraints
-
-
-if __name__ == '__main__':
-    f = "/Users/luptior/Desktop/Research_3/simulation_data/random_5_d3/rep_0_random_5_d3.xml"
-    print(parse(f))
-    print(xml_parse(f))
