@@ -12,7 +12,6 @@ import msg_structure
 
 
 def udp_send(a: agent, title, data, dest_node_id):
-
     a.logger.info('Udp_send, sending a message ...')
 
     info = a.agents_info
@@ -97,13 +96,13 @@ def listen_func(msgs, unprocessed_util, sock, agent):
         elif network_protocol == "UDP_FEC":
             data, addr = sock.recvfrom(65535)
             n = size = msg_structure.get_actual_size(data)
-            s = 10 # should bee changed to variable
+            s = 10  # should bee changed to variable
             udata = RSCoding.deserialize(data)
 
-            if np.random.random() <= network.rs_rej_prop(size, s, ber): # where there is error happen
-                print("there is an error sleep" + str(2*tran_time(agent, size)))
+            if np.random.random() <= network.rs_rej_prop(size, s, ber):  # where there is error happen
+                print("there is an error sleep" + str(2 * tran_time(agent, size)))
                 size = msg_structure.get_actual_size(data)
-                sleep(2*tran_time(agent, size))
+                sleep(2 * tran_time(agent, size))
 
             if agent.network_customization:
                 size = msg_structure.get_actual_size(data)
@@ -125,9 +124,10 @@ def listen_func(msgs, unprocessed_util, sock, agent):
             if agent.network_customization:
                 sleep(tran_time(agent, size))
 
-            if np.random.random() <= 1-np.power(1-ber, msg_structure.get_actual_size(data)): # where there is error happen
-                sleep(2*tran_time(agent, size))
-                print("there is an error , delay" + str(2*tran_time(agent, size)))
+            if np.random.random() <= 1 - np.power(1 - ber,
+                                                  msg_structure.get_actual_size(data)):  # where there is error happen
+                sleep(2 * tran_time(agent, size))
+                print("there is an error , delay" + str(2 * tran_time(agent, size)))
 
             udata = pickle.loads(data)  # Unpickled data
 
@@ -140,9 +140,10 @@ def listen_func(msgs, unprocessed_util, sock, agent):
 
         # just some record printing
         if len(str(udata[1])) < 100:
-            agent.logger.info(f"Msg received, size is {str(sys.getsizeof(data)) } bytes\n {udata[0]} : {str(udata[1])}")
+            agent.logger.info(f"Msg received, size is {str(sys.getsizeof(data))} bytes\n {udata[0]} : {str(udata[1])}")
         else:
-            agent.logger.info(f"Msg received, size is {str(sys.getsizeof(data)) } bytes\n {udata[0]} : {str(udata[1])[:100]} ...")
+            agent.logger.info(
+                f"Msg received, size is {str(sys.getsizeof(data))} bytes\n {udata[0]} : {str(udata[1])[:100]} ...")
 
         # exit only when exit is received
         if str(udata[1]) == "exit":
