@@ -30,6 +30,7 @@ if __name__ == '__main__':
     parser.add_argument("--computation", help="# whether to adjust the computation speed ", type=str, default="False")
     parser.add_argument("--comp_speed", help="# a parameter to adjust the computation speed ", type=float, default=1000)
     parser.add_argument("--net_speed", help="# a parameter to adjust the network speed ", type=float, default=1000)
+    parser.add_argument("--log_file", help="# path to output log ", type=str)
     args = parser.parse_args()
 
     properties = {}
@@ -42,5 +43,6 @@ if __name__ == '__main__':
     properties["comp_speed"] = args.comp_speed
     properties["network_customization"] = eval(args.network)
     properties["net_speed"] = args.net_speed
+    properties["log_file"] = args.log_file
 
     store_properties(properties, "properties.yaml")
