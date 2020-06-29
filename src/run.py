@@ -110,7 +110,8 @@ if __name__ == '__main__':
     start_time = time.time()
     logger = logging.getLogger("MAIN")
     logger.setLevel(level=logging.INFO)
-    handler = logging.FileHandler("log.txt")
+    properties = prop.load_properties("properties.yaml")
+    handler = logging.FileHandler(properties["log_file"])
     handler.setLevel(logging.INFO)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     handler.setFormatter(formatter)
@@ -124,7 +125,7 @@ if __name__ == '__main__':
 
     main(f=args.input)
 
-    print(f"--- {(time.time() - start_time)} seconds ---")
+    logger.info(f"{(time.time() - start_time)} - seconds")
 
 
 class ModeError(Exception):

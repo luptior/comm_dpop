@@ -31,7 +31,7 @@ for network_protocol in ["TCP"]:
                     if len(lines) > 2:
                         # read_list.append(int(lines[-1].strip()))
                         # print(lines[-1])
-                        read_list.append(float(lines[-1].split(" ")[1]))
+                        read_list.append(float(lines[-1].split(" - ")[-2]))
             except FileNotFoundError:
                 continue
                 print(f"FileNotFoundError: {f}")
