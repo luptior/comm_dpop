@@ -45,7 +45,7 @@ def slice_to_list_pipeline(agent, original_table: np.array) -> list:
     return sliced_msgs
 
 
-def slice_to_list(a:agent, original_table: np.array) -> list:
+def slice_to_list(a: agent, original_table: np.array) -> list:
     """
     the method will slice the original table into smaller pieces for faster communication
     :param a:
