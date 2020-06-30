@@ -3,6 +3,8 @@ from time import sleep
 from rudp import *
 from random import randint
 
+from rudp.rudp2 import *
+
 da = ('127.0.0.1', RCV_PORT)
 s = []
 strHead =[]

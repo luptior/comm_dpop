@@ -1,17 +1,18 @@
 
 
 from gevent.socket import *
-from rudpException import *
+from rudp.rudpException import *
 from struct import pack, unpack
 from gevent import sleep, spawn
 from time import time, localtime, strftime
-from Queue import Queue
-from Queue import Empty as QEmpty
+from queue import Queue
+from queue import Empty as QEmpty
 from collections import OrderedDict as oDict
 
 # -------------------#
 # RUDP Constants    #
 # -------------------#
+
 MAX_DATA = 10244
 MAX_RESND = 3
 RTO = 3  # The retransmission time period
