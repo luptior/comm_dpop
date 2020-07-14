@@ -10,7 +10,7 @@ network_speed = 10
 comp_customization = False
 comp_speed = 100
 
-dir = "log"
+dir = "../log"
 
 # domain_range=[5, 10, 20, 30, 40, 50]
 domain_range = [5]
