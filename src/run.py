@@ -117,11 +117,11 @@ if __name__ == '__main__':
     handler.setFormatter(formatter)
     logger.addHandler(handler)
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--input", help="# input file", type=str)
+    psr = argparse.ArgumentParser()
+    psr.add_argument("--input", help="# input file", type=str)
 
     # parser.add_argument("--output", help="# output file", type=str)
-    args = parser.parse_args()
+    args = psr.parse_args()
 
     main(f=args.input)
 
