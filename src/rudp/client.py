@@ -71,7 +71,7 @@ if __name__ == '__main__':
                     else:
                         data_store += data.split(delimiter)[3]
                     print(f"Sequence number: {seqNo}\nLength: {packetLength}")
-                    print(f"Server: %s on port {server}"
+                    print(f"Server: %s on port {server}")
 
                     # send ack to sender
                     sent = sock.sendto(pickle.dumps(str(seqNo) + "," + packetLength), server)
