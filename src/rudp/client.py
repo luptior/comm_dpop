@@ -25,10 +25,10 @@ if __name__ == '__main__':
     # Start - Connection initiation
     while 1:
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.settimeout(10);
+        sock.settimeout(10)
         server_address = (serverAddress, serverPort)
         # userInput = input("\nRequested file: ")
-        # message = userInput;
+        # message = userInput
 
         messsage = np.random.randint(10, size=(2,3,4))
 
@@ -48,7 +48,7 @@ if __name__ == '__main__':
                 try:
                     data, server = sock.recvfrom(4096)
                     # Reset failed trials on successful transmission
-                    connection_trials_count = 0;
+                    connection_trials_count = 0
                 except:
                     connection_trials_count += 1
                     if connection_trials_count < 5:
@@ -69,9 +69,9 @@ if __name__ == '__main__':
                         print("Requested file could not be found on the server")
                         # os.remove("r_" + userInput)
                     else:
-                        data_store += data.split(delimiter)[3];
-                    print(f"Sequence number: {seqNo}\nLength: {packetLength}");
-                    print(f"Server: %s on port {server}");
+                        data_store += data.split(delimiter)[3]
+                    print(f"Sequence number: {seqNo}\nLength: {packetLength}")
+                    print(f"Server: %s on port {server}"
 
                     # send ack to sender
                     sent = sock.sendto(pickle.dumps(str(seqNo) + "," + packetLength), server)
