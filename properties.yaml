@@ -1,0 +1,7 @@
+agent_mode: list
+comp_speed: 100.0
+log_file: /Users/gx/Documents/Research_3/dpop/log/TCP_a5_d5_r1_p0.5p0.5_list_networkTrue10_compFalse100.log
+net_speed: 10.0
+network_customization: true
+network_protocol: TCP
+slow_processing: false
