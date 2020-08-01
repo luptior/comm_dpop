@@ -15,10 +15,10 @@ import time
 
 # Packet class definition
 class packet():
-    checksum = 0;
-    length = 0;
-    seqNo = 0;
-    msg = 0;
+    checksum = 0
+    length = 0
+    seqNo = 0
+    msg = 0
 
     def make(self, data):
         self.msg = data
@@ -53,8 +53,8 @@ def handleConnection(address, pdata):
         data = fileRead.read()
         fileRead.close()
     except:
-        msg = "FNF";
-        pkt.make(msg);
+        msg = "FNF"
+        pkt.make(msg)
         finalPacket = str(pkt.checksum) + delimiter + str(pkt.seqNo) + delimiter + str(
             pkt.length) + delimiter + pkt.msg
         threadSock.sendto(finalPacket, address)
@@ -67,8 +67,8 @@ def handleConnection(address, pdata):
         packet_count += 1
         randomised_plp = random.random()
         if packet_loss_percentage < randomised_plp:
-            msg = data[x * 500:x * 500 + 500];
-            pkt.make(msg);
+            msg = data[x * 500:x * 500 + 500]
+            pkt.make(msg)
             finalPacket = str(pkt.checksum) + delimiter + str(pkt.seqNo) + delimiter + str(
                 pkt.length) + delimiter + pkt.msg
 
@@ -78,10 +78,10 @@ def handleConnection(address, pdata):
             print(f'Sent {sent} bytes back to {address}, awaiting acknowledgment..')
             threadSock.settimeout(2)
             try:
-                ack, address = threadSock.recvfrom(100);
+                ack, address = threadSock.recvfrom(100)
             except:
-                print("Time out reached, resending ...%s" % x);
-                continue;
+                print("Time out reached, resending ...%s" % x)
+                continue
             if ack.split(",")[0] == str(pkt.seqNo):
                 pkt.seqNo = int(not pkt.seqNo)
                 print(f"Acknowledged by: {ack} "
@@ -109,7 +109,7 @@ if __name__ == '__main__':
     serverPort = 8233
 
     # Delimiter
-    delimiter = "|:|:|";
+    delimiter = "|:|:|"
 
     # Seq number flag
     seqFlag = 0
