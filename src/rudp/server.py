@@ -1,10 +1,17 @@
+"""
+server reads file and send to client
+
+"""
+
+
+import datetime
+import hashlib
 import pickle
+import random
 import socket
 import threading
-import hashlib
 import time
-import datetime
-import random
+
 
 # Packet class definition
 class packet():
@@ -99,7 +106,7 @@ if __name__ == '__main__':
 
     # Set address and port
     serverAddress = "localhost"
-    serverPort = 10000
+    serverPort = 8233
 
     # Delimiter
     delimiter = "|:|:|";
