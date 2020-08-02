@@ -23,25 +23,23 @@ data_store = ""
 
 if __name__ == '__main__':
     # Start - Connection initiation
-    server_address = (serverAddress, serverPort)
 
-    while 1:
+    while True: # infinite loop if no exit signal
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.settimeout(10)
-        # userInput = input("\nRequested file: ")
-        # message = userInput
 
-        message = np.random.randint(10, size=(2, 3, 4))
-
+        # no actual meaning just tell the sender starts sending message
         seqNoFlag = 0
 
         try:
             # Connection trials
             connection_trials_count = 0
-            # Send data
+
+            # Send first message to request sending
             print(f'Requesting')
-            pdata = pickle.dumps("")
-            sent = sock.sendto(pdata, server_address)
+            pdata = pickle.dumps("init")
+            sent = sock.sendto(pdata, (serverAddress, serverPort))
+
             # Receive indefinitely
             while 1:
                 # Receive response
