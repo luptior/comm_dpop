@@ -11,6 +11,7 @@ import random
 import socket
 import threading
 import time
+import numpy as np
 
 
 # Packet class definition
@@ -44,8 +45,8 @@ def handleConnection(address, pdata):
     print("Request started at: " + str(datetime.datetime.utcnow()))
     pkt = packet()
     threadSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    # try:
-        # Read requested file
+
+    data  = np.random.randint(100, size=[3,4,5])
 
     # Fragment and send file 500 byte by 500 byte
     x = 0
@@ -56,7 +57,7 @@ def handleConnection(address, pdata):
             msg = data[x * 500:x * 500 + 500]
             pkt.make(msg)
             finalPacket = str(pkt.checksum) + delimiter + str(pkt.seqNo) + delimiter + str(
-                pkt.length) + delimiter + pkt.msg
+                pkt.length) + delimiter + str(pkt.msg)
 
             finalPacket = pickle.dumps(finalPacket)
             # Send packet
