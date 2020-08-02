@@ -47,20 +47,6 @@ def handleConnection(address, pdata):
     # try:
         # Read requested file
 
-    try:
-        print("Opening file %s" % data)
-        fileRead = open(data, 'r')
-        data = fileRead.read()
-        fileRead.close()
-    except:
-        msg = "FNF"
-        pkt.make(msg)
-        finalPacket = str(pkt.checksum) + delimiter + str(pkt.seqNo) + delimiter + str(
-            pkt.length) + delimiter + pkt.msg
-        threadSock.sendto(finalPacket, address)
-        print("Requested file could not be found, replied with FNF")
-        return
-
     # Fragment and send file 500 byte by 500 byte
     x = 0
     while x < (len(data) / 500) + 1:
