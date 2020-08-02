@@ -12,8 +12,8 @@ import numpy as np
 
 
 # Set address and port
-serverAddress = "localhost"
-serverPort = 8233
+server_address = "localhost"
+server_port = 8233
 
 # Delimiter
 delimiter = "|:|:|"
@@ -38,7 +38,7 @@ if __name__ == '__main__':
             # Send first message to request sending
             print(f'Requesting')
             pdata = pickle.dumps("init")
-            sent = sock.sendto(pdata, (serverAddress, serverPort))
+            sent = sock.sendto(pdata, (server_address, server_port))
 
             # Receive indefinitely
             while 1:
