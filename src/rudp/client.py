@@ -38,9 +38,9 @@ if __name__ == '__main__':
             # Connection trials
             connection_trials_count = 0
             # Send data
-            # print(f'Requesting {message}')
-            # pdata = pickle.dumps(message)
-            # sent = sock.sendto(pdata, server_address)
+            print(f'Requesting')
+            pdata = pickle.dumps("")
+            sent = sock.sendto(pdata, server_address)
             # Receive indefinitely
             while 1:
                 # Receive response
@@ -51,7 +51,7 @@ if __name__ == '__main__':
                     connection_trials_count = 0
                 except:
                     connection_trials_count += 1
-                    if connection_trials_count < 5:
+                    if connection_trials_count < 5: # arbitrarily set, can be adaptive
                         print("\nConnection time out, retrying")
                         continue
                     else:
