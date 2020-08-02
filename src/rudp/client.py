@@ -23,14 +23,15 @@ data_store = ""
 
 if __name__ == '__main__':
     # Start - Connection initiation
+    server_address = (serverAddress, serverPort)
+
     while 1:
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.settimeout(10)
-        server_address = (serverAddress, serverPort)
         # userInput = input("\nRequested file: ")
         # message = userInput
 
-        messsage = np.random.randint(10, size=(2,3,4))
+        message = np.random.randint(10, size=(2, 3, 4))
 
         seqNoFlag = 0
 
