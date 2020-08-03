@@ -45,7 +45,7 @@ if __name__ == '__main__':
                 # Receive response
                 print('\nWaiting to receive..')
                 try:
-                    data, server = sock.recvfrom(4096)
+                    pdata, server = sock.recvfrom(4096)
                     # Reset failed trials on successful transmission
                     connection_trials_count = 0
                 except: # TODO: better catch
@@ -59,7 +59,7 @@ if __name__ == '__main__':
                         # os.remove("r_" + userInput)
                         break
 
-                data = pickle.loads(data)
+                data = pickle.loads(pdata)
                 seqNo = data.split(delimiter)[1]
                 clientHash = hashlib.sha1(pickle.dumps(data.split(delimiter)[3])).hexdigest()
                 print("Server hash: " + data.split(delimiter)[0])
