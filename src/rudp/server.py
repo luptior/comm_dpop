@@ -92,7 +92,7 @@ def handleConnection(addr, ):
             print("Dropped packet\n")
             drop_count += 1
 
-    print("Packets served: " +packet_count)
+    print(f"Packets served: {packet_count}")
 
     if lossSimualation:
         print(f"Dropped packets:  {str(drop_count)} "
