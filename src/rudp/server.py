@@ -34,6 +34,7 @@ def handleConnection(address, pdata):
     data = pickle.loads(pdata)
     drop_count = 0
     packet_count = 0
+    fragment_size = 500
     time.sleep(0.5)
     if lossSimualation:
         packet_loss_percentage = float(input("Set PLP (0-99)%: ")) / 100.0
@@ -48,13 +49,13 @@ def handleConnection(address, pdata):
 
     data  = np.random.randint(100, size=[3,4,5])
 
-    # Fragment and send file 500 byte by 500 byte
+    # Fragment and send file fragment_size byte
     x = 0
-    while x < (len(data) / 500) + 1:
+    while x < (len(data) / fragment_size) + 1:
         packet_count += 1
         randomised_plp = random.random()
         if packet_loss_percentage < randomised_plp:
-            msg = data[x * 500:x * 500 + 500]
+            msg = data[x * fragment_size:x * fragment_size + fragment_size]
             pkt.make(msg)
             finalPacket = str(pkt.checksum) + delimiter + str(pkt.seqNo) + delimiter + str(
                 pkt.length) + delimiter + str(pkt.msg)
