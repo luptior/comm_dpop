@@ -40,8 +40,7 @@ class packet():
 
 
 # Connection handler
-def handleConnection(address, pdata):
-    data = pickle.loads(pdata)
+def handleConnection(addr, ):
     drop_count = 0
     packet_count = 0
     fragment_size = 500
@@ -74,13 +73,13 @@ def handleConnection(address, pdata):
             serialized_pkt = pickle.dumps(pkt.serialize())
 
             # Send packet
-            sent = threadSock.sendto(serialized_pkt, address)
-            print(f'Sent {sent} bytes back to {address}, awaiting acknowledgment..')
+            sent = threadSock.sendto(serialized_pkt, addr)
+            print(f'Sent {sent} bytes back to {addr}, awaiting acknowledgment..')
             threadSock.settimeout(10)
 
             # Wait for Ack
             try:
-                ack, address = threadSock.recvfrom(100)
+                ack, addr = threadSock.recvfrom(100)
                 ack = pickle.loads(ack)
             except:
                 print("Time out reached, resending ...%s" % x)
@@ -109,7 +108,7 @@ if __name__ == '__main__':
     # PLP Simulation settings
     lossSimualation = False
 
-    # Set address and port
+    # Set addr and port
     serverAddress = "localhost"
     serverPort = 8233
 
@@ -130,6 +129,6 @@ if __name__ == '__main__':
 
     print('Waiting to receive message')
     pdata, address = sock.recvfrom(600)
-    connectionThread = threading.Thread(target=handleConnection, args=(address, pdata))
+    connectionThread = threading.Thread(target=handleConnection, args=(address,))
     connectionThread.start()
     print('Received %s bytes from %s' % (len(pdata), address))

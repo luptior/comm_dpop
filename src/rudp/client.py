@@ -11,7 +11,7 @@ import numpy as np
 
 ## some constants
 
-# Set address and port
+# Set addr and port
 server_address = "localhost"
 server_port = 8233
 fragment_size = 500
