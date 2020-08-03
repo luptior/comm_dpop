@@ -40,6 +40,7 @@ if __name__ == '__main__':
         print(f'Requesting')
         pdata = pickle.dumps("init")
         sent = sock.sendto(pdata, (server_address, server_port))
+        print(f'Sent initial request')
 
         # Receive indefinitely
         while 1:
@@ -61,34 +62,29 @@ if __name__ == '__main__':
                     break
 
             data = pickle.loads(pdata)
-            print(data)
             pkt_checksum = data.split(delimiter)[0]
             seqNo = data.split(delimiter)[1]
             packetLength = data.split(delimiter)[2]
             msg = eval(data.split(delimiter)[3]) # supposed to be bytes
 
             clientHash = hashlib.sha1(msg).hexdigest()
-            print("Server hash: " + data.split(delimiter)[0] + " Client hash: " + clientHash)
-
-            # send ack to sender
-            ack_deq_no = str(seqNo) + "," + packetLength
-            sent = sock.sendto(pickle.dumps(ack_deq_no), server)
-
 
             if pkt_checksum == clientHash and seqNoFlag == int(seqNo == True):
                 if msg == "FNF":
                     print("Requested file could not be found on the server")
-                    # os.remove("r_" + userInput)
                 else:
                     # append data
                     data_store += msg
-                print(f"Sequence number: {seqNo}\nLength: {packetLength}")
-                print(f"Server: %s on port {server}")
+                print(f"Sequence number: {seqNo} Length: {packetLength}")
+                # print(f"Server: %s on port {server}")
 
                 # send ack to sender
-                sent = sock.sendto(pickle.dumps(str(seqNo) + "," + packetLength), server)
+                ack_deq_no = str(seqNo) + "," + packetLength
+                sent = sock.sendto(pickle.dumps(ack_deq_no), server)
+                print(f'Sent ack for {seqNo}')
             else:
                 print("Checksum mismatch detected, dropping packet")
+                print("Server hash: " + data.split(delimiter)[0] + " Client hash: " + clientHash)
                 print(f"Server: %s on port {server}")
                 continue
 
