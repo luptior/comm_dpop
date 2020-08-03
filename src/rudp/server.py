@@ -87,19 +87,16 @@ def handleConnection(addr, ):
             if ack.split(",")[0] == str(pkt.seqNo):
                 pkt.seqNo = int(not pkt.seqNo)
                 print(f"Acknowledged by: {ack} ")
-                      # f"\nAcknowledged at: {datetime.datetime.utcnow()} "
-                      # f"\nElapsed: {time.time() - start_time}")
                 x += 1
         else:
-            print("\n------------------------------\n\t\tDropped packet\n------------------------------\n")
+            print("Dropped packet\n")
             drop_count += 1
 
-    print("Packets served: " + str(packet_count))
+    print("Packets served: " +packet_count)
+
     if lossSimualation:
         print(f"Dropped packets:  {str(drop_count)} "
               f"\nComputed drop rate: {float(drop_count) / float(packet_count) * 100.0}")
-    # except:
-    #     print("Internal server error")
 
     print("Sending finished.")
 
