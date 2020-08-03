@@ -21,10 +21,16 @@ class packet():
     msg = 0
 
     def make(self, data):
-        self.msg = data
-        self.length = str(len(data))
-        self.checksum = hashlib.sha1(pickle.dumps(data)).hexdigest()
-        print(f"Length: {self.length}\nSequence number: {self.seqNo}")
+        if isinstance(data, bytes):
+            self.msg = data
+            self.length = str(len(data))
+            self.checksum = hashlib.sha1(self.msg).hexdigest()
+            print(f"Length: {self.length}\nSequence number: {self.seqNo}")
+        elif isinstance(data, str):
+            self.msg = pickle.dumps(data)
+            self.length = str(len(data))
+            self.checksum = hashlib.sha1(self.msg).hexdigest()
+            print(f"Length: {self.length}\nSequence number: {self.seqNo}")
 
     def serialize(self) -> str:
         serialized_packet = str(self.checksum) + delimiter + \
@@ -74,6 +80,8 @@ def handleConnection(address, pdata):
             sent = threadSock.sendto(finalPacket, address)
             print(f'Sent {sent} bytes back to {address}, awaiting acknowledgment..')
             threadSock.settimeout(2)
+
+            # Wait for Ack
             try:
                 ack, address = threadSock.recvfrom(100)
                 ack = pickle.loads(ack)
@@ -89,6 +97,7 @@ def handleConnection(address, pdata):
         else:
             print("\n------------------------------\n\t\tDropped packet\n------------------------------\n")
             drop_count += 1
+
     print("Packets served: " + str(packet_count))
     if lossSimualation:
         print(f"Dropped packets:  {str(drop_count)} "
