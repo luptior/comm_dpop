@@ -3,7 +3,6 @@ server reads file and send to client
 
 """
 
-
 import datetime
 import hashlib
 import pickle
@@ -29,16 +28,14 @@ class packet():
 
     def serialize(self) -> str:
         serialized_packet = str(self.checksum) + delimiter + \
-                      str(self.seqNo) + delimiter + \
-                      str(self.length) + delimiter + \
-                      str(self.msg)
+                            str(self.seqNo) + delimiter + \
+                            str(self.length) + delimiter + \
+                            str(self.msg)
         return serialized_packet
-
 
 
 # Connection handler
 def handleConnection(address, pdata):
-
     data = pickle.loads(pdata)
     drop_count = 0
     packet_count = 0
@@ -57,10 +54,9 @@ def handleConnection(address, pdata):
 
     data = np.random.randint(100, size=[3, 4, 5])
 
-    print("Random generated: " )
+    print("Random generated: ")
     print(data)
     data = pickle.dumps(data)
-
 
     # Fragment and send file fragment_size byte
     x = 0
@@ -68,12 +64,12 @@ def handleConnection(address, pdata):
         packet_count += 1
         randomised_plp = random.random()
         if packet_loss_percentage < randomised_plp:
-            msg = data[x * fragment_size:x * fragment_size + fragment_size]
-            pkt.make(msg)
-            finalPacket = str(pkt.checksum) + delimiter + str(pkt.seqNo) + delimiter + str(
-                pkt.length) + delimiter + str(pkt.msg)
 
-            finalPacket = pickle.dumps(finalPacket)
+            # extract the partial message
+            msg = data[x * fragment_size: (x + 1) * fragment_size]
+            pkt.make(msg)
+            finalPacket = pickle.dumps(pkt.serialize())
+
             # Send packet
             sent = threadSock.sendto(finalPacket, address)
             print(f'Sent {sent} bytes back to {address}, awaiting acknowledgment..')
@@ -87,7 +83,7 @@ def handleConnection(address, pdata):
             if ack.split(",")[0] == str(pkt.seqNo):
                 pkt.seqNo = int(not pkt.seqNo)
                 print(f"Acknowledged by: {ack} "
-                      f"\nAcknowledged at: { datetime.datetime.utcnow()} "
+                      f"\nAcknowledged at: {datetime.datetime.utcnow()} "
                       f"\nElapsed: {time.time() - start_time}")
                 x += 1
         else:
@@ -96,7 +92,7 @@ def handleConnection(address, pdata):
     print("Packets served: " + str(packet_count))
     if lossSimualation:
         print(f"Dropped packets:  {str(drop_count)} "
-              f"\nComputed drop rate: {float(drop_count) / float(packet_count) * 100.0}" )
+              f"\nComputed drop rate: {float(drop_count) / float(packet_count) * 100.0}")
     # except:
     #     print("Internal server error")
 
@@ -104,7 +100,6 @@ def handleConnection(address, pdata):
 
 
 if __name__ == '__main__':
-
     # PLP Simulation settings
     lossSimualation = False
 
