@@ -78,7 +78,7 @@ def handleConnection(address, pdata):
             # Send packet
             sent = threadSock.sendto(serialized_pkt, address)
             print(f'Sent {sent} bytes back to {address}, awaiting acknowledgment..')
-            threadSock.settimeout(2)
+            threadSock.settimeout(10)
 
             # Wait for Ack
             try:
@@ -89,9 +89,9 @@ def handleConnection(address, pdata):
                 continue
             if ack.split(",")[0] == str(pkt.seqNo):
                 pkt.seqNo = int(not pkt.seqNo)
-                print(f"Acknowledged by: {ack} "
-                      f"\nAcknowledged at: {datetime.datetime.utcnow()} "
-                      f"\nElapsed: {time.time() - start_time}")
+                print(f"Acknowledged by: {ack} ")
+                      # f"\nAcknowledged at: {datetime.datetime.utcnow()} "
+                      # f"\nElapsed: {time.time() - start_time}")
                 x += 1
         else:
             print("\n------------------------------\n\t\tDropped packet\n------------------------------\n")
