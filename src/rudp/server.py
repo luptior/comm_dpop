@@ -62,7 +62,8 @@ def handleConnection(address, pdata):
 
     # Fragment and send file fragment_size byte
     x = 0
-    while x < (len(data) / fragment_size) + 1:
+    while x < int(len(data) / fragment_size) + 1:
+        print(f"Sending package {x}")
         packet_count += 1
         randomised_plp = np.random.random()
         if packet_loss_percentage < randomised_plp:
