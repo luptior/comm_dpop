@@ -14,6 +14,7 @@ import numpy as np
 # Set address and port
 server_address = "localhost"
 server_port = 8233
+fragment_size = 500
 
 # Delimiter
 delimiter = "|:|:|"
@@ -60,17 +61,30 @@ if __name__ == '__main__':
                         break
 
                 data = pickle.loads(pdata)
+                pkt_checksum = data.split(delimiter)[0]
                 seqNo = data.split(delimiter)[1]
+                packetLength = data.split(delimiter)[2]
+                msg = data.split(delimiter)[3]
+
                 clientHash = hashlib.sha1(pickle.dumps(data.split(delimiter)[3])).hexdigest()
                 print("Server hash: " + data.split(delimiter)[0])
                 print("Client hash: " + clientHash)
-                if data.split(delimiter)[0] == clientHash and seqNoFlag == int(seqNo == True):
-                    packetLength = data.split(delimiter)[2]
-                    if data.split(delimiter)[3] == "FNF":
+
+                print(data)
+
+
+
+                # send ack to sender
+                ack_deq_no = str(seqNo) + "," + packetLength
+                sent = sock.sendto(pickle.dumps(ack_deq_no), server)
+
+
+                if pkt_checksum == clientHash and seqNoFlag == int(seqNo == True):
+                    if msg == "FNF":
                         print("Requested file could not be found on the server")
                         # os.remove("r_" + userInput)
                     else:
-                        data_store += data.split(delimiter)[3]
+                        data_store += msg
                     print(f"Sequence number: {seqNo}\nLength: {packetLength}")
                     print(f"Server: %s on port {server}")
 
@@ -80,7 +94,8 @@ if __name__ == '__main__':
                     print("Checksum mismatch detected, dropping packet")
                     print(f"Server: %s on port {server}")
                     continue
-                if int(packetLength) < 500:
+
+                if int(packetLength) < fragment_size:
                     seqNo = int(not seqNo)
                     break
 
