@@ -70,13 +70,13 @@ def handleConnection(address, pdata):
         randomised_plp = np.random.random()
         if packet_loss_percentage < randomised_plp:
 
-            # extract the partial message
+            # extract the partial dat to be msg
             msg = data[x * fragment_size: (x + 1) * fragment_size]
             pkt.make(msg)
-            finalPacket = pickle.dumps(pkt.serialize())
+            serialized_pkt = pickle.dumps(pkt.serialize())
 
             # Send packet
-            sent = threadSock.sendto(finalPacket, address)
+            sent = threadSock.sendto(serialized_pkt, address)
             print(f'Sent {sent} bytes back to {address}, awaiting acknowledgment..')
             threadSock.settimeout(2)
 
