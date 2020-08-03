@@ -58,9 +58,6 @@ def handleConnection(address, pdata):
     threadSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     data = np.random.randint(100, size=[3, 4, 5])
-
-    print("Random generated: ")
-    print(data)
     data = pickle.dumps(data)
 
     # Fragment and send file fragment_size byte
