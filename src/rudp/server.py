@@ -6,7 +6,6 @@ server reads file and send to client
 import datetime
 import hashlib
 import pickle
-import random
 import socket
 import threading
 import time
@@ -68,7 +67,7 @@ def handleConnection(address, pdata):
     x = 0
     while x < (len(data) / fragment_size) + 1:
         packet_count += 1
-        randomised_plp = random.random()
+        randomised_plp = np.random.random()
         if packet_loss_percentage < randomised_plp:
 
             # extract the partial message
