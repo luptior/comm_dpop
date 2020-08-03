@@ -27,6 +27,14 @@ class packet():
         self.checksum = hashlib.sha1(pickle.dumps(data)).hexdigest()
         print(f"Length: {self.length}\nSequence number: {self.seqNo}")
 
+    def serialize(self) -> str:
+        serialized_packet = str(self.checksum) + delimiter + \
+                      str(self.seqNo) + delimiter + \
+                      str(self.length) + delimiter + \
+                      str(self.msg)
+        return serialized_packet
+
+
 
 # Connection handler
 def handleConnection(address, pdata):
@@ -47,7 +55,12 @@ def handleConnection(address, pdata):
     pkt = packet()
     threadSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-    data  = np.random.randint(100, size=[3,4,5])
+    data = np.random.randint(100, size=[3, 4, 5])
+
+    print("Random generated: " )
+    print(data)
+    data = pickle.dumps(data)
+
 
     # Fragment and send file fragment_size byte
     x = 0
@@ -67,6 +80,7 @@ def handleConnection(address, pdata):
             threadSock.settimeout(2)
             try:
                 ack, address = threadSock.recvfrom(100)
+                ack = pickle.loads(ack)
             except:
                 print("Time out reached, resending ...%s" % x)
                 continue
@@ -85,6 +99,8 @@ def handleConnection(address, pdata):
               f"\nComputed drop rate: {float(drop_count) / float(packet_count) * 100.0}" )
     # except:
     #     print("Internal server error")
+
+    print("Sending finished.")
 
 
 if __name__ == '__main__':
@@ -110,9 +126,9 @@ if __name__ == '__main__':
     sock.bind(server_address)
 
     # Listening for requests indefinitely
-    while True:
-        print('Waiting to receive message')
-        pdata, address = sock.recvfrom(600)
-        connectionThread = threading.Thread(target=handleConnection, args=(address, pdata))
-        connectionThread.start()
-        print('Received %s bytes from %s' % (len(pdata), address))
+
+    print('Waiting to receive message')
+    pdata, address = sock.recvfrom(600)
+    connectionThread = threading.Thread(target=handleConnection, args=(address, pdata))
+    connectionThread.start()
+    print('Received %s bytes from %s' % (len(pdata), address))
