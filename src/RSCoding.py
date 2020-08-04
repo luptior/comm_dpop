@@ -19,10 +19,17 @@ def example():
     # Encoding
     raw_list = rsc.encode([1, 2, 3, 4])
     print(raw_list)
+    # bytearray(b'\x01\x02\x03\x04,\x9d\x1c+=\xf8h\xfa\x98M')
     byte_array = rsc.encode(bytearray([1, 2, 3, 4]))
     print(byte_array)
+    # bytearray(b'\x01\x02\x03\x04,\x9d\x1c+=\xf8h\xfa\x98M')
+    # will generate similar result
+
+    # or rsc.encode('hello world'.encode("utf-8"))
     b_str = rsc.encode(b'hello world')
     print(b_str)
+    # bytearray(b'hello world\xed%T\xc4\xfd\xfd\x89\xf3\xa8\xaa')
+
     # Note that chunking is supported transparently to encode any string length.
 
     # Decoding (repairing)
