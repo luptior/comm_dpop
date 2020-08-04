@@ -10,8 +10,6 @@ import pickle
 import numpy as np
 from reedsolo import RSCodec, ReedSolomonError
 
-import RSCoding
-
 ## some constants
 
 # Set addr and port
@@ -86,7 +84,7 @@ if __name__ == '__main__':
                 sent = sock.sendto(pickle.dumps(ack_deq_no), server)
                 print(f'Sent ack for {seqNo}')
             else:
-                print("Checksum mismatch detected, dropping packet")
+                print("Checksum mismatch detected, dropping Packet")
                 print("Server hash: " + data.split(delimiter)[0] + " Client hash: " + clientHash)
                 print(f"Server: %s on port {server}")
                 continue
