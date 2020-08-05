@@ -80,7 +80,8 @@ def rudp_send(a: agent, title: str, data, dest_node_id):
         raise
 
     sock.close()
-    a.waiting_ack.append(title)
+    if not title == "ACK":
+        a.waiting_ack.append(title)
     a.logger.info('Message sent, ' + title + ": " + str(data))
 
 
@@ -157,6 +158,9 @@ def listen_func(msgs, unprocessed_util, sock, agent):
             udata = pickle.loads(data)  # Unpickled data
 
         elif network_protocol == "RUDP":
+
+            agent.logger.info(f"ACK list: {agent.waiting_ack}")
+
             data, addr = sock.recvfrom(65536)
             udata = pickle.loads(data)  # Unpickled data
 
