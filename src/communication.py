@@ -180,12 +180,6 @@ def listen_func(msgs, unprocessed_util, sock, agent):
                 # if received a ACK, remove it from the listing
                 agent.waiting_ack.remove(udata[1])
 
-                if "value_msg_" in udata[1]:
-                    agent.logger.info(f"Recv ACK_{udata[1]}")
-                    if len(agent.waiting_ack) == 0:
-                        agent.logger.info("Finished")
-                        break
-
                 continue
             else:
                 #     # if not, needs to be ACKed
