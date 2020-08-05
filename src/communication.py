@@ -71,8 +71,18 @@ def rudp_send(a: agent, title: str, data, dest_node_id):
     a.logger.info(f"rudp_send, sending a message with just rudp...")
     info = a.agents_info
 
+    pdata = pickle.dumps((title, data))
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        sock.sendto(pdata, (info[dest_node_id]['IP'], int(info[dest_node_id]['PORT'])))
+    except OSError:
+        a.logger.error(f"Message too long {msg_structure.get_actual_size(pdata)}")
+        raise
+
+    sock.close()
     a.waiting_ack.append(title)
-    return
+    a.logger.info('Message sent, ' + title + ": " + str(data))
+
 
 
 def listen_func(msgs, unprocessed_util, sock, agent):
