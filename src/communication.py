@@ -182,7 +182,7 @@ def listen_func(msgs, unprocessed_util, sock, agent):
 
                 continue
             else:
-                #     # if not, needs to be ACKed
+                # if not, needs to be ACKed
                 if "ptinfo" in title:
                     # title ptinfo doesn't contain source agent id
                     agent.send("ACK", title, agent.root_id)
