@@ -60,39 +60,8 @@ def udp_send_fec(a: agent, title: str, data, dest_node_id):
     a.logger.info(f" Message sent, {title} : {str(data)[:100]} ...")
 
 
-def udp_send_fec_reliable(a: agent, title: str, data, dest_node_id):
-    """
-    TODO: implement a ACK system
-
-    RBUDP: Based on UDP, RBUDP adds simple ACK and retransmission mechanism to guarantee reliability. But it is different
-    from TCP’s ACK. In TCP, receiver sends an ACK to sender for each or every other received segment. This is too frequent.
-    Sending ACK takes up handling time and the ACK packets also take up bandwidth. On other hand, in FLDnet, because the
-    RTT is large, after the sender sends out all the packets allowed by window, it may has to wait for a long time to
-    receive the ACK. While, RBUDP firstly uses UDP to continually transfer all the data, the receiver keeps a tally of the
-    packets that are received but gives no ACK until it receives the finish signal DONE. Then, the receiver sends an ACK
-    consisting of a bitmap tally of the received packets by TCP. The sender resends the missing packets and the process
-    repeats until no more packets need to be retransmitted.
-
-    RBUDP needs user to set the sending rate. User has to measure the available bandwidth before transfer. Another problem
-    is that because the sender has to keep all the packets that have been sent for retransmission if needed, if the file
-    size is bigger than the memory, it can’t be done.
-
-    """
-    a.logger.info(f"udp_send_fec, sending a message with FEC...")
-
-    info = a.agents_info
-
-    pdata = RSCoding.serialize(title, data)
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    try:
-        sock.sendto(pdata, (info[dest_node_id]['IP'], int(info[dest_node_id]['PORT'])))
-    except OSError:
-        a.logger.error(f"Message too long {msg_structure.get_actual_size(pdata)}")
-        raise
-
-    sock.close()
-
-    a.logger.info(f" Message sent, {title} : {str(data)[:100]} ...")
+def rudp_send_fec(a: agent, title: str, data, dest_node_id):
+    return
 
 
 def listen_func(msgs, unprocessed_util, sock, agent):
