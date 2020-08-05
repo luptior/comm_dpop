@@ -178,8 +178,14 @@ def listen_func(msgs, unprocessed_util, sock, agent):
 
             if title == "ACK":
                 # if received a ACK, remove it from the listing
-                agent.logger.info(f"ACK_{udata[1]}")
                 agent.waiting_ack.remove(udata[1])
+
+                if "value_msg_" in udata[1]:
+                    agent.logger.info(f"Recv ACK_{udata[1]}")
+                    if len(agent.waiting_ack) == 0:
+                        agent.logger.info("Finished")
+                        break
+
                 continue
             else:
                 #     # if not, needs to be ACKed
@@ -187,9 +193,8 @@ def listen_func(msgs, unprocessed_util, sock, agent):
                     # title ptinfo doesn't contain source agent id
                     agent.send("ACK", title, agent.root_id)
                     # agent.logger.info(f"ACK {title} {agent.root_id}")
-                elif "pre_util_msg" in title or  "value_msg_" in title or "neighbors" in title or "domain" in title:
+                elif "pre_util_msg" in title or "value_msg_" in title or "neighbors" in title or "domain" in title:
                     ori_node_id = int(title.split("_")[-1])
-                    # agent.logger.info(f"ACK {title} {ori_node_id}")
                     agent.send("ACK", title, ori_node_id)
                 else:
                     ori_node_id = int(title.split("_")[-1])
@@ -226,7 +231,14 @@ def listen_func(msgs, unprocessed_util, sock, agent):
             agent.logger.info(
                 f"Msg received, size is {str(sys.getsizeof(data))} bytes\n {udata[0]} : {str(udata[1])[:100]} ...")
 
+        if "value_msg_" in udata[0] and agent.is_leaf():
+            # for leaf agent, end listen func when value msg is received
+            agent.logger.info(f"End listen_func")
+            return
+
         # exit only when exit is received
         if str(udata[1]) == "exit":
             agent.logger.info(f"End listen_func")
             return
+
+    agent.logger.info(f"End listen_func")
