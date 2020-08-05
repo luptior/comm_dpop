@@ -90,7 +90,6 @@ def rudp_send(a: agent, title: str, data, dest_node_id):
             a.outgoing_draft[title] = [data, dest_node_id]
         # a.logger.info(str(a.outgoing_draft))
 
-
     a.logger.info('Message sent, ' + title + ": " + str(data))
 
 
@@ -237,3 +236,7 @@ def listen_func(msgs, unprocessed_util, sock, agent):
             return
 
     agent.logger.info(f"End listen_func")
+
+
+def resend_noack(sock, agent):
+    return
