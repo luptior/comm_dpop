@@ -73,6 +73,7 @@ class Agent:
         # added for split processing
 
         self.waiting_ack = [] # the list that each call of send using rudp will send to
+        self.outgoing_draft = {}  # the dict {waiting_ack: actual data}, for the need ot resending
 
         self.split_processing = False
 
@@ -179,8 +180,10 @@ class Agent:
         elif self.network_protocol == "TCP":
             communication.tcp_send(self, title, data, self.id, dest_node_id)
         elif self.network_protocol == "RUDP":
+            self.outgoing_draft[title] = [data, dest_node_id]
             communication.rudp_send(self, title, data, dest_node_id)
         elif self.network_protocol == "RUDP_FEC":
+            self.outgoing_draft[title] = [data, dest_node_id]
             communication.rudp_send_fec(self, title, data, dest_node_id)
 
 
