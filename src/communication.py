@@ -176,11 +176,19 @@ def listen_func(msgs, unprocessed_util, sock, agent):
                     agent.send("ACK", title, title.split("_")[-1])
 
 
+            if agent.network_customization:
+                size = msg_structure.get_actual_size(data)
+                sleep(tran_time(agent, size))
+
         elif network_protocol == "RUDP_FEC":
             #TODO: to be continued
 
             data, addr = sock.recvfrom(65536)
             udata = pickle.loads(data)  # Unpickled data
+
+            if agent.network_customization:
+                size = msg_structure.get_actual_size(data)
+                sleep(tran_time(agent, size))
 
 
 
