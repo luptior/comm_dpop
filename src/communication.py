@@ -63,6 +63,9 @@ def udp_send_fec(a: agent, title: str, data, dest_node_id):
 def rudp_send_fec(a: agent, title: str, data, dest_node_id):
     return
 
+def rudp_send(a: agent, title: str, data, dest_node_id):
+    return
+
 
 def listen_func(msgs, unprocessed_util, sock, agent):
     """
