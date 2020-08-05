@@ -146,6 +146,34 @@ def listen_func(msgs, unprocessed_util, sock, agent):
 
             udata = pickle.loads(data)  # Unpickled data
 
+        elif network_protocol == "RUDP":
+            data, addr = sock.recvfrom(65536)
+            udata = pickle.loads(data)  # Unpickled data
+
+            title = udata[0] # util_msg_{agent_id}_seq
+
+            # ACK messge:
+            #   title: ACK
+            #   data: util_msg_{agent_id}_seq, the title of ack message
+
+            if title == "ACK":
+                agent.waiting_ack.remove(udata[1])
+                continue
+            else: # if not, needs to be acked
+                if "/" in title: # contains seq
+                    agent.send("ACK", title, title.split("_")[-2])
+                else:
+                    agent.send("ACK", title, title.split("_")[-1])
+
+
+        elif network_protocol == "RUDP_FEC":
+            #TODO: to be continued
+
+            data, addr = sock.recvfrom(65536)
+            udata = pickle.loads(data)  # Unpickled data
+
+
+
         # msgs entry example util_msg_1:[[...]]
         msgs[udata[0]] = udata[1]
 
