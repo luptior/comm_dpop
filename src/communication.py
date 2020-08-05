@@ -209,8 +209,6 @@ def listen_func(msgs, unprocessed_util, sock, agent):
                 size = msg_structure.get_actual_size(data)
                 sleep(tran_time(agent, size))
 
-
-
         # msgs entry example util_msg_1:[[...]]
         msgs[udata[0]] = udata[1]
 

@@ -354,7 +354,7 @@ def util_msg_handler_split(agent):
         while True:
             all_children_msgs_arrived = True
             if sum([len(x) for x in new_array.values()]) < len(new_array):
-                agent.logger.info(f"{sum([len(x) for x in new_array.values()])} is < {len(new_array)}")
+                # agent.logger.info(f"{sum([len(x) for x in new_array.values()])} is < {len(new_array)}")
                 all_children_msgs_arrived = False
                 if len(agent.unprocessed_util) > 0:
                     # actually do the processing
