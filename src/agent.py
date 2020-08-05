@@ -6,6 +6,7 @@ SplitAgent: split message based on optimization
 PipelineAgent: do optimization at root and pipeline at non-leaf nodes
 
 """
+import time
 
 import pseudotree_creation
 import util_msg_prop
@@ -159,6 +160,9 @@ class Agent:
 
         if not self.is_root:
             value_msg_prop.value_msg_prop(self)
+
+        while len(self.waiting_ack) > 0:
+            time.sleep(0.1)
         self.logger.info(f"Finished")
 
     def send(self, title, data, dest_node_id):
@@ -200,7 +204,10 @@ class PipelineAgent(Agent):
 
         if not self.is_root:
             value_msg_prop.value_msg_prop(self)
-        self.logger.info(f" Finished")
+
+        while len(self.waiting_ack) > 0:
+            time.sleep(0.1)
+        self.logger.info(f"Finished")
 
 
 class SplitAgent(Agent):
@@ -223,6 +230,9 @@ class SplitAgent(Agent):
 
         if not self.is_root:
             value_msg_prop.value_msg_prop(self)
+
+        while len(self.waiting_ack) > 0:
+            time.sleep(0.1)
         self.logger.info(f"Finished")
 
 
@@ -245,4 +255,7 @@ class ListAgent(Agent):
 
         if not self.is_root:
             value_msg_prop.value_msg_prop(self)
+
+        while len(self.waiting_ack) > 0:
+            time.sleep(0.1)
         self.logger.info(f"Finished")
