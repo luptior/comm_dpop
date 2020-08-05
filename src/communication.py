@@ -67,6 +67,7 @@ def rudp_send_fec(a: agent, title: str, data, dest_node_id):
     a.waiting_ack.append(title)
     return
 
+
 def rudp_send(a: agent, title: str, data, dest_node_id):
     a.logger.info(f"rudp_send, sending a message with just rudp...")
     info = a.agents_info
@@ -81,7 +82,11 @@ def rudp_send(a: agent, title: str, data, dest_node_id):
 
     sock.close()
     if not title == "ACK":
-        a.waiting_ack.append(title)
+        if isinstance(data, list) and isinstance(data[0], tuple): # in split processing format
+            a.waiting_ack.append(f"{title}_{data[0]}")
+        else:
+            a.waiting_ack.append(title)
+
     a.logger.info('Message sent, ' + title + ": " + str(data))
 
 
@@ -119,6 +124,7 @@ def listen_func(msgs, unprocessed_util, sock, agent):
             if agent.network_customization:
                 size = msg_structure.get_actual_size(data)
                 sleep(tran_time(agent, size))
+
         elif network_protocol == "UDP_FEC":
             data, addr = sock.recvfrom(65535)
             n = size = msg_structure.get_actual_size(data)
@@ -159,28 +165,36 @@ def listen_func(msgs, unprocessed_util, sock, agent):
 
         elif network_protocol == "RUDP":
 
-            agent.logger.info(f"ACK list: {agent.waiting_ack}")
-
             data, addr = sock.recvfrom(65536)
             udata = pickle.loads(data)  # Unpickled data
 
-            title = udata[0] # util_msg_{agent_id}_seq
-
-            # ACK messge:
+            # regular data message
+            #   title: util_msg_{agent_id}
+            #   data: ex. [(6,), [219.0, 249.0, 270.0, 239.0]]
+            # ACK message:
             #   title: ACK
-            #   data: util_msg_{agent_id}_seq, the title of ack message
+            #   data: util_msg_{agent_id}_(6,), the title of ack message
+            title = udata[0]
 
             if title == "ACK":
+                # if received a ACK, remove it from the listing
+                agent.logger.info(f"ACK_{udata[1]}")
                 agent.waiting_ack.remove(udata[1])
                 continue
-            else: # if not, needs to be acked
-                if "/" in title: # contains seq
-                    agent.send("ACK", title, int(title.split("_")[-2]))
-                elif "ptinfo" in title:
+            else:
+                #     # if not, needs to be ACKed
+                if "ptinfo" in title:
+                    # title ptinfo doesn't contain source agent id
                     agent.send("ACK", title, agent.root_id)
+                    # agent.logger.info(f"ACK {title} {agent.root_id}")
+                elif "pre_util_msg" in title or  "value_msg_" in title or "neighbors" in title or "domain" in title:
+                    ori_node_id = int(title.split("_")[-1])
+                    # agent.logger.info(f"ACK {title} {ori_node_id}")
+                    agent.send("ACK", title, ori_node_id)
                 else:
-                    agent.send("ACK", title, int(title.split("_")[-1]))
-
+                    ori_node_id = int(title.split("_")[-1])
+                    agent.send("ACK", f"{title}_{udata[1][0]}", ori_node_id)
+                    # agent.logger.info(f"ACK {title}_{udata[1][0]} {ori_node_id}")
 
             if agent.network_customization:
                 size = msg_structure.get_actual_size(data)
