@@ -180,10 +180,8 @@ class Agent:
         elif self.network_protocol == "TCP":
             communication.tcp_send(self, title, data, self.id, dest_node_id)
         elif self.network_protocol == "RUDP":
-            self.outgoing_draft[title] = [data, dest_node_id]
             communication.rudp_send(self, title, data, dest_node_id)
         elif self.network_protocol == "RUDP_FEC":
-            self.outgoing_draft[title] = [data, dest_node_id]
             communication.rudp_send_fec(self, title, data, dest_node_id)
 
 

@@ -84,8 +84,12 @@ def rudp_send(a: agent, title: str, data, dest_node_id):
     if not title == "ACK":
         if isinstance(data, list) and isinstance(data[0], tuple): # in split processing format
             a.waiting_ack.append(f"{title}_{data[0]}")
+            a.outgoing_draft[f"{title}_{data[0]}"] = [data, dest_node_id]
         else:
             a.waiting_ack.append(title)
+            a.outgoing_draft[title] = [data, dest_node_id]
+        # a.logger.info(str(a.outgoing_draft))
+
 
     a.logger.info('Message sent, ' + title + ": " + str(data))
 
@@ -179,7 +183,6 @@ def listen_func(msgs, unprocessed_util, sock, agent):
             if title == "ACK":
                 # if received a ACK, remove it from the listing
                 agent.waiting_ack.remove(udata[1])
-
                 continue
             else:
                 # if not, needs to be ACKed
