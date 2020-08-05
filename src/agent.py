@@ -71,6 +71,8 @@ class Agent:
         self.unprocessed_util = []  # The dict where all the received util_messages are stored,
         # added for split processing
 
+        self.waiting_ack = [] # the list that each call of send using rudp will send to
+
         self.split_processing = False
 
         self.IP = info[self.id]['IP']

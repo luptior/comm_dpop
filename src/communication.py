@@ -61,9 +61,17 @@ def udp_send_fec(a: agent, title: str, data, dest_node_id):
 
 
 def rudp_send_fec(a: agent, title: str, data, dest_node_id):
+    a.logger.info(f"rudp_send_fec, sending a message with FEC...")
+    info = a.agents_info
+
+    a.waiting_ack.append(title)
     return
 
 def rudp_send(a: agent, title: str, data, dest_node_id):
+    a.logger.info(f"rudp_send, sending a message with just rudp...")
+    info = a.agents_info
+
+    a.waiting_ack.append(title)
     return
 
 
