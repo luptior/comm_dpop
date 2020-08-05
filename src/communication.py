@@ -171,9 +171,11 @@ def listen_func(msgs, unprocessed_util, sock, agent):
                 continue
             else: # if not, needs to be acked
                 if "/" in title: # contains seq
-                    agent.send("ACK", title, title.split("_")[-2])
+                    agent.send("ACK", title, int(title.split("_")[-2]))
+                elif "ptinfo" in title:
+                    agent.send("ACK", title, agent.root_id)
                 else:
-                    agent.send("ACK", title, title.split("_")[-1])
+                    agent.send("ACK", title, int(title.split("_")[-1]))
 
 
             if agent.network_customization:
