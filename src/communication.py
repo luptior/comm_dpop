@@ -86,10 +86,12 @@ def rudp_send(a: agent, title: str, data, dest_node_id):
     sock.close()
     if not title == "ACK":
         if isinstance(data, list) and isinstance(data[0], tuple): # in split processing format
+            a.logger.info(f"Waiting_ack is {a.waiting_ack}, add {title}_{data[0]}")
             a.waiting_ack.append(f"{title}_{data[0]}")
             a.waiting_ack_time[time.time()] = (f"{title}_{data[0]}", dest_node_id)
             a.outgoing_draft[(f"{title}_{data[0]}", dest_node_id)] = data
         else:
+            a.logger.info(f"Waiting_ack is {a.waiting_ack}, add {title}")
             a.waiting_ack.append(title)
             a.waiting_ack_time[time.time()] = (title, dest_node_id)
             a.outgoing_draft[(title, dest_node_id)] = data
@@ -195,6 +197,7 @@ def listen_func(msgs, unprocessed_util, sock, agent):
             if title == "ACK":
                 # if received a ACK, remove it from the listing
                 if udata[1] in agent.waiting_ack:
+                    agent.logger.info(f"Waiting_ack is {agent.waiting_ack}, remove {udata[1]}")
                     agent.waiting_ack.remove(udata[1])
                 # else ignore, just make sure receiver has got the data
                 continue
@@ -235,10 +238,10 @@ def listen_func(msgs, unprocessed_util, sock, agent):
 
         # just some record printing
         if len(str(udata[1])) < 100:
-            agent.logger.info(f"Msg received, size is {str(sys.getsizeof(data))} bytes\n {udata[0]} : {str(udata[1])}")
+            agent.logger.info(f"Msg received, size is {msg_structure.get_actual_size(data)} bytes\n {udata[0]} : {str(udata[1])}")
         else:
             agent.logger.info(
-                f"Msg received, size is {str(sys.getsizeof(data))} bytes\n {udata[0]} : {str(udata[1])[:100]} ...")
+                f"Msg received, size is {msg_structure.get_actual_size(data)} bytes\n {udata[0]} : {str(udata[1])[:100]} ...")
 
         if "value_msg_" in udata[0] and agent.is_leaf():
             # for leaf agent, end listen func when value msg is received
@@ -258,18 +261,39 @@ def resend_noack(agent):
     # resend packet if message ACK not received
 
     # if set speed is 10 then timeout is 10
-    timeout = 100/agent.net_speed
+    # timeout = 100/agent.net_speed
 
     while True:
         if len(agent.waiting_ack) > 0:
             oldest_tick = sorted(agent.waiting_ack_time)[0]
+
+            data = agent.outgoing_draft[agent.waiting_ack_time[oldest_tick]]
+            size = msg_structure.get_actual_size(data)
+            timeout = 10 * tran_time(agent, size)
+
             if time.time() - sorted(agent.waiting_ack_time)[0] >= timeout:
 
-                agent.logger.info("A resend is needed")
-                # waiting ack + waiting ack timed out
                 (title, dest_node_id) = agent.waiting_ack_time[oldest_tick]
+                agent.logger.info(f"A resend is needed, {(title, dest_node_id)} packet size is {size}, estimated to take {2*tran_time(agent, size)}, not take {time.time() - sorted(agent.waiting_ack_time)[0]}")
+                # waiting ack + waiting ack timed out
 
                 # resend
+                # need to remove the previous one
+                if isinstance(data, list) and isinstance(data[0], tuple):  # in split processing format
+                    agent.logger.info(f"Waiting_ack is {agent.waiting_ack}, resend remove {title}_{data[0]}")
+                    if f"{title}_{data[0]}" not in agent.waiting_ack:
+                        agent.waiting_ack_time.pop(oldest_tick)
+                        continue
+                    else:
+                        agent.waiting_ack.remove(f"{title}_{data[0]}")
+                else:
+                    agent.logger.info(f"Waiting_ack is {agent.waiting_ack}, resend remove {title}")
+                    if title not in agent.waiting_ack:
+                        agent.waiting_ack_time.pop(oldest_tick)
+                        continue
+                    else:
+                        agent.waiting_ack.remove(title)
+
                 agent.send(title, agent.outgoing_draft[(title, dest_node_id)], dest_node_id)
 
                 # update tick
