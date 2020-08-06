@@ -55,7 +55,7 @@ def slice_to_list(a: agent, original_table: np.array) -> list:
     """
 
     # optimization comes into play
-    if a.network_protocol == "UDP_FEC" and isinstance(a, agent.SplitAgent) or isinstance(a, agent.PipelineAgent):
+    if a.network_protocol in ["UDP_FEC", "RUDP", "RUDP_FEC"] and isinstance(a, agent.SplitAgent) or isinstance(a, agent.PipelineAgent):
         # split is necessary but no need for optimization
         # serialized = serialize(title, np.random.randint(0, 100, size=(7500,)))
         # get_actual_size(serialized)
