@@ -1,6 +1,7 @@
 import socket
 import pickle
 import sys
+import threading
 import time
 
 import network
@@ -66,7 +67,7 @@ def rudp_send_fec(a: agent, title: str, data, dest_node_id):
     info = a.agents_info
 
     a.waiting_ack.append(title)
-    a.waiting_ack_time[title]=time.time()
+    a.waiting_ack_time[time.time()]=(title, dest_node_id)
     return
 
 
@@ -86,12 +87,12 @@ def rudp_send(a: agent, title: str, data, dest_node_id):
     if not title == "ACK":
         if isinstance(data, list) and isinstance(data[0], tuple): # in split processing format
             a.waiting_ack.append(f"{title}_{data[0]}")
-            a.waiting_ack_time[f"{title}_{data[0]}"] = time.time()
-            a.outgoing_draft[f"{title}_{data[0]}"] = [data, dest_node_id]
+            a.waiting_ack_time[time.time()] = (f"{title}_{data[0]}", dest_node_id)
+            a.outgoing_draft[(f"{title}_{data[0]}", dest_node_id)] = data
         else:
             a.waiting_ack.append(title)
-            a.waiting_ack_time[title] = time.time()
-            a.outgoing_draft[title] = [data, dest_node_id]
+            a.waiting_ack_time[time.time()] = (title, dest_node_id)
+            a.outgoing_draft[(title, dest_node_id)] = data
         # a.logger.info(str(a.outgoing_draft))
 
     a.logger.info('Message sent, ' + title + ": " + str(data))
@@ -117,6 +118,14 @@ def listen_func(msgs, unprocessed_util, sock, agent):
 
     properties = prop.load_properties("properties.yaml")
     network_protocol = properties["network_protocol"]
+
+    if network_protocol in ["RUDP", "RUDP_FEC"]:
+        # Creating and starting the 'listen' thread
+        resend_thread = threading.Thread(name='Resending-Unacked-Packet-of' + str(agent.id),
+                                  target=resend_noack,
+                                  kwargs={'agent': agent})
+        resend_thread.setDaemon(True)
+        resend_thread.start()
 
     while True:
         # The 'data' which is received should be the pickled string representation of a tuple.
@@ -242,5 +251,30 @@ def listen_func(msgs, unprocessed_util, sock, agent):
     agent.logger.info(f"End listen_func")
 
 
-def resend_noack(sock, agent):
-    return
+def resend_noack(agent):
+
+    # resend packet if message ACK not received
+
+    # if set speed is 10 then timeout is 10
+    timeout = 100/agent.net_speed
+
+    while True:
+        if len(agent.waiting_ack) > 0:
+            oldest_tick = sorted(agent.waiting_ack_time)[0]
+            if time.time() - sorted(agent.waiting_ack_time)[0] >= timeout:
+
+                agent.logger.info("A resend is needed")
+                # waiting ack + waiting ack timed out
+                (title, dest_node_id) = agent.waiting_ack_time[oldest_tick]
+
+                # resend
+                agent.send(title, agent.outgoing_draft[(title, dest_node_id)], dest_node_id)
+
+                # update tick
+                agent.waiting_ack_time.pop(oldest_tick)
+                agent.waiting_ack_time[time.time()] = (title, dest_node_id)
+
+                tick_diff = time.time() - sorted(agent.waiting_ack_time)[0]
+                if tick_diff < timeout:
+                    sleep(tick_diff)
+
