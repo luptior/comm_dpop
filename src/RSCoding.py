@@ -96,7 +96,7 @@ def serialize(title: str, message, rsc: RSCodec = RSCodec(10)) -> bytearray:
         # for the pre_util_msg_, contain should either be list or tuple
         shape = np.asarray(len(message))
         b = np.asarray(message).tobytes()
-    elif title == "ptinfo" and isinstance(message, datastruct.Relatives):
+    elif "ptinfo" in title and isinstance(message, datastruct.Relatives):
         # ptinfo
         data = dump_relatives(message)
         shape = np.asarray(len(data))
