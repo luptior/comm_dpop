@@ -6,7 +6,7 @@ from reedsolo import RSCodec, ReedSolomonError
 
 import numpy as np
 
-import utility
+import datastruct
 
 logger = logging.getLogger("RSCoding")
 
@@ -92,7 +92,7 @@ def serialize(title: str, message, rsc: RSCodec = RSCodec(10)) -> bytearray:
         # for the pre_util_msg_, contain should either be list or tuple
         shape = np.asarray(len(message))
         b = np.asarray(message).tobytes()
-    elif title == "ptinfo" and isinstance(message, utility.Relatives):
+    elif title == "ptinfo" and isinstance(message, datastruct.Relatives):
         # ptinfo
         data = dump_relatives(message)
         shape = np.asarray(len(data))
@@ -133,20 +133,20 @@ def dump_dict(d: dict) -> list:
     return l
 
 
-def load_relatives(l) -> utility.Relatives:
+def load_relatives(l) -> datastruct.Relatives:
     if not isinstance(l, list):
         l = list(l)
     index = l[:3]
     values = l[3:]
 
-    r = utility.Relatives(int(values[0]),
+    r = datastruct.Relatives(int(values[0]),
                           [int(x) for x in values[1:index[1]]],
                           [int(x) for x in values[index[1]:index[2]]],
                           [int(x) for x in values[index[2]:]])
     return r
 
 
-def dump_relatives(relatives: utility.Relatives) -> list:
+def dump_relatives(relatives: datastruct.Relatives) -> list:
     # dump relatives type to a list
     index = [1, len(relatives.pseudoparents), len(relatives.children)]
     index2 = []
