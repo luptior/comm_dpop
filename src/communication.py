@@ -273,6 +273,12 @@ def resend_noack(agent):
 
             oldest_tick = sorted(agent.waiting_ack_time)[0]
 
+            (title, dest_node_id) = agent.waiting_ack_time[oldest_tick]
+
+            if title in agent.received_ack:
+                agent.waiting_ack_time.pop(oldest_tick)
+                continue
+
             data = agent.outgoing_draft[agent.waiting_ack_time[oldest_tick]]
             size = msg_structure.get_actual_size(data)
             timeout = 10 * tran_time(agent, size)
