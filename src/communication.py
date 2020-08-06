@@ -66,9 +66,29 @@ def rudp_send_fec(a: agent, title: str, data, dest_node_id):
     a.logger.info(f"rudp_send_fec, sending a message with FEC...")
     info = a.agents_info
 
-    a.waiting_ack.append(title)
-    a.waiting_ack_time[time.time()] = (title, dest_node_id)
-    return
+    pdata = RSCoding.serialize(title, data)
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        sock.sendto(pdata, (info[dest_node_id]['IP'], int(info[dest_node_id]['PORT'])))
+    except OSError:
+        a.logger.error(f"Message too long {msg_structure.get_actual_size(pdata)}")
+        raise
+
+    sock.close()
+    if not title == "ACK":
+        if isinstance(data, list) and isinstance(data[0], tuple):  # in split processing format
+            a.logger.info(f"Waiting_ack is {a.waiting_ack}, add {title}_{data[0]}")
+            a.waiting_ack.append(f"{title}_{data[0]}")
+            a.waiting_ack_time[time.time()] = (f"{title}_{data[0]}", dest_node_id)
+            a.outgoing_draft[(f"{title}_{data[0]}", dest_node_id)] = data
+        else:
+            a.logger.info(f"Waiting_ack is {a.waiting_ack}, add {title}")
+            a.waiting_ack.append(title)
+            a.waiting_ack_time[time.time()] = (title, dest_node_id)
+            a.outgoing_draft[(title, dest_node_id)] = data
+        # a.logger.info(str(a.outgoing_draft))
+
+    a.logger.info('Message sent, ' + title + ": " + str(data))
 
 
 def rudp_send(a: agent, title: str, data, dest_node_id):
@@ -183,7 +203,9 @@ def listen_func(msgs, unprocessed_util, sock, agent):
         elif network_protocol == "RUDP":
 
             data, addr = sock.recvfrom(65536)
-            udata = pickle.loads(data)  # Unpickled data
+            n = size = msg_structure.get_actual_size(data)
+            s = 10  # should bee changed to variable
+            udata = RSCoding.deserialize(data)
 
             # regular data message
             #   title: util_msg_{agent_id}
@@ -193,11 +215,12 @@ def listen_func(msgs, unprocessed_util, sock, agent):
             #   data: util_msg_{agent_id}_(6,), the title of ack message
             title = udata[0]
 
+            # ACK processing part
             if title == "ACK":
                 # if received a ACK, remove it from the listing
-                agent.logger.info(f"Received ACK: {udata[1]}")
+                # agent.logger.info(f"Received ACK: {udata[1]}")
                 agent.received_ack.add(udata[1])
-                agent.logger.info(f"Received ACKs: {agent.received_ack}")
+                # agent.logger.info(f"Received ACKs: {agent.received_ack}")
                 # if udata[1] in agent.waiting_ack:
                 #     agent.logger.info(f"Waiting_ack is {agent.waiting_ack}, remove {udata[1]}")
                 #     agent.waiting_ack.remove(udata[1])
@@ -217,6 +240,12 @@ def listen_func(msgs, unprocessed_util, sock, agent):
                     agent.send("ACK", f"{title}_{udata[1][0]}", ori_node_id)
                     # agent.logger.info(f"ACK {title}_{udata[1][0]} {ori_node_id}")
 
+            # delay and rejection part
+            if np.random.random() <= network.rs_rej_prop(size, s, ber):  # where there is error happen
+                print("there is an error sleep" + str(2 * tran_time(agent, size)))
+                size = msg_structure.get_actual_size(data)
+                sleep(2 * tran_time(agent, size))
+
             if agent.network_customization:
                 size = msg_structure.get_actual_size(data)
                 sleep(tran_time(agent, size))
@@ -225,7 +254,39 @@ def listen_func(msgs, unprocessed_util, sock, agent):
             # TODO: to be continued
 
             data, addr = sock.recvfrom(65536)
-            udata = pickle.loads(data)  # Unpickled data
+            udata = RSCoding.deserialize(data)
+
+            # regular data message
+            #   title: util_msg_{agent_id}
+            #   data: ex. [(6,), [219.0, 249.0, 270.0, 239.0]]
+            # ACK message:
+            #   title: ACK
+            #   data: util_msg_{agent_id}_(6,), the title of ack message
+            title = udata[0]
+
+            if title == "ACK":
+                # if received a ACK, remove it from the listing
+                # agent.logger.info(f"Received ACK: {udata[1]}")
+                agent.received_ack.add(udata[1])
+                # agent.logger.info(f"Received ACKs: {agent.received_ack}")
+                # if udata[1] in agent.waiting_ack:
+                #     agent.logger.info(f"Waiting_ack is {agent.waiting_ack}, remove {udata[1]}")
+                #     agent.waiting_ack.remove(udata[1])
+                # else ignore, just make sure receiver has got the data
+                continue
+            else:
+                # if not, needs to be ACKed
+                if "ptinfo" in title:
+                    # title ptinfo doesn't contain source agent id
+                    agent.send("ACK", title, agent.root_id)
+                    # agent.logger.info(f"ACK {title} {agent.root_id}")
+                elif "pre_util_msg" in title or "value_msg_" in title or "neighbors" in title or "domain" in title:
+                    ori_node_id = int(title.split("_")[-1])
+                    agent.send("ACK", title, ori_node_id)
+                else:
+                    ori_node_id = int(title.split("_")[-1])
+                    agent.send("ACK", f"{title}_{udata[1][0]}", ori_node_id)
+                    # agent.logger.info(f"ACK {title}_{udata[1][0]} {ori_node_id}")
 
             if agent.network_customization:
                 size = msg_structure.get_actual_size(data)
