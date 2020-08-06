@@ -1,6 +1,7 @@
 import socket
 import pickle
 import sys
+import time
 
 import network
 from network import *
@@ -65,6 +66,7 @@ def rudp_send_fec(a: agent, title: str, data, dest_node_id):
     info = a.agents_info
 
     a.waiting_ack.append(title)
+    a.waiting_ack_time[title]=time.time()
     return
 
 
@@ -84,9 +86,11 @@ def rudp_send(a: agent, title: str, data, dest_node_id):
     if not title == "ACK":
         if isinstance(data, list) and isinstance(data[0], tuple): # in split processing format
             a.waiting_ack.append(f"{title}_{data[0]}")
+            a.waiting_ack_time[f"{title}_{data[0]}"] = time.time()
             a.outgoing_draft[f"{title}_{data[0]}"] = [data, dest_node_id]
         else:
             a.waiting_ack.append(title)
+            a.waiting_ack_time[title] = time.time()
             a.outgoing_draft[title] = [data, dest_node_id]
         # a.logger.info(str(a.outgoing_draft))
 
