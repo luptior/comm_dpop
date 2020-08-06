@@ -51,9 +51,13 @@ def deserialize(input: bytearray, rsc: RSCodec = RSCodec(10), datatype="int64"):
     title = combined_decoded[0].decode()
     shape = np.frombuffer(combined_decoded[1], "int64")
     # shape = np.frombuffer(combined_decoded[1].encode(), "int64")
+
+    if title == "ACK":
+        return title, combined_decoded[2].decode("utf-8")
+
     data = np.frombuffer(combined_decoded[2], datatype)
 
-    if title == "ptinfo":
+    if "ptinfo" in title:
         return title, load_relatives(data)
     elif "domain_" in title or "neighbors_" in title:
         return title, list(data)
@@ -102,6 +106,10 @@ def serialize(title: str, message, rsc: RSCodec = RSCodec(10)) -> bytearray:
         data = dump_dict(message)
         shape = np.asarray(len(data))
         b = np.asarray(data).tobytes()
+    elif "ACK" in title:
+        # message should be just str
+        b = data = message.encode("utf-8")
+        shape = np.asarray(len(data))
     else:
         logger.error(f"not supportd input: {title}  {message} {type(message)}")
         raise Exception(f"not supportd input {title} {type(message)} {message}")
@@ -191,4 +199,9 @@ def test_serialize():
 
 
 if __name__ == '__main__':
-    test_serialize()
+    # test_serialize()
+
+    serialized = serialize(title="ACK", message="util_msg_1")
+    deserialized = deserialize(serialized)
+
+    print(deserialized[1])
