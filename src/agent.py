@@ -237,7 +237,7 @@ class SplitAgent(Agent):
         while len(self.waiting_ack) > 0:
             time.sleep(0.1)
             self.logger.info(self.waiting_ack)
-        self.logger.info(f"Finished")
+        self.logger.info(f"Finished All Acks:{self.received_ack}")
 
 
 class ListAgent(Agent):
