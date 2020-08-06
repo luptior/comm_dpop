@@ -194,7 +194,9 @@ def listen_func(msgs, unprocessed_util, sock, agent):
 
             if title == "ACK":
                 # if received a ACK, remove it from the listing
-                agent.waiting_ack.remove(udata[1])
+                if udata[1] in agent.waiting_ack:
+                    agent.waiting_ack.remove(udata[1])
+                # else ignore, just make sure receiver has got the data
                 continue
             else:
                 # if not, needs to be ACKed
