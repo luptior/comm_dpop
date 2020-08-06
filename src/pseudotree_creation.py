@@ -57,7 +57,7 @@ def tell_relative(node_id, agent, graph, parents, pstree, depths):
         agent.p, agent.pp, agent.c, agent.pc = p, pp, c, pc
     else:
         # agent.udp_send('ptinfo', Relatives(p, pp, c, pc), node_id)
-        agent.send('ptinfo', Relatives(p, pp, c, pc), node_id)
+        agent.send(f'ptinfo_{node_id}', Relatives(p, pp, c, pc), node_id)
         # agent.tcp_send('ptinfo', Relatives(p, pp, c, pc), node_id)
 
 
@@ -136,11 +136,11 @@ def pseudotree_creation(agent):
 
         # Wait till the message (p, pp, c, pc) [has title: 'ptinfo'] arrives
         # from the root.
-        while 'ptinfo' not in agent.msgs:
+        while 'ptinfo_' + str(agent.id) not in agent.msgs:
             pass
 
         # Initialize all the respective fields
-        agent.p, agent.pp, agent.c, agent.pc = agent.msgs['ptinfo']
+        agent.p, agent.pp, agent.c, agent.pc = agent.msgs['ptinfo_' + str(agent.id)]
 
         # Send this node's domain to all children and pseudochildren.
         # For example, if this node's id is 7, the message is, in title:value
