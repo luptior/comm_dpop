@@ -67,7 +67,7 @@ def rudp_send_fec(a: agent, title: str, data, dest_node_id):
     info = a.agents_info
 
     a.waiting_ack.append(title)
-    a.waiting_ack_time[time.time()]=(title, dest_node_id)
+    a.waiting_ack_time[time.time()] = (title, dest_node_id)
     return
 
 
@@ -85,7 +85,7 @@ def rudp_send(a: agent, title: str, data, dest_node_id):
 
     sock.close()
     if not title == "ACK":
-        if isinstance(data, list) and isinstance(data[0], tuple): # in split processing format
+        if isinstance(data, list) and isinstance(data[0], tuple):  # in split processing format
             a.logger.info(f"Waiting_ack is {a.waiting_ack}, add {title}_{data[0]}")
             a.waiting_ack.append(f"{title}_{data[0]}")
             a.waiting_ack_time[time.time()] = (f"{title}_{data[0]}", dest_node_id)
@@ -98,7 +98,6 @@ def rudp_send(a: agent, title: str, data, dest_node_id):
         # a.logger.info(str(a.outgoing_draft))
 
     a.logger.info('Message sent, ' + title + ": " + str(data))
-
 
 
 def listen_func(msgs, unprocessed_util, sock, agent):
@@ -124,8 +123,8 @@ def listen_func(msgs, unprocessed_util, sock, agent):
     if network_protocol in ["RUDP", "RUDP_FEC"]:
         # Creating and starting the 'listen' thread
         resend_thread = threading.Thread(name='Resending-Unacked-Packet-of' + str(agent.id),
-                                  target=resend_noack,
-                                  kwargs={'agent': agent})
+                                         target=resend_noack,
+                                         kwargs={'agent': agent})
         resend_thread.setDaemon(True)
         resend_thread.start()
 
@@ -196,9 +195,12 @@ def listen_func(msgs, unprocessed_util, sock, agent):
 
             if title == "ACK":
                 # if received a ACK, remove it from the listing
-                if udata[1] in agent.waiting_ack:
-                    agent.logger.info(f"Waiting_ack is {agent.waiting_ack}, remove {udata[1]}")
-                    agent.waiting_ack.remove(udata[1])
+                # agent.logger.info(f"Received ACK: {udata[1]}")
+                agent.received_ack.add(udata[1])
+                # agent.logger.info(f"Received ACKs: {agent.received_ack}")
+                # if udata[1] in agent.waiting_ack:
+                #     agent.logger.info(f"Waiting_ack is {agent.waiting_ack}, remove {udata[1]}")
+                #     agent.waiting_ack.remove(udata[1])
                 # else ignore, just make sure receiver has got the data
                 continue
             else:
@@ -220,7 +222,7 @@ def listen_func(msgs, unprocessed_util, sock, agent):
                 sleep(tran_time(agent, size))
 
         elif network_protocol == "RUDP_FEC":
-            #TODO: to be continued
+            # TODO: to be continued
 
             data, addr = sock.recvfrom(65536)
             udata = pickle.loads(data)  # Unpickled data
@@ -238,7 +240,8 @@ def listen_func(msgs, unprocessed_util, sock, agent):
 
         # just some record printing
         if len(str(udata[1])) < 100:
-            agent.logger.info(f"Msg received, size is {msg_structure.get_actual_size(data)} bytes\n {udata[0]} : {str(udata[1])}")
+            agent.logger.info(
+                f"Msg received, size is {msg_structure.get_actual_size(data)} bytes\n {udata[0]} : {str(udata[1])}")
         else:
             agent.logger.info(
                 f"Msg received, size is {msg_structure.get_actual_size(data)} bytes\n {udata[0]} : {str(udata[1])[:100]} ...")
@@ -257,14 +260,17 @@ def listen_func(msgs, unprocessed_util, sock, agent):
 
 
 def resend_noack(agent):
-
     # resend packet if message ACK not received
 
     # if set speed is 10 then timeout is 10
     # timeout = 100/agent.net_speed
 
     while True:
+
+        agent.waiting_ack = list(set(agent.waiting_ack).difference(agent.received_ack))
+
         if len(agent.waiting_ack) > 0:
+
             oldest_tick = sorted(agent.waiting_ack_time)[0]
 
             data = agent.outgoing_draft[agent.waiting_ack_time[oldest_tick]]
@@ -274,7 +280,8 @@ def resend_noack(agent):
             if time.time() - sorted(agent.waiting_ack_time)[0] >= timeout:
 
                 (title, dest_node_id) = agent.waiting_ack_time[oldest_tick]
-                agent.logger.info(f"A resend is needed, {(title, dest_node_id)} packet size is {size}, estimated to take {2*tran_time(agent, size)}, not take {time.time() - sorted(agent.waiting_ack_time)[0]}")
+                agent.logger.info(
+                    f"A resend is needed, {(title, dest_node_id)} packet size is {size}, timeout is {timeout}, not take {time.time() - sorted(agent.waiting_ack_time)[0]}")
                 # waiting ack + waiting ack timed out
 
                 # resend
@@ -300,7 +307,6 @@ def resend_noack(agent):
                 agent.waiting_ack_time.pop(oldest_tick)
                 agent.waiting_ack_time[time.time()] = (title, dest_node_id)
 
-                tick_diff = time.time() - sorted(agent.waiting_ack_time)[0]
-                if tick_diff < timeout:
-                    sleep(tick_diff)
-
+            tick_diff = time.time() - sorted(agent.waiting_ack_time)[0]
+            if tick_diff < timeout:
+                sleep(tick_diff)
