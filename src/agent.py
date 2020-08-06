@@ -73,6 +73,7 @@ class Agent:
         # added for split processing
 
         self.waiting_ack = [] # the list that each call of send using rudp will send to
+        self.received_ack = set([])  # the list that each call of send using rudp will send to
         self.waiting_ack_time = {}
         self.outgoing_draft = {}  # the dict {waiting_ack: actual data}, for the need ot resending
 
