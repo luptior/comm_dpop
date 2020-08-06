@@ -11,8 +11,9 @@ import utility
 import pseudotree
 import properties as prop
 import communication
+import datastruct
 
-Relatives = utility.Relatives
+Relatives = datastruct.Relatives
 
 
 def bfs(tree, tree_node, procedure, *extra_procedure_args):
