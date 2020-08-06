@@ -288,6 +288,11 @@ def listen_func(msgs, unprocessed_util, sock, agent):
                     agent.send("ACK", f"{title}_{udata[1][0]}", ori_node_id)
                     # agent.logger.info(f"ACK {title}_{udata[1][0]} {ori_node_id}")
 
+            if np.random.random() <= network.rs_rej_prop(size, s, ber):  # where there is error happen
+                print("there is an error sleep" + str(2 * tran_time(agent, size)))
+                size = msg_structure.get_actual_size(data)
+                sleep(2 * tran_time(agent, size))
+
             if agent.network_customization:
                 size = msg_structure.get_actual_size(data)
                 sleep(tran_time(agent, size))
