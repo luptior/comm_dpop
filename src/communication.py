@@ -195,9 +195,9 @@ def listen_func(msgs, unprocessed_util, sock, agent):
 
             if title == "ACK":
                 # if received a ACK, remove it from the listing
-                # agent.logger.info(f"Received ACK: {udata[1]}")
+                agent.logger.info(f"Received ACK: {udata[1]}")
                 agent.received_ack.add(udata[1])
-                # agent.logger.info(f"Received ACKs: {agent.received_ack}")
+                agent.logger.info(f"Received ACKs: {agent.received_ack}")
                 # if udata[1] in agent.waiting_ack:
                 #     agent.logger.info(f"Waiting_ack is {agent.waiting_ack}, remove {udata[1]}")
                 #     agent.waiting_ack.remove(udata[1])
@@ -246,10 +246,10 @@ def listen_func(msgs, unprocessed_util, sock, agent):
             agent.logger.info(
                 f"Msg received, size is {msg_structure.get_actual_size(data)} bytes\n {udata[0]} : {str(udata[1])[:100]} ...")
 
-        if "value_msg_" in udata[0] and agent.is_leaf():
-            # for leaf agent, end listen func when value msg is received
-            agent.logger.info(f"End listen_func")
-            return
+        # if "value_msg_" in udata[0] and agent.is_leaf() :
+        #     # for leaf agent, end listen func when value msg is received
+        #     agent.logger.info(f"End listen_func")
+        #     return
 
         # exit only when exit is received
         if str(udata[1]) == "exit":
@@ -268,16 +268,11 @@ def resend_noack(agent):
     while True:
 
         agent.waiting_ack = list(set(agent.waiting_ack).difference(agent.received_ack))
+        # update_ack(agent)
 
         if len(agent.waiting_ack) > 0:
 
             oldest_tick = sorted(agent.waiting_ack_time)[0]
-
-            (title, dest_node_id) = agent.waiting_ack_time[oldest_tick]
-
-            if title in agent.received_ack:
-                agent.waiting_ack_time.pop(oldest_tick)
-                continue
 
             data = agent.outgoing_draft[agent.waiting_ack_time[oldest_tick]]
             size = msg_structure.get_actual_size(data)
@@ -316,3 +311,15 @@ def resend_noack(agent):
             tick_diff = time.time() - sorted(agent.waiting_ack_time)[0]
             if tick_diff < timeout:
                 sleep(tick_diff)
+
+def update_ack(agent):
+    # remove received ack
+    agent.waiting_ack = list(set(agent.waiting_ack).difference(agent.received_ack))
+
+    t_to_delete = []
+    for t, (title, dest_node_id) in agent.waiting_ack_time.items():
+        if title not in agent.waiting_ack:
+            t_to_delete.append(t)
+
+    for t in t_to_delete:
+        agent.waiting_ack_time.pop(t)
