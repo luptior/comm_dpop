@@ -19,3 +19,4 @@ csv2latex.py
 device_connectiontable.csv
 configure/properties.yaml
 src/test.py
+properties.yaml
