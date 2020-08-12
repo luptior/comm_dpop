@@ -27,7 +27,7 @@ comp_speed: 100
 net_speed: 100
 network_customization: False
 slow_processing: False
-network_protocol: UDP_FEC
+network_protocol: UDP/UDP_FEC/TCP/RDUP/RDUP_FEC
 ```
 can be edited by using properties.py
 
