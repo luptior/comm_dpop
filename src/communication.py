@@ -142,7 +142,7 @@ def listen_func(msgs, unprocessed_util, sock, agent):
 
     if network_protocol in ["RUDP", "RUDP_FEC"]:
         # Creating and starting the 'listen' thread
-        resend_thread = threading.Thread(name='Resending-Unacked-Packet-of' + str(agent.id),
+        resend_thread = threading.Thread(name='Resending-Unacked-Packet-of-' + str(agent.id),
                                          target=resend_noack,
                                          kwargs={'agent': agent})
         resend_thread.setDaemon(True)
