@@ -255,7 +255,8 @@ def listen_func(msgs, unprocessed_util, sock, agent):
 
             data, addr = sock.recvfrom(65536)
             udata = RSCoding.deserialize(data)
-
+            n = size = msg_structure.get_actual_size(data)
+            s = 10  # should bee changed to variable
             # regular data message
             #   title: util_msg_{agent_id}
             #   data: ex. [(6,), [219.0, 249.0, 270.0, 239.0]]
