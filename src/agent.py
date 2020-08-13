@@ -101,14 +101,14 @@ class Agent:
 
         self.logger.info(f" is initialized IP: {self.IP} Port: {self.PORT}")
 
-    def get_graph_nodes(self):
+    def get_graph_nodes(self) -> list:
         graph_nodes = []
         for key in self.agents_info:
             if key != 'root' and key != self.id:
                 graph_nodes.append(key)
         return graph_nodes
 
-    def get_neighbors(self):
+    def get_neighbors(self) -> list:
         neighbors = []
         for first, second in self.relations.keys():
             if first == self.i:
@@ -235,9 +235,11 @@ class SplitAgent(Agent):
         if not self.is_root:
             value_msg_prop.value_msg_prop(self)
 
-        while len(self.waiting_ack) > 0:
+        counter = 100 # only repeat 100 times
+        while len(self.waiting_ack) > 0 and counter > 0:
             time.sleep(0.1)
             self.logger.info(self.waiting_ack)
+            counter -= 0
         self.logger.info(f"Finished All Acks:{self.received_ack}")
 
 
