@@ -83,10 +83,13 @@ def pseudotree_creation(agent):
         listening_socket.listen(20)
 
     # Creating and starting the 'listen' thread
+    # listen = threading.Thread(name='Listening-Thread-of-Agent-' + str(agent.id),
+    #                           target=communication.listen_func,
+    #                           args=(msgs, unprocessed_util, listening_socket),
+    #                           kwargs={'agent': agent})
     listen = threading.Thread(name='Listening-Thread-of-Agent-' + str(agent.id),
                               target=communication.listen_func,
-                              args=(msgs, unprocessed_util, listening_socket),
-                              kwargs={'agent': agent})
+                              args=(agent, msgs, unprocessed_util, listening_socket))
     listen.setDaemon(True)
     listen.start()
 
