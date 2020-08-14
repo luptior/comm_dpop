@@ -1,3 +1,25 @@
+"""
+communication.py
+
+Contains the functions using different network procotol to send data
+
+Sending functions:
+udp_send
+udp_send_fec
+rudp_send
+rudp_send_fec
+tcp_send
+
+Receiving function:
+
+listen_func
+
+
+@auther: gan.xu
+"""
+
+
+
 import socket
 import pickle
 import sys
