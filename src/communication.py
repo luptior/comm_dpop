@@ -213,8 +213,10 @@ def listen_func(a: agent, msgs, unprocessed_util, sock):
             if a.network_customization:
                 sleep(tran_time(a, size))
 
-            if np.random.random() <= 1 - np.power(1 - ber,
-                                                  msg_structure.get_actual_size(data)):  # where there is error happen
+            # if np.random.random() <= 1 - np.power(1 - ber,  msg_structure.get_actual_size(data)):
+            if np.random.random() <= checksum_rej_prop(
+                                                  msg_structure.get_actual_size(data), ber):
+                network.rs_rej_prop(size, 10, ber) # run this balance time out
                 sleep(2 * tran_time(a, size))
                 print("there is an error , delay" + str(2 * tran_time(a, size)))
 
