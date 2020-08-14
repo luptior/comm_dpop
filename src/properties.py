@@ -1,22 +1,29 @@
+"""
+prop.py
+a script that takes in command line input and set up a local yaml configuration file for dcop running
+
+@author gan.xu
+"""
+
 import argparse
 import json
 import yaml
 import yaml as yaml
 
 
-def store_properties(properties: dict, file: str = "../properties.yaml"):
+def store_properties(prop: dict, file: str = "../properties.yaml"):
     with open(file, "w") as f:
-        yaml.dump(properties, f)
+        yaml.dump(prop, f)
 
 
 def load_properties(file: str = "../properties.yaml"):
-    properties = {}
+    prop = {}
     with open(file, "r") as f:
         docs = yaml.load_all(f, Loader=yaml.FullLoader)
         for doc in docs:
             for k, v in doc.items():
-                properties[k] = v
-    return properties
+                prop[k] = v
+    return prop
 
 
 if __name__ == '__main__':
@@ -31,18 +38,16 @@ if __name__ == '__main__':
     parser.add_argument("--comp_speed", help="# a parameter to adjust the computation speed ", type=float, default=1000)
     parser.add_argument("--net_speed", help="# a parameter to adjust the network speed ", type=float, default=1000)
     parser.add_argument("--log_file", help="# path to output log ", type=str)
+    parser.add_argument("--ber", help="# bit error rate", type=float, default=0) # default to be always correct
     args = parser.parse_args()
 
-    properties = {}
-
-
-    # "UDP", "TCP", "UDP_FEC"
-    properties['network_protocol'] = args.network_protocol
-    properties["agent_mode"] = args.mode
-    properties["slow_processing"] = eval(args.computation)
-    properties["comp_speed"] = args.comp_speed
-    properties["network_customization"] = eval(args.network)
-    properties["net_speed"] = args.net_speed
-    properties["log_file"] = args.log_file
+    properties = {'network_protocol': args.network_protocol,
+                  "agent_mode": args.mode,
+                  "slow_processing": eval(args.computation),
+                  "comp_speed": args.comp_speed,
+                  "network_customization": eval(args.network),
+                  "net_speed": args.net_speed,
+                  "log_file": args.log_file,
+                  "ber": args.ber}
 
     store_properties(properties, "properties.yaml")
