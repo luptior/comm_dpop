@@ -68,6 +68,7 @@ class Agent:
         self.comp_speed = int(properties["comp_speed"]) # c
         self.network_customization = properties["network_customization"]
         self.net_speed = int(properties["net_speed"])
+        self.ber = float(properties["ber"])
 
         self.unprocessed_util = []  # The dict where all the received util_messages are stored,
         # added for split processing
