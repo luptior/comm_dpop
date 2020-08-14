@@ -29,7 +29,7 @@ import time
 import network
 from network import *
 
-import RSCoding
+import rs_coding
 import properties as prop
 import agent
 import msg_structure
@@ -71,7 +71,7 @@ def udp_send_fec(a: agent, title: str, data, dest_node_id):
 
     info = a.agents_info
 
-    pdata = RSCoding.serialize(title, data)
+    pdata = rs_coding.serialize(title, data)
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
         sock.sendto(pdata, (info[dest_node_id]['IP'], int(info[dest_node_id]['PORT'])))
@@ -88,7 +88,7 @@ def rudp_send_fec(a: agent, title: str, data, dest_node_id):
     a.logger.info(f"rudp_send_fec, sending a message with FEC...")
     info = a.agents_info
 
-    pdata = RSCoding.serialize(title, data)
+    pdata = rs_coding.serialize(title, data)
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
         sock.sendto(pdata, (info[dest_node_id]['IP'], int(info[dest_node_id]['PORT'])))
@@ -188,7 +188,7 @@ def listen_func(msgs, unprocessed_util, sock, agent):
             data, addr = sock.recvfrom(65535)
             n = size = msg_structure.get_actual_size(data)
             s = 10  # should bee changed to variable
-            udata = RSCoding.deserialize(data)
+            udata = rs_coding.deserialize(data)
 
             if np.random.random() <= network.rs_rej_prop(size, s, ber):  # where there is error happen
                 print("there is an error sleep" + str(2 * tran_time(agent, size)))
@@ -227,7 +227,7 @@ def listen_func(msgs, unprocessed_util, sock, agent):
             data, addr = sock.recvfrom(65536)
             n = size = msg_structure.get_actual_size(data)
             s = 10  # should bee changed to variable
-            udata = RSCoding.deserialize(data)
+            udata = rs_coding.deserialize(data)
 
             # regular data message
             #   title: util_msg_{agent_id}
@@ -276,7 +276,7 @@ def listen_func(msgs, unprocessed_util, sock, agent):
             # TODO: to be continued
 
             data, addr = sock.recvfrom(65536)
-            udata = RSCoding.deserialize(data)
+            udata = rs_coding.deserialize(data)
             n = size = msg_structure.get_actual_size(data)
             s = 10  # should bee changed to variable
             # regular data message

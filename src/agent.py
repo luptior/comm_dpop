@@ -16,7 +16,7 @@ import utility
 import logging
 
 from reedsolo import RSCodec
-import RSCoding
+import rs_coding
 import properties as prop
 
 
