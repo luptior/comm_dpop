@@ -150,7 +150,7 @@ def listen_func(msgs, unprocessed_util, sock, agent):
     Used in pseudotree_creation
     """
 
-    ber = 10 ** -4
+    ber = agent.ber
 
     if agent is None:
         agent_id = 'No agent'
