@@ -29,22 +29,26 @@ def find_free_port(ip='localhost'):
 # some constants for network communication
 
 Q = 0.01
-RTT = 100.  # unit in ms
+RTT = 0.1  # unit in ms
 MAX_SEG = 1460.  # unit in bytes
 
 
-def throughput(agent, q, rtt, s) -> float:
+def tcp_throughput(q, rtt, s) -> float:
     # return unit in bytes / s
-    return 1.22 * s / (rtt * np.sqrt(q)) * agent.net_speed
+    return 1.22 * s / (rtt* 1000 * np.sqrt(q))
+
+
+def udp_throughput(q, rtt, s) -> float:
+    # return unit in bytes / s
+    return s / (rtt* 1000) * 2
 
 
 def tran_time(agent, size):
     # return 0.1 + size / 100 , return unit in s
-    return size / throughput(agent, Q, RTT, MAX_SEG)
-
-
-def tcp_rtt(agent, size):
-    return size / agent.net_speed * 2
+    if "TCP" in agent.network_protocol:
+        return size / tcp_throughput(Q, RTT, MAX_SEG)
+    else:
+        return size / udp_throughput(Q, RTT, MAX_SEG)
 
 
 def loss(s):
