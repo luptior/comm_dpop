@@ -188,14 +188,14 @@ def listen_func(a: agent, msgs, unprocessed_util, sock):
             s = 10  # should bee changed to variable
             udata = rs_coding.deserialize(data)
 
-            if np.random.random() <= network.rs_rej_prop(size, s, ber):  # where there is error happen
-                print("there is an error sleep" + str(2 * tran_time(a, size)))
-                size = msg_structure.get_actual_size(data)
-                sleep(2 * tran_time(a, size))
-
             # network delay time
             if a.network_customization:
-                size = msg_structure.get_actual_size(data)
+
+                if np.random.random() <= network.rs_rej_prop(size, s, ber):  # where there is error happen
+                    print("there is an error sleep" + str(2 * tran_time(a, size)))
+                    size = msg_structure.get_actual_size(data)
+                    sleep(2 * tran_time(a, size))
+
                 sleep(tran_time(a, size))
 
         elif network_protocol == "TCP":
@@ -214,13 +214,15 @@ def listen_func(a: agent, msgs, unprocessed_util, sock):
 
             # network delay time
             if a.network_customization:
+
+                # error rate delay part
+                if np.random.random() <= checksum_rej_prop(size, ber):
+                    network.rs_rej_prop(size, 10, ber)  # run this balance time out
+                    sleep(2 * tran_time(a, size))
+                    print("there is an error , delay" + str(2 * tran_time(a, size)))
+
                 sleep(tran_time(a, size))
 
-            # error rate delay part
-            if np.random.random() <= checksum_rej_prop(size, ber):
-                network.rs_rej_prop(size, 10, ber) # run this balance time out
-                sleep(2 * tran_time(a, size))
-                print("there is an error , delay" + str(2 * tran_time(a, size)))
 
             udata = pickle.loads(data)  # Unpickled data
 
@@ -264,14 +266,15 @@ def listen_func(a: agent, msgs, unprocessed_util, sock):
                     a.send("ACK", f"{title}_{udata[1][0]}", ori_node_id)
                     # a.logger.info(f"ACK {title}_{udata[1][0]} {ori_node_id}")
 
-            # delay and rejection part
-            if np.random.random() <= network.rs_rej_prop(size, s, ber):  # where there is error happen
-                a.logger.info("there is an error, dropped and wait" )
-                # size = msg_structure.get_actual_size(data)
-                # sleep(2 * tran_time(a, size))
-                continue
-
             if a.network_customization:
+
+                # delay and rejection part
+                if np.random.random() <= network.rs_rej_prop(size, s, ber):  # where there is error happen
+                    a.logger.info("there is an error, dropped and wait")
+                    # size = msg_structure.get_actual_size(data)
+                    # sleep(2 * tran_time(a, size))
+                    continue
+
                 size = msg_structure.get_actual_size(data)
                 sleep(tran_time(a, size))
 
@@ -314,14 +317,14 @@ def listen_func(a: agent, msgs, unprocessed_util, sock):
                     a.send("ACK", f"{title}_{udata[1][0]}", ori_node_id)
                     # a.logger.info(f"ACK {title}_{udata[1][0]} {ori_node_id}")
 
-            if np.random.random() <= network.rs_rej_prop(size, s, ber):  # where there is error happen
-                a.logger.info("There is an error sleep" + str(2 * tran_time(a, size)))
-                # size = msg_structure.get_actual_size(data)
-                # sleep(2 * tran_time(a, size))
-                continue
-
             if a.network_customization:
-                size = msg_structure.get_actual_size(data)
+
+                if np.random.random() <= network.rs_rej_prop(size, s, ber):  # where there is error happen
+                    a.logger.info("There is an error sleep" + str(2 * tran_time(a, size)))
+                    # size = msg_structure.get_actual_size(data)
+                    # sleep(2 * tran_time(a, size))
+                    continue
+
                 sleep(tran_time(a, size))
 
         # msgs entry example util_msg_1:[[...]]
