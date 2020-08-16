@@ -16,13 +16,20 @@ def optimize_size(agent, original_table: np.array, start_length: int = 1) -> int
 
     if start_length == 1:
         result = [time_with_optimization(agent, original_table, x) for x in
-                  np.arange(start_length, original_table.size)]
+                  np.arange(start_length, original_table.size+1)]
     else:
         result = [time_with_optimization(agent, original_table, x)
-                  for x in np.arange(start_length, original_table.size, start_length)]
+                  for x in np.arange(start_length, original_table.size+1, step=start_length)]
+
+    try:
+        max_improve = min(result)
+    except ValueError:
+        print("#"*100 + "There is an error")
+        print(start_length, original_table.size)
 
     max_improve = min(result)
-    length = np.arange(start_length, original_table.size, start_length)[result.index(max_improve)]
+
+    length = np.arange(start_length, original_table.size+1, start_length)[result.index(max_improve)]
     return length
 
 
@@ -76,7 +83,7 @@ def computation_time(agent, sliced_size: int):
     :return:
     """
     # return np.product(table_dim) * length * 10 / clock_rate  # return unit in seconds
-    if agent.comp_speed:
+    if agent.slow_processing:
         return (6.144387919188346e-06 * sliced_size + 0.017582085621144466) * 1 / agent.comp_speed
     else:
         return 6.144387919188346e-06 * sliced_size + 0.017582085621144466
