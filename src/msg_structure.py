@@ -55,13 +55,17 @@ def slice_to_list(a: agent, original_table: np.array) -> list:
     """
 
     # optimization comes into play
-    if a.network_protocol in ["UDP_FEC", "RUDP", "RUDP_FEC"] and isinstance(a, agent.SplitAgent) or isinstance(a, agent.PipelineAgent):
+    if "UDP" in a.network_protocol  and isinstance(a, agent.SplitAgent) or isinstance(a, agent.PipelineAgent):
         # split is necessary but no need for optimization
         # serialized = serialize(title, np.random.randint(0, 100, size=(7500,)))
         # get_actual_size(serialized)
-        # 62545
-        # TODO: better calculation for this number
-        length = 1100
+        length = 1472
+
+        if "FEC" in a.network_protocol: # further limit the packet size
+            length = length - 20
+
+        # the first frame can carry up to 1472 bytes of UDP data that is, 1500 (MTU of Ethernet) minus 20 bytes of IPv4
+        # header, minus 8 bytes of UDP header.
     else:
         length = optimization.optimize_size(a, original_table)
 
