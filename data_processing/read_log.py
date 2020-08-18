@@ -4,17 +4,20 @@ import pandas as pd
 df = pd.DataFrame(columns=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 
 num_agent = 5
-agent_type = "list"
-network_customization = True
-network_speed = 10
+# agent_type = "split"
+agent_type = "default"
+network_customization = False
+network_speed = 100
 comp_customization = False
 comp_speed = 100
 
-dir = "../log"
+# dir = "../data/no_net_no_comp"
+# dir = "../data/no_no_def"
+dir = "./log"
 
-# domain_range=[5, 10, 20, 30, 40, 50]
-domain_range = [5]
-repo_range = range(1, 2)
+domain_range=[5, 10, 20, 30, 40, 50, 60, 70 ,80, 90 ,100, 120]
+# domain_range = [50]
+repo_range = range(1, 10)
 frames = {}
 
 for network_protocol in ["TCP"]:
@@ -30,7 +33,10 @@ for network_protocol in ["TCP"]:
                     if len(lines) > 2:
                         # read_list.append(int(lines[-1].strip()))
                         # print(lines[-1])
-                        read_list.append(float(lines[-1].split(" - ")[-2]))
+                        try:
+                            read_list.append(float(lines[-1].split(" - ")[-2]))
+                        except :
+                            continue
             except FileNotFoundError:
                 print(f"FileNotFoundError: {f}")
         # print(read_list)
