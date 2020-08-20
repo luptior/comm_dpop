@@ -15,16 +15,17 @@ mkdir -p $logdir
 rm $logdir/*
 
 # configuration parts
-network=True
+network=False
 comp_set=False
-mode=list
+mode=split
+ber=0.0001
 
-#for dom in 5 10 30 30 40 50; do
+#for dom in 5 10 20 30 40 50 60 70 80 90 100 120; do
 for dom in 5; do
   for network_protocol in TCP; do
-#    for repo in 1 2 3 4 5 6 7 8 9 10; do
-    for repo in 1; do
-      for net_speed in 10; do
+#    for repo in 0 1 2 3 4 5 6 7 8 9; do
+    for repo in 0; do
+      for net_speed in 100; do
         for comp_speed in 100; do
           for num in 5; do
             name=${network_protocol}_a${num}_d${dom}_r${repo}_p0.5p0.5
@@ -36,7 +37,8 @@ for dom in 5; do
                                       --computation $comp_set \
                                       --comp_speed ${comp_speed} \
                                       --net_speed ${net_speed} \
-                                      --log_file ${log} &&
+                                      --log_file ${log} \
+                                      --ber ${ber} &&
             python3 $script --input $datadir/random_a${num}_d${dom}_r${repo}_p0.5p0.5.xml
             #                 mode=split
             #                 name=random_a${num}_d${dom}_r${repo}
