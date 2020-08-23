@@ -229,9 +229,7 @@ def listen_func(a: agent, msgs, unprocessed_util, sock):
         elif network_protocol == "RUDP":
 
             data, addr = sock.recvfrom(65536)
-            n = size = msg_structure.get_actual_size(data)
-            s = 10  # should bee changed to variable
-            udata = rs_coding.deserialize(data)
+            udata = pickle.loads(data)  # Unpickled data
 
             # regular data message
             #   title: util_msg_{agent_id}
