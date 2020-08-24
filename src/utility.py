@@ -11,7 +11,6 @@ import properties as prop
 from optimization import *
 
 
-
 def get_agents_info(filepath: str) -> dict:
     """
     Return a dict with that has all the information extracted from a file like
