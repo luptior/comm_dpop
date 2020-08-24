@@ -33,27 +33,6 @@ def optimize_size(agent, original_table: np.array, start_length: int = 1) -> int
     return length
 
 
-def optimize_size2(agent, original_table: np.array) -> int:
-    """
-    where i tried to add gradient descent
-    :param agent:
-    :param original_table:
-    :return: a tuple represents the shape
-    """
-    # if np.size(original_table) < 100:
-    #     test_range = np.arange(1, original_table.size)
-    # else:
-    #     test_range = list(np.arange(1, 100)) + \
-    #                  list(np.arange(100, original_table.size, 2*int(np.log10(np.size(original_table)))))
-
-    func = lambda x: time_with_optimization(agent, original_table, x)
-    result = optimize.minimize(func, np.array(np.size(original_table) / 2))
-    print(result)
-    result = int(result)
-
-    return result
-
-
 def time_with_optimization(agent, original_table: np.array, length: int) -> float:
     """
     calculated the total time spent if apply optimization, there are two conditions, 1, transmission of
