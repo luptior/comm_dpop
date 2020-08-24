@@ -116,7 +116,7 @@ def get_util_cube(a: agent):
     return util_msg, dim_util_msg
 
 
-def get_util_cube_pipeline(agent):
+def get_util_cube_pipeline(a: agent):
     """
     Get the utility cube which will be used by a non-leaf node
     has a utility cube with axis for [pp, p, agent self]
@@ -127,10 +127,10 @@ def get_util_cube_pipeline(agent):
     dim_util_msg: dims of domains basically
     """
 
-    util_msg, dim_util_msg = get_util_cube(agent)
+    util_msg, dim_util_msg = get_util_cube(a)
 
-    prev = list([agent.id] + [agent.p] + agent.pp)
-    reorder = list(agent.pp + [agent.p] + [agent.id])
+    prev = list([a.id] + [a.p] + a.pp)
+    reorder = list(a.pp + [a.p] + [a.id])
 
     util_msg = np.transpose(util_msg, tuple([prev.index(x) for x in reorder]))
     if len(dim_util_msg) > 2:
