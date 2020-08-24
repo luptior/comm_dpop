@@ -68,10 +68,13 @@ def deserialize(input: bytearray, rsc: RSCodec = RSCodec(10), datatype="int64"):
     elif "util_msg_" == title[:9]:
         # TODO: a more robust way to distinguish these 2
         if np.prod(shape) == len(data):
-            # pure list no split
-            return title, data.reshape(shape)
+            # pure list no split, product of shape = total elements #
+            if len(shape) == 1:
+                return title, load_dict(data)
+            else:
+                return title, data.reshape(shape)
         else:
-            # plit list
+            # split list, product of shape != total elements #
             # k = data[:np.prod(shape)]
             return title, [tuple(shape), list(data)]
     else:
@@ -80,36 +83,42 @@ def deserialize(input: bytearray, rsc: RSCodec = RSCodec(10), datatype="int64"):
 
 
 def serialize(title: str, message, rsc: RSCodec = RSCodec(10)) -> bytearray:
+
     if "util_msg_" == title[:9] and isinstance(message, np.ndarray):
         # original version of util message
         message = message.astype(int)
-        shape = np.asarray(message.shape)
+        shape = np.asarray(message.shape, dtype="int64")
         b = message.tobytes()
+    elif "util_msg_" == title[:9] and isinstance(message, dict):
+        # dict version of the util message, used by pipeline
+        data = dump_dict(message)
+        shape = np.asarray(len(data), dtype="int64")
+        b = np.asarray(data, dtype="int64").tobytes()
     elif "util_msg_" == title[:9] and isinstance(message[0], tuple):
         # list version of the util message
         k = list(message[0])
         v = list(message[1])
-        shape = np.asarray(k)
-        b = np.asarray(v).tobytes()
+        shape = np.asarray(k, dtype="int64")
+        b = np.asarray(v, dtype="int64").tobytes()
     elif "pre_util_msg_" == title[:13] or "neighbors_" in title or "domain_" in title and \
             (isinstance(message, list) or isinstance(message, tuple)):
         # for the pre_util_msg_, contain should either be list or tuple
         shape = np.asarray(len(message))
-        b = np.asarray(message).tobytes()
+        b = np.asarray(message, dtype="int64").tobytes()
     elif "ptinfo" in title and isinstance(message, datastruct.Relatives):
         # ptinfo
         data = dump_relatives(message)
-        shape = np.asarray(len(data))
-        b = np.asarray(data).tobytes()
+        shape = np.asarray(len(data), dtype="int64")
+        b = np.asarray(data, dtype="int64").tobytes()
     elif "value_msg_" in title and isinstance(message, dict):
-        # for value msg
+        # for value msg, in dict format
         data = dump_dict(message)
-        shape = np.asarray(len(data))
-        b = np.asarray(data).tobytes()
+        shape = np.asarray(len(data), dtype="int64")
+        b = np.asarray(data, dtype="int64").tobytes()
     elif "ACK" in title:
         # message should be just str
         b = data = message.encode("utf-8")
-        shape = np.asarray(len(data))
+        shape = np.asarray(len(data), dtype="int64")
     else:
         logger.error(f"not supportd input: {title}  {message} {type(message)}")
         raise Exception(f"not supportd input {title} {type(message)} {message}")
@@ -124,7 +133,7 @@ def load_dict(l: list) -> dict:
         d = {int(l[2 * i]): int(l[2 * i + 1]) for i in range(len(l) // 2)}
     else:
         logger.error(f"list input l is not with correct length: {len(l)}")
-        raise Exception(f"list input l is not with correct length: {len(l)}")
+        raise Exception(f"list input l is not with correct length: {len(l)}, {l[:10] if len(l) > 10 else l}")
     return d
 
 
@@ -188,6 +197,7 @@ def test_serialize():
 
     # serialized = serialize( title="ssss", input_array = input_array)
     serialized = serialize(title="util_msg_1", message=input_array)
+
     deserialized = deserialize(serialized)
 
     print(deserialized[1])
@@ -199,9 +209,9 @@ def test_serialize():
 
 
 if __name__ == '__main__':
-    # test_serialize()
+    test_serialize()
 
-    serialized = serialize(title="ACK", message="util_msg_1")
-    deserialized = deserialize(serialized)
-
-    print(deserialized[1])
+    # serialized = serialize(title="ACK", message="util_msg_1")
+    # deserialized = deserialize(serialized)
+    #
+    # print(deserialized[1])
