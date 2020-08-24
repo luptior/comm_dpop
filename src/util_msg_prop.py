@@ -82,7 +82,7 @@ def get_util_msg(a: agent):
     return util_table, value_table
 
 
-def get_util_cube(agent):
+def get_util_cube(a: agent):
     """
     Get the utility cube which will be used by a non-leaf node to combine with
     the combined cube it has generated from the util_msgs received from all the
@@ -92,25 +92,25 @@ def get_util_cube(agent):
     dim_util_msg: dims of domains basically
     """
 
-    info = agent.agents_info
+    info = a.agents_info
 
     # Domain of the parent
-    parent_domain = info[agent.p]['domain']
+    parent_domain = info[a.p]['domain']
     # Calculate the dimensions of the util_msg
     # The dimensions of util_msg and table_stored will be the same.
     # dim_util_msg = [ size_agent_domain, size_pdoomain, size_ppdomain,..]
-    dim_util_msg = [len(agent.domain)] + [len(parent_domain)] + \
-                   [len(info[x]['domain']) for x in agent.pp]
+    dim_util_msg = [len(a.domain)] + [len(parent_domain)] + \
+                   [len(info[x]['domain']) for x in a.pp]
     dim_util_msg = tuple(dim_util_msg)
     util_msg = np.empty(dim_util_msg, dtype=object)
 
-    lists = [parent_domain] + [info[x]['domain'] for x in agent.pp]
+    lists = [parent_domain] + [info[x]['domain'] for x in a.pp]
     indices = [range(len(parent_domain))] + \
-              [range(len(info[x]['domain'])) for x in agent.pp]
+              [range(len(info[x]['domain'])) for x in a.pp]
 
     for item, index in zip(itertools.product(*lists), itertools.product(*indices)):
-        for i, xi in enumerate(agent.domain):
-            util = agent.calculate_util(item, xi)
+        for i, xi in enumerate(a.domain):
+            util = a.calculate_util(item, xi)
             util_msg[(i,) + index] = util
 
     return util_msg, dim_util_msg
