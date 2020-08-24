@@ -101,6 +101,12 @@ def rudp_send_fec(a: agent, title: str, data, dest_node_id):
             a.waiting_ack.append(f"{title}_{data[0]}")
             a.waiting_ack_time[time.time()] = (f"{title}_{data[0]}", dest_node_id)
             a.outgoing_draft[(f"{title}_{data[0]}", dest_node_id)] = data
+        elif isinstance(data, dict) and "value" not in title:  # in pipeline processing format
+            seq = list(data.keys())[0]
+            a.logger.info(f"Waiting_ack is {a.waiting_ack}, add {title}_{seq}")
+            a.waiting_ack.append(f"{title}_{seq}")
+            a.waiting_ack_time[time.time()] = (f"{title}_{seq}", dest_node_id)
+            a.outgoing_draft[(f"{title}_{seq}", dest_node_id)] = data
         else:
             a.logger.info(f"Waiting_ack is {a.waiting_ack}, add {title}")
             a.waiting_ack.append(title)
@@ -290,6 +296,7 @@ def listen_func(a: agent, msgs, unprocessed_util, sock):
             #   title: ACK
             #   data: util_msg_{agent_id}_(6,), the title of ack message
             title = udata[0]
+            message = udata[1]
 
             if title == "ACK":
                 # if received a ACK, remove it from the listing
@@ -312,8 +319,13 @@ def listen_func(a: agent, msgs, unprocessed_util, sock):
                     a.send("ACK", title, ori_node_id)
                 else:
                     ori_node_id = int(title.split("_")[-1])
-                    a.send("ACK", f"{title}_{udata[1][0]}", ori_node_id)
-                    # a.logger.info(f"ACK {title}_{udata[1][0]} {ori_node_id}")
+                    if "util_msg_" == title[:9] and isinstance(message, dict):
+                        seq = list(message.keys())[0]
+                        a.send("ACK", f"{title}_{seq}", ori_node_id)
+                        a.logger.info(f"ACK {title}_{seq} {ori_node_id}")
+                    else:
+                        a.send("ACK", f"{title}_{message[0]}", ori_node_id)
+
 
             if a.network_customization:
 
