@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#maximize the size of UDP buffer
+#sudo sysctl -w net.inet.udp.maxdgram=65535
+
 # read this script path
 pushd $(dirname "${0}") > /dev/null
 basedir=$(pwd -L)
@@ -20,9 +23,9 @@ comp_set=False
 mode=split
 ber=0.0001
 
-#for dom in 5 10 20 30 40 50 60 70 80 90 100 120; do
 for dom in 5; do
-  for network_protocol in TCP; do
+#for dom in 10; do
+  for network_protocol in UDP_FEC RUDP_FEC; do
 #    for repo in 0 1 2 3 4 5 6 7 8 9; do
     for repo in 0; do
       for net_speed in 100; do
