@@ -36,7 +36,7 @@ def slow_process(agent, msg):
 logging.basicConfig(level=logging.INFO)
 
 
-def get_util_msg(agent):
+def get_util_msg(a: agent):
     """
     Get the util_table to be sent to the parent and the table to be stored as
     a tuple, (util_table, value_table).
@@ -45,13 +45,13 @@ def get_util_msg(agent):
     value_table: the value for max util, axes are the different domain of p and pp
     """
 
-    info = agent.agents_info
+    info = a.agents_info
     # Domain of the parent
-    parent_domain = info[agent.p]['domain']
+    parent_domain = info[a.p]['domain']
     # Calculate the dimensions of the util_table
     # The dimensions of util_table and table_stored will be the same.
     # [ len_of_parent_domain, len_of_pparent_domain...]
-    dim_util_msg = [len(parent_domain)] + [len(info[x]['domain']) for x in agent.pp]
+    dim_util_msg = [len(parent_domain)] + [len(info[x]['domain']) for x in a.pp]
     dim_util_msg = tuple(dim_util_msg)
 
     # util_table for utility value, value_table for the chosen value for agent
@@ -59,25 +59,25 @@ def get_util_msg(agent):
     value_table = np.empty(dim_util_msg, dtype=object)
 
     # [[p_domain],[pp_domain], ...]
-    lists = [parent_domain] + [info[x]['domain'] for x in agent.pp]
+    lists = [parent_domain] + [info[x]['domain'] for x in a.pp]
 
     # [[1,2,...,len p_domain], ...]
-    indices = [range(len(parent_domain))] + [range(len(info[x]['domain'])) for x in agent.pp]
+    indices = [range(len(parent_domain))] + [range(len(info[x]['domain'])) for x in a.pp]
 
     # tuple(v1, v2, ...), tuple(index1, index2, ...)
     for item, index in zip(itertools.product(*lists), itertools.product(*indices)):
-        max_util = agent.max_util
+        max_util = a.max_util
         xi_val = -1
-        for xi in agent.domain:
+        for xi in a.domain:
             # for each set value of p/parents, choose the with most gain
-            util = agent.calculate_util(item, xi)
+            util = a.calculate_util(item, xi)
             if util > max_util:
                 max_util = util
                 xi_val = xi
         util_table[index] = max_util
         value_table[index] = xi_val
 
-    agent.table_ant = tuple([agent.p] + agent.pp)
+    a.table_ant = tuple([a.p] + a.pp)
 
     return util_table, value_table
 
@@ -233,7 +233,7 @@ def util_msg_handler(agent: agent):
         agent.send('util_msg_' + str(agent.id), msg_to_send, agent.p)
 
 
-def util_msg_prop(agent:agent):
+def util_msg_prop(agent: agent):
     agent.logger.info(f"Begin util_msg_prop")
 
     if agent.is_leaf():
@@ -439,16 +439,16 @@ def util_msg_handler_split(agent):
 
         sliced_msgs = msg_structure.slice_to_list(agent, msg_to_send)
         # if len(sliced_msgs) > 150 and "UDP" in agent.network_protocol :
-        if False:
-            for sliced_msg in sliced_msgs[:100]:
-                agent.send('util_msg_' + str(agent.id), sliced_msg, agent.p)
-                sleep(0.05)
-            for sliced_msg in sliced_msgs[150:]:
-                agent.send('util_msg_' + str(agent.id), sliced_msg, agent.p)
-                sleep(0.15)
-        else:
-            for sliced_msg in sliced_msgs:
-                agent.send('util_msg_' + str(agent.id), sliced_msg, agent.p)
+        # if False:
+        #     for sliced_msg in sliced_msgs[:100]:
+        #         agent.send('util_msg_' + str(agent.id), sliced_msg, agent.p)
+        #         sleep(0.05)
+        #     for sliced_msg in sliced_msgs[150:]:
+        #         agent.send('util_msg_' + str(agent.id), sliced_msg, agent.p)
+        #         sleep(0.15)
+        # else:
+        for sliced_msg in sliced_msgs:
+            agent.send('util_msg_' + str(agent.id), sliced_msg, agent.p)
 
 
 def util_msg_prop_split(agent):
