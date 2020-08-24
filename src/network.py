@@ -35,12 +35,12 @@ MAX_SEG = 1460.  # unit in bytes
 
 def tcp_throughput(q, rtt, s) -> float:
     # return unit in bytes / s
-    return 1.22 * s / (rtt* 1000 * np.sqrt(q))
+    return 1.22 * s / (rtt * 1000 * np.sqrt(q))
 
 
 def udp_throughput(q, rtt, s) -> float:
     # return unit in bytes / s
-    return s / (rtt* 1000) * 2
+    return s / (rtt * 1000) * 2
 
 
 def tran_time(agent, size):
