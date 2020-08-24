@@ -141,7 +141,7 @@ def get_util_cube_pipeline(a: agent):
     return util_msg, dim_util_msg
 
 
-def util_msg_handler(agent: agent):
+def util_msg_handler(a: agent):
     """
     The util_msg_handler routine in the util_msg_prop part; this method
     is run for non-leaf nodes;
@@ -158,56 +158,54 @@ def util_msg_handler(agent: agent):
     # Wait till util_msg from all the children have arrived
     while True:
         all_children_msgs_arrived = True
-        for child in agent.c:
-            if ('util_msg_' + str(child)) not in agent.msgs:
+        for child in a.c:
+            if ('util_msg_' + str(child)) not in a.msgs:
                 all_children_msgs_arrived = False
                 break
         if all_children_msgs_arrived:
             break
 
     util_msgs = []
-    for child in sorted(agent.c):
-        util_msgs.append(agent.msgs['util_msg_' + str(child)])
-    for child in sorted(agent.c):
-        util_msgs.append(agent.msgs['pre_util_msg_' + str(child)])
+    for child in sorted(a.c):
+        util_msgs.append(a.msgs['util_msg_' + str(child)])
+    for child in sorted(a.c):
+        util_msgs.append(a.msgs['pre_util_msg_' + str(child)])
 
     combined_msg, combined_ant = utility.combine(*util_msgs)
 
-    if agent.slow_processing:
-        slow_process(util_msgs, agent.comp_speed)
+    if a.slow_processing:
+        slow_process(util_msgs, a.comp_speed)
 
     # info = agent.agents_info
 
-    if agent.is_root:
-        assert combined_ant == (agent.id,)
+    if a.is_root:
+        assert combined_ant == (a.id,)
 
         # Choose the optimal utility
         utilities = list(combined_msg)
         max_util = max(utilities)
-        xi_star = agent.domain[utilities.index(max_util)]
-        agent.value = xi_star
-        agent.max_util = max_util
+        xi_star = a.domain[utilities.index(max_util)]
+        a.value = xi_star
+        a.max_util = max_util
 
         # Send the index of assigned value
         D = {}
-        ind = agent.domain.index(xi_star)
-        D[agent.id] = ind
-        for node in agent.c:
-            # agent.udp_send('value_msg_'+str(agent.id), D, node)
-            # agent.tcp_send('value_msg_' + str(agent.id), D, node)
-            agent.send('value_msg_' + str(agent.id), D, node)
+        ind = a.domain.index(xi_star)
+        D[a.id] = ind
+        for node in a.c:
+            a.send('value_msg_' + str(a.id), D, node)
     else:
-        util_cube, _ = get_util_cube(agent)
+        util_cube, _ = get_util_cube(a)
 
         # Combine the 2 cubes
         combined_cube, cube_ant = utility.combine(
             util_cube, combined_msg,
-            tuple([agent.id] + [agent.p] + agent.pp), combined_ant
+            tuple([a.id] + [a.p] + a.pp), combined_ant
         )
 
         # Removing own dimension by taking maximum
         L_ant = list(cube_ant)
-        ownid_index = L_ant.index(agent.id)
+        ownid_index = L_ant.index(a.id)
         msg_to_send = np.maximum.reduce(combined_cube, axis=ownid_index)
         # Ant to send in pre_util_msg
         ant_to_send = cube_ant[:ownid_index] + cube_ant[ownid_index + 1:]
@@ -223,14 +221,14 @@ def util_msg_handler(agent: agent):
         for i, abc in enumerate(cc_rolled):
             for index, _ in np.ndenumerate(abc):
                 if abc[index] == msg_to_send[index]:
-                    table[index] = agent.domain[i]
-        agent.table = table
-        agent.table_ant = ant_to_send
+                    table[index] = a.domain[i]
+        a.table = table
+        a.table_ant = ant_to_send
 
         # Send the assignment-nodeid-tuple
 
-        agent.send('pre_util_msg_' + str(agent.id), ant_to_send, agent.p)
-        agent.send('util_msg_' + str(agent.id), msg_to_send, agent.p)
+        a.send('pre_util_msg_' + str(a.id), ant_to_send, a.p)
+        a.send('util_msg_' + str(a.id), msg_to_send, a.p)
 
 
 def util_msg_prop(agent: agent):
