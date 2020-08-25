@@ -1023,7 +1023,8 @@ def util_msg_handler_split_pipeline(agent):
 
                 break
 
-    elif len(agent.c) == 2:  # the will wait for 2 piece of infomation
+    elif len(agent.c) == 2:  # the will wait for 2 piece of information
+
         # need to wait until all pre_util_msg arrived, need to know the dimensions
         while True:
             all_children_pre_msgs_arrived = True
@@ -1034,15 +1035,26 @@ def util_msg_handler_split_pipeline(agent):
             if all_children_pre_msgs_arrived:
                 break
 
-        pre_msgs = [agent.msgs['pre_util_msg_' + str(child)] for child in sorted(agent.c)]  # a list of tuple
-        merged_ant = utility.merge_ant(pre_msgs)  # the combined set of nodeids for the table sent from two children
-        reorder_merged_ant = swap(merged_ant, merged_ant.index(agent.id))  # move this agent's id to the last
-        children_ant = swap(reorder_merged_ant, merged_ant.index(agent.p), -2)  # move this agent's p to the -2
+        # a list of tuple
+        pre_msgs = [agent.msgs['pre_util_msg_' + str(child)] for child in sorted(agent.c)]
+
+        # the combined set of nodeids for the table sent from two children
+        merged_ant = utility.merge_ant(pre_msgs)
+
+        # move this agent's id to the last position of tuple
+        reorder_merged_ant = swap(merged_ant, merged_ant.index(agent.id))
+
+        # move this agent's parent to the -2
+        if agent.p in merged_ant:
+            children_ant = swap(reorder_merged_ant, merged_ant.index(agent.p), -2)
+        else:
+            children_ant = reorder_merged_ant
 
         # [(agent.c 1 domain sizes), (agent.c domain sizes)]
         try:
             msg_shapes = [tuple(len(info[x]['domain']) for x in ant) for ant in pre_msgs]
         except KeyError:
+            # TODO: assume same domain size for all agents, can be changed later
             msg_shapes = [tuple(len(agent.domain) for _ in ant) for ant in pre_msgs]
 
         # [other_ids, p_id, this agent.id]
