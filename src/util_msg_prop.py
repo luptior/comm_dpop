@@ -917,6 +917,7 @@ def util_msg_handler_split_pipeline(agent):
         combine_w_util_cube, tmp_ant = utility.combine(combine_w_util_cube, util_cube, tuple(combine_ant),
                                                        tuple(util_cube_ant))
 
+        # reorder axis as expected by combine_ant
         trans = tuple([tmp_ant.index(x) for x in combine_ant])
         combine_w_util_cube = np.transpose(combine_w_util_cube, trans)
 
@@ -965,27 +966,40 @@ def util_msg_handler_split_pipeline(agent):
                     for k, v in unfold_msg.items():
                         unfold_msg_array[k] += v
 
-                    # add child info to storage_combine
+                    for k, v in np.ndenumerate(unfold_msg_array):
+                        if v == 0.:
+                            unfold_msg_array[k] += 0.01
+
+                    # add message from child to storage_combine
+                    agent.logger.debug(f"util_w_msg_cube before: {util_w_msg_cube}")
                     util_w_msg_cube, tmp_ant = \
                         utility.combine(util_w_msg_cube, unfold_msg_array, combine_ant, child_ant)
+                    agent.logger.debug(f"unfold_msg_array: {unfold_msg_array}")
 
                     # projection from util_w_msg_cube to combine_cube
                     trans = tuple([tmp_ant.index(x) for x in combine_ant])
-                    util_w_msg_cube = np.transpose(util_w_msg_cube, trans)  # reorder the axis according to combine_ant
+                    # reorder the axis according to combine_ant
+                    util_w_msg_cube = np.transpose(util_w_msg_cube, trans)
+                    agent.logger.debug(f"util_w_msg_cube after: {util_w_msg_cube}")
 
-                    # the different in the value of new array2 and storage cube
+                    # the different in the value of combined with new message cube and original storage cube
                     diff = util_w_msg_cube - combine_w_util_cube
+                    agent.logger.debug(f"combine_w_util_cube: {combine_w_util_cube}")
+                    agent.logger.debug(f"diff: {diff}")
 
                     # the minimum value in this agent axis column,
                     # if 0.0, indicates the information haven't been received
                     amin = np.amin(diff, axis=len(util_w_msg_cube.shape) - 1)
+                    agent.logger.debug(f"amin: {amin}")
 
                     # the maximum value in this agent axis column
                     amax = np.amax(util_w_msg_cube, axis=len(util_w_msg_cube.shape) - 1)
+                    agent.logger.debug(f"amax: {amax}")
 
                     # if the minimum in the diff is zero then not received
                     msg_tosend = {k: v for k, v in np.ndenumerate(amax) if amin[k] != 0.0 and k not in processed_keys}
-                    # print("msg_tosend", msg_tosend)
+                    agent.logger.debug(f"processed_keys: {processed_keys}")
+                    agent.logger.debug(f"msg_tosend: {msg_tosend}")
 
                     processed_keys += list(msg_tosend.keys())
                     # print("processed_keys", processed_keys)
@@ -993,8 +1007,11 @@ def util_msg_handler_split_pipeline(agent):
                     if len(msg_tosend) > 0:
                         agent.send('util_msg_' + str(agent.id), msg_tosend, agent.p)
                         msg_tosend_store.update(msg_tosend)
+                        agent.logger.debug(f'{msg_tosend_store} \n {msg_tosend}')
 
             if all_children_msgs_arrived:
+
+                agent.logger.debug(f"agent.msgs: {agent.msgs}")
 
                 L_ant = list(combine_ant)
                 ownid_index = L_ant.index(agent.id)
