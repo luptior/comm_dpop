@@ -921,13 +921,12 @@ def util_msg_handler_split_pipeline(agent):
         combine_w_util_cube = np.transpose(combine_w_util_cube, trans)
 
         util_w_msg_cube = np.copy(combine_w_util_cube)
-        # print("combine_w_util_cube", combine_w_util_cube)
+
         """
         actual piece-wise msg
         """
-        # print("msg_shape", msg_shape)
+
         counter = np.prod(msg_shape)  # how many values should be received
-        # print("counter", counter)
         processed_keys = []
         msg_tosend_store = {}
 
