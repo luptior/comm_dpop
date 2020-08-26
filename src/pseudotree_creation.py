@@ -94,7 +94,7 @@ def pseudotree_creation(agent):
     listen.start()
 
     # Wait before all agents have started listening
-    time.sleep(2)
+    time.sleep(1)
 
     if agent.is_root:
         # Wait till the each agent sends its neighbors' list.
@@ -109,11 +109,13 @@ def pseudotree_creation(agent):
 
         # Create the graph and use it to generate the pseudo-tree structure.
         graph = {agent.id: agent.neighbors}
+        agent.logger.debug(f"Graph: {graph}")
         for key, value in msgs.items():
-            if key[0:10] == 'neighbors_':
+            if key[:10] == 'neighbors_':
                 graph[int(key[10:])] = list(value)
         pstree = {}
         pstree = pseudotree.dfsTree(graph, agent.id)
+        agent.logger.debug(f"Pstree: {pstree}")
 
         # Set own fields and tell (p, pp, c, pc) to all nodes
         parents = pseudotree.get_parents(pstree)
