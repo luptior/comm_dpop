@@ -73,7 +73,7 @@ def pseudotree_creation(agent):
 
     info = agent.agents_info
 
-    if network_protocol in ['UDP', "UDP_FEC", "RUDP", "RUDP_FEC"]:
+    if "UDP" in network_protocol :
         # UDP
         listening_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         listening_socket.bind((info[agent.id]['IP'], int(info[agent.id]['PORT'])))
