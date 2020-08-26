@@ -21,15 +21,8 @@ def optimize_size(agent, original_table: np.array, start_length: int = 1) -> int
         result = [time_with_optimization(agent, original_table, x)
                   for x in np.arange(start_length, original_table.size+1, step=start_length)]
 
-    try:
-        max_improve = min(result)
-    except ValueError:
-        print("#"*100 + "There is an error")
-        print(start_length, original_table.size)
+    length = np.arange(start_length, original_table.size+1, start_length)[np.argmin(result)]
 
-    max_improve = min(result)
-
-    length = np.arange(start_length, original_table.size+1, start_length)[result.index(max_improve)]
     return length
 
 
