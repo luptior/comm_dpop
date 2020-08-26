@@ -29,12 +29,16 @@ def main(f):
         agents, domains, variables, relations, constraints = parser.parse(f)
 
     agent_ids = list(range(len(agents)))
-    root_id = int(len(agent_ids) / 2)
+
     d = list(range(domains['d']['domain_range'][0], domains['d']['domain_range'][1] + 1))
 
     r = [tuple([int(i) for i in x.split("_")[1:]]) for x in relations.keys()]
 
     relations = {x: relations["".join(["r_", str(x[0]), "_", str(x[1])])]["relations"] for x in r}
+
+    relation_ids = np.asarray(list(relations.keys()))
+    unique_ids, counts = np.unique(relation_ids.flatten(), return_counts=True)
+    root_id = unique_ids[np.argmax(counts)] # now update the root to be the node with most connections
 
     # dict keys are agent id and values are (agent_id, neighbor_id):{(val1, val2):util}
     agent_relations = {}
