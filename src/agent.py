@@ -85,7 +85,7 @@ class Agent:
 
         # logger initialize
         self.logger = logging.getLogger(f"Agent.{self.i}")
-        self.logger.setLevel(level=logging.DEBUG)
+        self.logger.setLevel(level=logging.ERROR)
         # create file handler which logs even debug messages
         fh = logging.FileHandler(properties["log_file"])
         fh.setLevel(logging.INFO)
