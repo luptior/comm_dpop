@@ -846,7 +846,7 @@ def util_msg_handler_split_pipeline(agent):
 
     if agent.is_root:
         # if agent is the root, it still needs to wait for all msg so no pipeline can be done
-        # will si,ply use the old method
+        # will simply use the old method
         util_msg_handler_split_pipeline_root(agent)
         return
 
