@@ -253,6 +253,9 @@ def util_msg_prop(agent: agent):
     agent.logger.info(f"End util_msg_prop")
 
 
+"""Split Processing"""
+
+
 def util_msg_handler_split(agent):
     """
     Change the handling of util message from waiting to piece by piece
@@ -474,6 +477,9 @@ def util_msg_prop_split(agent):
     agent.logger.info(f"End util_msg_prop_split")
 
 
+"""List Processing"""
+
+
 def util_msg_handler_list(agent):
     """process
     Change the handling of util message to process list shape but not
@@ -691,6 +697,9 @@ def util_msg_prop_list(agent):
     agent.logger.info(f"End util_msg_prop_split")
 
 
+"""Pipeline Processing"""
+
+
 def util_msg_handler_split_pipeline_root(agent):
     """
     Change the handling of util message from waiting to piece by piece
@@ -751,7 +760,11 @@ def util_msg_handler_split_pipeline_root(agent):
                                 if x not in index_ant1:
                                     expand.append(tuple(range(len(l_domains[x]))))
                                 else:
-                                    expand.append((list(sliced_msg.keys())[0][index_ant1.index(x)],))
+                                    try:
+                                        expand.append((list(sliced_msg.keys())[0][index_ant1.index(x)],))
+                                    except AttributeError:
+                                        agent.logger.error(f"AttributeError sliced_msg : {sliced_msg}")
+                                        raise AttributeError
 
                             to_add = {x: list(sliced_msg.values())[0] for x in itertools.product(*expand)}
 
@@ -765,7 +778,11 @@ def util_msg_handler_split_pipeline_root(agent):
                                 if x not in index_ant2:
                                     expand.append(tuple(range(len(l_domains[x]))))
                                 else:
-                                    expand.append((list(sliced_msg.keys())[0][index_ant2.index(x)],))
+                                    try:
+                                        expand.append((list(sliced_msg.keys())[0][index_ant2.index(x)],))
+                                    except AttributeError:
+                                        agent.logger.error(f"AttributeError sliced_msg : {sliced_msg}")
+                                        raise AttributeError
 
                             to_add = {x: list(sliced_msg.values())[0] for x in itertools.product(*expand)}
 
@@ -801,60 +818,23 @@ def util_msg_handler_split_pipeline_root(agent):
     combined_ant = merged_ant
 
     # info = agent.agents_info
-    if agent.is_root:
-        assert combined_ant == (agent.id,)
 
-        # Choose the optimal utility
-        utilities = list(combined_msg)
-        max_util = max(utilities)
-        xi_star = agent.domain[utilities.index(max_util)]
-        agent.value = xi_star
-        agent.max_util = max_util
+    assert combined_ant == (agent.id,)
 
-        # Send the index of assigned value
-        D = {}
-        ind = agent.domain.index(xi_star)
-        D[agent.id] = ind
-        for node in agent.c:
-            agent.send('value_msg_' + str(agent.id), D, node)
-    else:
-        util_cube, _ = get_util_cube(agent)
+    # Choose the optimal utility
+    utilities = list(combined_msg)
+    max_util = max(utilities)
+    xi_star = agent.domain[utilities.index(max_util)]
+    agent.value = xi_star
+    agent.max_util = max_util
 
-        # Combine the 2 cubes
-        combined_cube, cube_ant = utility.combine(
-            util_cube, combined_msg,
-            tuple([agent.id] + [agent.p] + agent.pp), combined_ant
-        )
+    # Send the index of assigned value
+    D = {}
+    ind = agent.domain.index(xi_star)
+    D[agent.id] = ind
+    for node in agent.c:
+        agent.send('value_msg_' + str(agent.id), D, node)
 
-        # Removing own dimension by taking maximum
-        L_ant = list(cube_ant)
-        ownid_index = L_ant.index(agent.id)
-        msg_to_send = np.maximum.reduce(combined_cube, axis=ownid_index)
-        # Ant to send in pre_util_msg
-        ant_to_send = cube_ant[:ownid_index] + cube_ant[ownid_index + 1:]
-
-        # Creating the table to store
-        cc = combined_cube
-        table_shape = list(cc.shape[:])
-        del table_shape[ownid_index]
-        table_shape = tuple(table_shape)
-
-        table = np.zeros(table_shape, dtype=object)
-        cc_rolled = np.rollaxis(cc, ownid_index)
-        for i, abc in enumerate(cc_rolled):
-            for index, _ in np.ndenumerate(abc):
-                if abc[index] == msg_to_send[index]:
-                    table[index] = agent.domain[i]
-        agent.table = table
-        agent.table_ant = ant_to_send
-
-        # Send the assignment-nodeid-tuple
-
-        agent.send('pre_util_msg_' + str(agent.id), ant_to_send, agent.p)
-
-        sliced_msgs = msg_structure.slice_to_list(agent, msg_to_send)
-        for sliced_msg in sliced_msgs:
-            agent.send('util_msg_' + str(agent.id), sliced_msg, agent.p)
 
 
 def util_msg_handler_split_pipeline(agent):
@@ -1211,6 +1191,8 @@ def util_msg_prop_split_pipeline(agent):
 
         # Send 'util_msg_<ownid>'' to parent
         sliced_msgs = msg_structure.slice_to_list_pipeline(agent, util_msg)
+
+        agent.logger.error(f"sliced_msgs: {sliced_msgs}")
 
         for sliced_msg in sliced_msgs:
             agent.send('util_msg_' + str(agent.id), sliced_msg, agent.p)
