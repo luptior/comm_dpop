@@ -42,6 +42,8 @@ def slice_to_list_pipeline(a: agent, original_table: np.array) -> list:
 
     sliced_msgs = [[list(sliced_msg.keys())[0], list(sliced_msg.values())] for sliced_msg in sliced_msgs]
 
+    sliced_msgs = [unfold_sliced_msg(x, original_table.shape) for x in sliced_msgs]
+
     return sliced_msgs
 
 
