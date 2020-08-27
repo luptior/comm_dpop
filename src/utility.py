@@ -175,3 +175,21 @@ def element_projection(agent, ants: list, new_entry):
         shared_id = list(merged_ant).index(shared_ax)
         id1 = ants[0].index(shared_ax)
         id2 = ants[2].index(shared_ax)
+
+
+def list_to_dict(l : list) ->dict:
+    # input list should be [ [(tuples), [list]], [(tuples), [list]] ... ]
+    # or [(tuples), [list]]
+    depth = lambda L: isinstance(L, list) and max(map(depth, L)) + 1
+
+    if isinstance(l, dict):
+        return l
+
+    if depth(l) == 3:
+        result = { x[0]:x[1] for x in l}
+    elif depth(l) == 2 and isinstance(l[0], tuple):
+        result = {l[0]:l[1]}
+    else:
+        raise TypeError(f"input list is not supported l:{l}")
+
+    return result
