@@ -66,10 +66,8 @@ def main(f):
         agents_info[id] = {'IP': '127.0.0.1', 'PORT': network.find_free_port()}
     agents_info[root_id]['is_root']=True
 
-
     properties = prop.load_properties("properties.yaml")
     mode = properties["agent_mode"]
-
 
     if mode == "default":
         agents = [agent.Agent(i, d, agent_relations[i], agents_info) for i in agent_ids]
@@ -93,7 +91,7 @@ def main(f):
                 children.append(child_id)
                 if child_id == 0:
                     a.start()
-                    logger.debug('agent' + str(a.id) + ': ' + str(a.value))
+                    logger.debug('Agent' + str(a.id) + ': ' + str(a.value))
 
     # Start root agent
     root_agent = agents[root_id]
@@ -129,7 +127,8 @@ if __name__ == '__main__':
 
     main(f=args.input)
 
-    logger.info(f"{(time.time() - start_time)} - seconds")
+    # minus 1 because delayed start of all agents 1s for sync
+    logger.info(f"{(time.time() - start_time)-1 } - seconds")
 
 
 class ModeError(Exception):
