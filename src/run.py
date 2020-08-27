@@ -99,8 +99,8 @@ def main(f):
     root_agent = agents[root_id]
     if pid == os.getpid():
         root_agent.start()
-        print('max_util: ' + str(root_agent.max_util))
-        print('agent' + str(root_agent.id) + ': ' + str(root_agent.value))
+        logger.info('max_util: ' + str(root_agent.max_util))
+        logger.info('agent' + str(root_agent.id) + ': ' + str(root_agent.value))
         for _ in children:
             os.wait()
 
