@@ -737,6 +737,7 @@ def util_msg_handler_split_pipeline_root(agent):
         while True:
             all_children_msgs_arrived = True
             if sum([len(x) for x in new_array.values()]) < 2 * len(new_array):  # there should be 2 value in each entry
+                agent.logger.debug(f"new_array: {new_array}")
                 all_children_msgs_arrived = False
                 if len(agent.unprocessed_util) > 0:
                     # actually do the processing
@@ -760,11 +761,8 @@ def util_msg_handler_split_pipeline_root(agent):
                                 if x not in index_ant1:
                                     expand.append(tuple(range(len(l_domains[x]))))
                                 else:
-                                    try:
-                                        expand.append((list(sliced_msg.keys())[0][index_ant1.index(x)],))
-                                    except AttributeError:
-                                        agent.logger.error(f"AttributeError sliced_msg : {sliced_msg}")
-                                        raise AttributeError
+                                    sliced_msg = utility.list_to_dict(sliced_msg)
+                                    expand.append((list(sliced_msg.keys())[0][index_ant1.index(x)],))
 
                             to_add = {x: list(sliced_msg.values())[0] for x in itertools.product(*expand)}
 
@@ -778,11 +776,9 @@ def util_msg_handler_split_pipeline_root(agent):
                                 if x not in index_ant2:
                                     expand.append(tuple(range(len(l_domains[x]))))
                                 else:
-                                    try:
-                                        expand.append((list(sliced_msg.keys())[0][index_ant2.index(x)],))
-                                    except AttributeError:
-                                        agent.logger.error(f"AttributeError sliced_msg : {sliced_msg}")
-                                        raise AttributeError
+                                    sliced_msg = utility.list_to_dict(sliced_msg)
+                                    expand.append((list(sliced_msg.keys())[0][index_ant2.index(x)],))
+
 
                             to_add = {x: list(sliced_msg.values())[0] for x in itertools.product(*expand)}
 
@@ -834,7 +830,6 @@ def util_msg_handler_split_pipeline_root(agent):
     D[agent.id] = ind
     for node in agent.c:
         agent.send('value_msg_' + str(agent.id), D, node)
-
 
 
 def util_msg_handler_split_pipeline(agent):
@@ -951,35 +946,35 @@ def util_msg_handler_split_pipeline(agent):
                             unfold_msg_array[k] += 0.01
 
                     # add message from child to storage_combine
-                    agent.logger.debug(f"util_w_msg_cube before: {util_w_msg_cube}")
+                    # agent.logger.debug(f"util_w_msg_cube before: {util_w_msg_cube}")
                     util_w_msg_cube, tmp_ant = \
                         utility.combine(util_w_msg_cube, unfold_msg_array, combine_ant, child_ant)
-                    agent.logger.debug(f"unfold_msg_array: {unfold_msg_array}")
+                    # agent.logger.debug(f"unfold_msg_array: {unfold_msg_array}")
 
                     # projection from util_w_msg_cube to combine_cube
                     trans = tuple([tmp_ant.index(x) for x in combine_ant])
                     # reorder the axis according to combine_ant
                     util_w_msg_cube = np.transpose(util_w_msg_cube, trans)
-                    agent.logger.debug(f"util_w_msg_cube after: {util_w_msg_cube}")
+                    # agent.logger.debug(f"util_w_msg_cube after: {util_w_msg_cube}")
 
                     # the different in the value of combined with new message cube and original storage cube
                     diff = util_w_msg_cube - combine_w_util_cube
-                    agent.logger.debug(f"combine_w_util_cube: {combine_w_util_cube}")
-                    agent.logger.debug(f"diff: {diff}")
+                    # agent.logger.debug(f"combine_w_util_cube: {combine_w_util_cube}")
+                    # agent.logger.debug(f"diff: {diff}")
 
                     # the minimum value in this agent axis column,
                     # if 0.0, indicates the information haven't been received
                     amin = np.amin(diff, axis=len(util_w_msg_cube.shape) - 1)
-                    agent.logger.debug(f"amin: {amin}")
+                    # agent.logger.debug(f"amin: {amin}")
 
                     # the maximum value in this agent axis column
                     amax = np.amax(util_w_msg_cube, axis=len(util_w_msg_cube.shape) - 1)
-                    agent.logger.debug(f"amax: {amax}")
+                    # agent.logger.debug(f"amax: {amax}")
 
                     # if the minimum in the diff is zero then not received
                     msg_tosend = {k: v for k, v in np.ndenumerate(amax) if amin[k] != 0.0 and k not in processed_keys}
-                    agent.logger.debug(f"processed_keys: {processed_keys}")
-                    agent.logger.debug(f"msg_tosend: {msg_tosend}")
+                    # agent.logger.debug(f"processed_keys: {processed_keys}")
+                    # agent.logger.debug(f"msg_tosend: {msg_tosend}")
 
                     processed_keys += list(msg_tosend.keys())
                     # print("processed_keys", processed_keys)
@@ -1150,6 +1145,8 @@ def util_msg_handler_split_pipeline(agent):
 
             if all_children_msgs_arrived:
 
+                agent.logger.debug(f"agent.msgs: {agent.msgs}")
+
                 L_ant = list(combine_ant)
                 ownid_index = L_ant.index(agent.id)
 
@@ -1191,8 +1188,6 @@ def util_msg_prop_split_pipeline(agent):
 
         # Send 'util_msg_<ownid>'' to parent
         sliced_msgs = msg_structure.slice_to_list_pipeline(agent, util_msg)
-
-        agent.logger.error(f"sliced_msgs: {sliced_msgs}")
 
         for sliced_msg in sliced_msgs:
             agent.send('util_msg_' + str(agent.id), sliced_msg, agent.p)
