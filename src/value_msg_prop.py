@@ -1,3 +1,5 @@
+import time
+import properties as prop
 
 def value_msg_prop(agent):
     # print(dt.now(), str(agent.id) + ': Begin value_msg_prop')
@@ -23,3 +25,4 @@ def value_msg_prop(agent):
         agent.send('value_msg_' + str(agent.id), D, child)
 
     agent.logger.info(f"End value_msg_prop")
+    agent.logger.info(f"End time - {time.time()  -  prop.load_properties('properties.yaml')['start_time']} - seconds")
