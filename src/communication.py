@@ -91,7 +91,6 @@ def rudp_send_fec(a: agent, title: str, data, dest_node_id):
     try:
         sock.sendto(pdata, (info[dest_node_id]['IP'], int(info[dest_node_id]['PORT'])))
     except OSError:
-        a.logger.error(f"Message too long {msg_structure.get_actual_size(pdata)}")
         raise OSError(f"Message too long {msg_structure.get_actual_size(pdata)}")
 
     sock.close()
