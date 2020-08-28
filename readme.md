@@ -4,8 +4,9 @@
 ##Dependency
 ```yaml
 pip install numpy
+pip install scipy
 pip install pandas
-pip install 
+pip install reedsolo
 ```
 
 ## Running the program
