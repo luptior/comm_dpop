@@ -15,7 +15,7 @@ comp_speed = 100
 # dir = "../data/no_no_def"
 dir = "./log"
 
-domain_range=[5, 10, 20, 30, 40, 50, 60, 70 ,80, 90 ,100, 120]
+domain_range = [5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120]
 # domain_range = [50]
 repo_range = range(1, 10)
 frames = {}
@@ -33,9 +33,12 @@ for network_protocol in ["TCP"]:
                     if len(lines) > 2:
                         # read_list.append(int(lines[-1].strip()))
                         # print(lines[-1])
+
+                        end_times = [float(l.split(" - ")[-2]) for l in lines if 'End time' in l]
+
                         try:
-                            read_list.append(float(lines[-1].split(" - ")[-2]))
-                        except :
+                            read_list.append(max(end_times))
+                        except:
                             continue
             except FileNotFoundError:
                 print(f"FileNotFoundError: {f}")
