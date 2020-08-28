@@ -109,7 +109,7 @@ def get_relatives(num_agents, constrains) -> dict:
 
 if __name__ == '__main__':
 
-    start_time = time.time()
+    # start_time = time.time()
     logger = logging.getLogger("MAIN")
     logger.setLevel(level=logging.INFO)
     properties = prop.load_properties("properties.yaml")
@@ -128,7 +128,7 @@ if __name__ == '__main__':
     main(f=args.input)
 
     # minus 1 because delayed start of all agents 1s for sync
-    logger.info(f"{(time.time() - start_time)-1 } - seconds")
+    # logger.info(f"{(time.time() - start_time)-1 } - seconds")
 
 
 class ModeError(Exception):
