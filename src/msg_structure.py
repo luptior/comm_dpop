@@ -15,7 +15,7 @@ import agent
 logger = logging.getLogger("msg_structure")
 
 
-def slice_to_list_pipeline(a: agent, original_table: np.array) -> list:
+def slice_to_list_pipeline(a: agent, original_table: np.array, buffer_size =65535) -> list:
     """
     now add the minimum of length into consideration
 
@@ -32,7 +32,7 @@ def slice_to_list_pipeline(a: agent, original_table: np.array) -> list:
         # split is necessary but no need for optimization
         # serialized = serialize(title, np.random.randint(0, 100, size=(7500,)))
         # get_actual_size(serialized)
-        max_length_bytes = 65535
+        max_length_bytes = buffer_size
 
         max_length = (max_length_bytes - len(original_table.shape) * 2) // 8
 
@@ -63,7 +63,7 @@ def slice_to_list_pipeline(a: agent, original_table: np.array) -> list:
     return sliced_msgs
 
 
-def slice_to_list(a: agent, original_table: np.array) -> list:
+def slice_to_list(a: agent, original_table: np.array, buffer_size = 65535) -> list:
     """
     the method will slice the original table into smaller pieces for faster communication
     :param a:
@@ -77,7 +77,7 @@ def slice_to_list(a: agent, original_table: np.array) -> list:
         # split is necessary but no need for optimization
         # serialized = serialize(title, np.random.randint(0, 100, size=(7500,)))
         # get_actual_size(serialized)
-        max_length_bytes = 65535
+        max_length_bytes = buffer_size
 
         max_length = (max_length_bytes - len(original_table.shape)*2) // 8
 
@@ -106,7 +106,7 @@ def slice_to_list(a: agent, original_table: np.array) -> list:
     return sliced_msgs
 
 
-def split_msg(a: agent, msg: dict) -> list:
+def split_msg(a: agent, msg: dict, buffer_size = 65535) -> list:
     """split
     further split messages if too big
     import should be in dict format
@@ -117,7 +117,7 @@ def split_msg(a: agent, msg: dict) -> list:
         # split is necessary but no need for optimization
         # serialized = serialize(title, np.random.randint(0, 100, size=(7500,)))
         # get_actual_size(serialized)
-        max_length_bytes = 65535
+        max_length_bytes = buffer_size
 
         if get_actual_size(msg) < max_length_bytes - 20:
             return [msg]
