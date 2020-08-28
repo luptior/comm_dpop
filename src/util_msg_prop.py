@@ -980,7 +980,9 @@ def util_msg_handler_split_pipeline(agent):
                     # print("processed_keys", processed_keys)
 
                     if len(msg_tosend) > 0:
-                        agent.send('util_msg_' + str(agent.id), msg_tosend, agent.p)
+                        for msg in msg_structure.split_msg(agent, msg_tosend):
+                            agent.send('util_msg_' + str(agent.id), msg, agent.p)
+                        # agent.send('util_msg_' + str(agent.id), msg_tosend, agent.p)
                         msg_tosend_store.update(msg_tosend)
                         agent.logger.debug(f'{msg_tosend_store} \n {msg_tosend}')
 
