@@ -23,6 +23,9 @@ import optimization
 import properties as prop
 
 def main(f):
+
+    start_time = time.time()
+
     if f.split(".")[-1] == "xml":
         agents, domains, variables, relations, constraints = parser.xml_parse(f)
     else:
@@ -66,7 +69,11 @@ def main(f):
         agents_info[id] = {'IP': '127.0.0.1', 'PORT': network.find_free_port()}
     agents_info[root_id]['is_root']=True
 
+    # agents_info["start_time"] = start_time
+
+    prop.add_argument("properties.yaml", time.time())
     properties = prop.load_properties("properties.yaml")
+
     mode = properties["agent_mode"]
 
     if mode == "default":
