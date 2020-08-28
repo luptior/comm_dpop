@@ -28,7 +28,23 @@ def slice_to_list_pipeline(a: agent, original_table: np.array) -> list:
     step = original_table.shape[-1]  # use the last column which corresponds to the agent this message is sent to
 
     # optimization comes into play
-    length = optimization.optimize_size(a, original_table, step)
+    if "UDP" in a.network_protocol and isinstance(a, agent.SplitAgent) or isinstance(a, agent.PipelineAgent):
+        # split is necessary but no need for optimization
+        # serialized = serialize(title, np.random.randint(0, 100, size=(7500,)))
+        # get_actual_size(serialized)
+        max_length_bytes = 65535
+
+        max_length = (max_length_bytes - len(original_table.shape) * 2) // 8
+
+        if "FEC" in a.network_protocol:  # further limit the packet size
+            max_length = max_length - 20
+
+        # the first frame can carry up to 1472 bytes of UDP data that is, 1500 (MTU of Ethernet) minus 20 bytes of IPv4
+        # header, minus 8 bytes of UDP header.
+
+        length = optimization.optimize_size(a, original_table, step=step, max_length=max_length)
+    else:
+        length = optimization.optimize_size(a, original_table, step=step)
 
     elements = {i: u for i, u in np.ndenumerate(original_table)}
     index = list(elements.keys())
@@ -61,13 +77,17 @@ def slice_to_list(a: agent, original_table: np.array) -> list:
         # split is necessary but no need for optimization
         # serialized = serialize(title, np.random.randint(0, 100, size=(7500,)))
         # get_actual_size(serialized)
-        length = 1472
+        max_length_bytes = 65535
+
+        max_length = (max_length_bytes - len(original_table.shape)*2) // 8
 
         if "FEC" in a.network_protocol: # further limit the packet size
-            length = length - 20
+            max_length = max_length - 20
 
         # the first frame can carry up to 1472 bytes of UDP data that is, 1500 (MTU of Ethernet) minus 20 bytes of IPv4
         # header, minus 8 bytes of UDP header.
+
+        length = optimization.optimize_size(a, original_table, max_length=max_length)
     else:
         length = optimization.optimize_size(a, original_table)
 
@@ -84,6 +104,59 @@ def slice_to_list(a: agent, original_table: np.array) -> list:
     sliced_msgs = [[list(sliced_msg.keys())[0], list(sliced_msg.values())] for sliced_msg in sliced_msgs]
 
     return sliced_msgs
+
+
+def split_msg(a: agent, msg: dict) -> list:
+    """split
+    further split messages if too big
+    import should be in dict format
+    """
+
+
+    if "UDP" in a.network_protocol and isinstance(a, agent.SplitAgent) or isinstance(a, agent.PipelineAgent):
+        # split is necessary but no need for optimization
+        # serialized = serialize(title, np.random.randint(0, 100, size=(7500,)))
+        # get_actual_size(serialized)
+        max_length_bytes = 65535
+
+        if get_actual_size(msg) < max_length_bytes - 20:
+            return [msg]
+
+
+        element = {}
+
+        for k, v in enumerate(msg):
+            element = {k: v}
+            break
+
+        element_size = get_actual_size(element)
+
+        max_length = max_length_bytes//element_size
+
+        if "FEC" in a.network_protocol:  # further limit the packet size
+            max_length = max_length - 20
+
+        # the first frame can carry up to 1472 bytes of UDP data that is, 1500 (MTU of Ethernet) minus 20 bytes of IPv4
+        # header, minus 8 bytes of UDP header.
+
+        length = optimization.optimize_size_dict(a, msg, step = 20, max_length=max_length)
+    else:
+        return [msg]
+
+
+
+    elements = msg
+    index = list(elements.keys())
+    n_chunks = int(len(index) / length)
+
+    chunk_index = [index[x * length: (x + 1) * length] for x in range(n_chunks)]
+    if n_chunks * length != len(elements):
+        chunk_index.append(index[n_chunks * length:])
+
+    sliced_msgs = [{index: elements[index] for index in chunk} for chunk in chunk_index]
+
+    return sliced_msgs
+
 
 
 def table_to_list(original_table: np.array) -> list:
@@ -130,9 +203,9 @@ def size_sliced_msg(table_dim: tuple, length: int) -> int:
     :return: size in byte
     """
 
-    example = [table_dim, np.random.random()]
+    example = [table_dim, np.random.random(size=length)]
 
-    return get_actual_size(example) + 8 * (length - 1)
+    return get_actual_size(example)
 
 
 def get_actual_size(obj: object) -> int:
