@@ -26,6 +26,16 @@ def load_properties(file: str = "../properties.yaml"):
     return prop
 
 
+def add_argument(file: str, t):
+
+    props = load_properties(file)
+
+    props["start_time"] = t
+
+    store_properties(props, file)
+
+
+
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
