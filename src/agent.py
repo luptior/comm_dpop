@@ -85,7 +85,7 @@ class Agent:
 
         # logger initialize
         self.logger = logging.getLogger(f"Agent.{self.i}")
-        self.logger.setLevel(level=logging.ERROR)
+        self.logger.setLevel(level=logging.INFO)
         # create file handler which logs even debug messages
         fh = logging.FileHandler(properties["log_file"])
         fh.setLevel(logging.INFO)
@@ -211,7 +211,7 @@ class PipelineAgent(Agent):
 
         while len(self.waiting_ack) > 0:
             time.sleep(0.1)
-            self.logger.info(self.waiting_ack)
+            self.logger.debug(self.waiting_ack)
         self.logger.info(f"Finished All Acks:{self.received_ack}")
 
 
@@ -239,7 +239,7 @@ class SplitAgent(Agent):
         counter = 100 # only repeat 100 times
         while len(self.waiting_ack) > 0 and counter > 0:
             time.sleep(0.1)
-            self.logger.info(self.waiting_ack)
+            self.logger.debug(self.waiting_ack)
             counter -= 0
         self.logger.info(f"Finished All Acks:{self.received_ack}")
 
