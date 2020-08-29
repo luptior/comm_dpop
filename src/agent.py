@@ -71,6 +71,7 @@ class Agent:
         self.ber = float(properties["ber"])
         self.rtt = float(properties["rtt"])
         self.drop = float(properties["drop"])
+        self.buffer_size = int(properties["buffer_size"])
 
         self.unprocessed_util = []  # The dict where all the received util_messages are stored,
         # added for split processing
