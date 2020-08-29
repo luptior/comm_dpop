@@ -82,7 +82,7 @@ def rs_rej_prop(msg_len: int, rs_k: int, ber: float) -> float:
 
 
 def checksum_rej_prop(msg_len: int, ber: float) -> float:
-    """ a function that the package will get rejected by checksum
+    """ a function that the package will get rejected by TCP checksum
     :param msg_len: the length of the total message
     :param ber: bit error rate
     :return: a float of possibility it get rejected
