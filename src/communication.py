@@ -94,18 +94,28 @@ def rudp_send_fec(a: agent, title: str, data, dest_node_id):
         raise OSError(f"Message too long {msg_structure.get_actual_size(pdata)}")
 
     sock.close()
-    if not title == "ACK":
+    if not title == "ACK" and title not in a.waiting_ack:
+
         if isinstance(data, list) and isinstance(data[0], tuple):  # in split processing format
             a.logger.info(f"Waiting_ack is {a.waiting_ack}, add {title}_{data[0]}")
-            a.waiting_ack.append(f"{title}_{data[0]}")
-            a.waiting_ack_time[time.time()] = (f"{title}_{data[0]}", dest_node_id)
-            a.outgoing_draft[(f"{title}_{data[0]}", dest_node_id)] = data
+            if "(" not in title:
+                a.waiting_ack.append(f"{title}_{data[0]}")
+                a.waiting_ack_time[time.time()] = (f"{title}_{data[0]}", dest_node_id)
+                a.outgoing_draft[(f"{title}_{data[0]}", dest_node_id)] = data
+            else:
+                a.waiting_ack_time[time.time()] = (f"{title}", dest_node_id)
+                a.outgoing_draft[(f"{title}", dest_node_id)] = data
         elif isinstance(data, dict) and "value" not in title:  # in pipeline processing format
-            seq = list(data.keys())[0]
-            a.logger.info(f"Waiting_ack is {a.waiting_ack}, add {title}_{seq}")
-            a.waiting_ack.append(f"{title}_{seq}")
-            a.waiting_ack_time[time.time()] = (f"{title}_{seq}", dest_node_id)
-            a.outgoing_draft[(f"{title}_{seq}", dest_node_id)] = data
+            if "(" not in title:
+                seq = list(data.keys())[0]
+                a.logger.info(f"Waiting_ack is {a.waiting_ack}, add {title}_{seq}")
+                a.waiting_ack.append(f"{title}_{seq}")
+                a.waiting_ack_time[time.time()] = (f"{title}_{seq}", dest_node_id)
+                a.outgoing_draft[(f"{title}_{seq}", dest_node_id)] = data
+            else:
+                a.logger.info(f"Waiting_ack is {a.waiting_ack}, add {title}")
+                a.waiting_ack_time[time.time()] = (f"{title}", dest_node_id)
+                a.outgoing_draft[(f"{title}", dest_node_id)] = data
         else:
             a.logger.info(f"Waiting_ack is {a.waiting_ack}, add {title}")
             a.waiting_ack.append(title)
@@ -129,8 +139,7 @@ def rudp_send(a: agent, title: str, data, dest_node_id):
         raise
 
     sock.close()
-    if not title == "ACK":
-        a.logger("#"*20 + f"{data[0]}")
+    if not title == "ACK" and title not in a.waiting_ack:
 
         if isinstance(data, list) and isinstance(data[0], tuple):  # in split processing format
             a.logger.info(f"Waiting_ack is {a.waiting_ack}, add {title}_{data[0]}")
@@ -224,11 +233,10 @@ def listen_func(a: agent, msgs, unprocessed_util, sock):
 
             # network delay time
             if a.network_customization:
-
                 # error rate delay part
 
                 network.rs_rej_prop(size, 10, ber)  # run this balance time out
-                sleep(2 * tran_time(a, size) / (1-checksum_rej_prop(size, ber)))
+                sleep(2 * tran_time(a, size) / (1 - checksum_rej_prop(size, ber)))
                 a.logger.info("There is an error , delay" + str(2 * tran_time(a, size)))
 
                 sleep(tran_time(a, size))
@@ -254,7 +262,7 @@ def listen_func(a: agent, msgs, unprocessed_util, sock):
                 # if received a ACK, remove it from the listing
                 # a.logger.info(f"Received ACK: {udata[1]}")
                 a.received_ack.add(udata[1])
-                # a.logger.info(f"Received ACKs: {a.received_ack}")
+                # a.logger.info(f"New ACKs: {udata[1]}")
                 # if udata[1] in a.waiting_ack:
                 #     a.logger.info(f"Waiting_ack is {a.waiting_ack}, remove {udata[1]}")
                 #     a.waiting_ack.remove(udata[1])
@@ -322,7 +330,10 @@ def listen_func(a: agent, msgs, unprocessed_util, sock):
                     ori_node_id = int(title.split("_")[-1])
                     a.send("ACK", title, ori_node_id)
                 else:
-                    ori_node_id = int(title.split("_")[-1])
+                    if "(" in title:
+                        ori_node_id = int(title.split("_")[-2])
+                    else:
+                        ori_node_id = int(title.split("_")[-1])
                     if "util_msg_" == title[:9] and isinstance(message, dict):
                         seq = list(message.keys())[0]
                         a.send("ACK", f"{title}_{seq}", ori_node_id)
