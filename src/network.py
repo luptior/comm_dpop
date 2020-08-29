@@ -65,6 +65,7 @@ def tcp_time_ber(ber: float, bitlength: int) -> float:
 
     raise NotImplementedError("tcp_time_ber not implemented")
 
+
 def rs_rej_prop(msg_len: int, rs_k: int, ber: float) -> float:
     """
     calculate the possibility that a rs coded string to be unrecoverable
