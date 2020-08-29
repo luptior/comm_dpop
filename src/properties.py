@@ -49,6 +49,8 @@ if __name__ == '__main__':
     parser.add_argument("--net_speed", help="# a parameter to adjust the network speed ", type=float, default=1000)
     parser.add_argument("--log_file", help="# path to output log ", type=str)
     parser.add_argument("--ber", help="# bit error rate", type=float, default=0) # default to be always correct
+    parser.add_argument("--drop", help="# packet drop rate", type=float, default=0)  # default to be always correct
+    parser.add_argument("--rtt", help="# round trip time", type=float, default=0.01)  # default to be always correct
     args = parser.parse_args()
 
     properties = {'network_protocol': args.network_protocol,
@@ -58,6 +60,8 @@ if __name__ == '__main__':
                   "network_customization": eval(args.network),
                   "net_speed": args.net_speed,
                   "log_file": args.log_file,
-                  "ber": args.ber}
+                  "ber": args.ber,
+                  "drop": args.drop,
+                  "rtt": args.rtt}
 
     store_properties(properties, "properties.yaml")
