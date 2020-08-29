@@ -66,7 +66,7 @@ def main(f):
 
     agents_info = {"root": {'root_id': root_id}}
     for id in agent_ids:
-        agents_info[id] = {'IP': '127.0.0.1', 'PORT': network.find_free_port()}
+        agents_info[id] = {'IP': 'localhost', 'PORT': network.find_free_port()}
     agents_info[root_id]['is_root']=True
 
     # agents_info["start_time"] = start_time
