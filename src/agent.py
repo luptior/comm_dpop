@@ -67,7 +67,6 @@ class Agent:
         self.slow_processing = properties["slow_processing"] # whether slowing down is applied
         self.comp_speed = int(properties["comp_speed"]) # c
         self.network_customization = properties["network_customization"]
-        self.net_speed = int(properties["net_speed"])
         self.ber = float(properties["ber"])
         self.rtt = float(properties["rtt"])
         self.drop = float(properties["drop"])
@@ -161,7 +160,11 @@ class Agent:
 
         pseudotree_creation.pseudotree_creation(self)
         self.logger.info(f"Split processing is {self.split_processing}, computation speed is {self.comp_speed} \n "
-                         f"network customization is {self.network_customization}, network speed is {self.net_speed} ")
+                         f"network customization is {self.network_customization}, "
+                         f"rtt: {self.rtt}, "
+                         f"drop_rate: {self.drop}, "
+                         f"ber: {self.ber}, "
+                         f"buffer_size: {self.buffer_size}")
 
         util_msg_prop.util_msg_prop(self)
 
@@ -205,7 +208,11 @@ class PipelineAgent(Agent):
 
         pseudotree_creation.pseudotree_creation(self)
         self.logger.info(f"Split processing is {self.split_processing}, computation speed is {self.comp_speed} \n "
-                         f"network customization is {self.network_customization}, network speed is {self.net_speed} ")
+                         f"network customization is {self.network_customization}, "
+                         f"rtt: {self.rtt}, "
+                         f"drop_rate: {self.drop}, "
+                         f"ber: {self.ber}, "
+                         f"buffer_size: {self.buffer_size}")
 
         util_msg_prop.util_msg_prop_split_pipeline(self)
 
@@ -232,7 +239,11 @@ class SplitAgent(Agent):
 
         pseudotree_creation.pseudotree_creation(self)
         self.logger.info(f"Split processing is {self.split_processing}, computation speed is {self.comp_speed} \n "
-                         f"network customization is {self.network_customization}, network speed is {self.net_speed} ")
+                         f"network customization is {self.network_customization}, "
+                         f"rtt: {self.rtt}, "
+                         f"drop_rate: {self.drop}, "
+                         f"ber: {self.ber}, "
+                         f"buffer_size: {self.buffer_size}")
 
         util_msg_prop.util_msg_prop_split(self)
 
@@ -260,7 +271,11 @@ class ListAgent(Agent):
 
         pseudotree_creation.pseudotree_creation(self)
         self.logger.info(f"Split processing is {self.split_processing}, computation speed is {self.comp_speed} \n "
-                         f"network customization is {self.network_customization}, network speed is {self.net_speed} ")
+                         f"network customization is {self.network_customization}, "
+                         f"rtt: {self.rtt}, "
+                         f"drop_rate: {self.drop}, "
+                         f"ber: {self.ber}, "
+                         f"buffer_size: {self.buffer_size}")
 
         util_msg_prop.util_msg_prop_list(self)
 
