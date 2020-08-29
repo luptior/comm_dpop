@@ -347,10 +347,12 @@ def listen_func(a: agent, msgs, unprocessed_util, sock):
         # just some record printing
         if len(str(udata[1])) < 100:
             a.logger.info(
-                f"Msg received, size is {msg_structure.get_actual_size(data)} bytes\n {udata[0]} : {str(udata[1])}")
+                f"Msg received, size is {msg_structure.get_actual_size(data)} bytes"
+                f"\n {udata[0]} : {str(udata[1])}")
         else:
             a.logger.info(
-                f"Msg received, size is {msg_structure.get_actual_size(data)} bytes\n {udata[0]} : {str(udata[1])[:100]} ...")
+                f"Msg received, size is {msg_structure.get_actual_size(data)} bytes"
+                f"\n {udata[0]} : {str(udata[1])[:100]} ...")
 
         # if "value_msg_" in udata[0] and a.is_leaf() :
         #     # for leaf a, end listen func when value msg is received
