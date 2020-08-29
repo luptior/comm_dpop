@@ -15,10 +15,11 @@ import agent
 logger = logging.getLogger("msg_structure")
 
 
-def slice_to_list_pipeline(a: agent, original_table: np.array, buffer_size =65535) -> list:
+def slice_to_list_pipeline(a: agent, original_table: np.array, buffer_size=65535) -> list:
     """
     now add the minimum of length into consideration
 
+    :param buffer_size:
     :param a: type agent
     :param original_table: np.ndarray
     :return: list of dict of length length, len(list[0])=length
@@ -63,9 +64,10 @@ def slice_to_list_pipeline(a: agent, original_table: np.array, buffer_size =6553
     return sliced_msgs
 
 
-def slice_to_list(a: agent, original_table: np.array, buffer_size = 65535) -> list:
+def slice_to_list(a: agent, original_table: np.array, buffer_size=65535) -> list:
     """
     the method will slice the original table into smaller pieces for faster communication
+    :param buffer_size:
     :param a:
     :param original_table: np.ndarray
     :return: list of dict of length length, len(list[0])=length
@@ -79,9 +81,9 @@ def slice_to_list(a: agent, original_table: np.array, buffer_size = 65535) -> li
         # get_actual_size(serialized)
         max_length_bytes = buffer_size
 
-        max_length = (max_length_bytes - len(original_table.shape)*2) // 8
+        max_length = (max_length_bytes - len(original_table.shape) * 2) // 8
 
-        if "FEC" in a.network_protocol: # further limit the packet size
+        if "FEC" in a.network_protocol:  # further limit the packet size
             max_length = max_length - 20
 
         # the first frame can carry up to 1472 bytes of UDP data that is, 1500 (MTU of Ethernet) minus 20 bytes of IPv4
@@ -106,12 +108,11 @@ def slice_to_list(a: agent, original_table: np.array, buffer_size = 65535) -> li
     return sliced_msgs
 
 
-def split_msg(a: agent, msg: dict, buffer_size = 65535) -> list:
+def split_msg(a: agent, msg: dict, buffer_size=65535) -> list:
     """split
     further split messages if too big
     import should be in dict format
     """
-
 
     if "UDP" in a.network_protocol and isinstance(a, agent.SplitAgent) or isinstance(a, agent.PipelineAgent):
         # split is necessary but no need for optimization
@@ -122,7 +123,6 @@ def split_msg(a: agent, msg: dict, buffer_size = 65535) -> list:
         if get_actual_size(msg) < max_length_bytes - 20:
             return [msg]
 
-
         element = {}
 
         for k, v in enumerate(msg):
@@ -131,7 +131,7 @@ def split_msg(a: agent, msg: dict, buffer_size = 65535) -> list:
 
         element_size = get_actual_size(element)
 
-        max_length = max_length_bytes//element_size
+        max_length = max_length_bytes // element_size
 
         if "FEC" in a.network_protocol:  # further limit the packet size
             max_length = max_length - 20
@@ -139,11 +139,9 @@ def split_msg(a: agent, msg: dict, buffer_size = 65535) -> list:
         # the first frame can carry up to 1472 bytes of UDP data that is, 1500 (MTU of Ethernet) minus 20 bytes of IPv4
         # header, minus 8 bytes of UDP header.
 
-        length = optimization.optimize_size_dict(a, msg, step = 20, max_length=max_length)
+        length = optimization.optimize_size_dict(a, msg, step=20, max_length=max_length)
     else:
         return [msg]
-
-
 
     elements = msg
     index = list(elements.keys())
@@ -156,7 +154,6 @@ def split_msg(a: agent, msg: dict, buffer_size = 65535) -> list:
     sliced_msgs = [{index: elements[index] for index in chunk} for chunk in chunk_index]
 
     return sliced_msgs
-
 
 
 def table_to_list(original_table: np.array) -> list:
