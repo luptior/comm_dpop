@@ -27,28 +27,30 @@ def find_free_port(ip='localhost'):
 
 
 # some constants for network communication
-
-Q = 0.01
-RTT = 0.1  # unit in ms
-MAX_SEG = 1460.  # unit in bytes
+MAX_SEG = 1460.  # TCP maximum segment size
 
 
 def tcp_throughput(q, rtt, s) -> float:
     # return unit in bytes / s
-    return 1.22 * s / (rtt * 1000 * np.sqrt(q))
+    # function generated from mathis equation
+    return 1.22 * s / (rtt * np.sqrt(q))
 
 
 def udp_throughput(q, rtt, s) -> float:
-    # return unit in bytes / s
-    return s / (rtt * 1000) * 2
+    # TODO
+    raise NotImplementedError("udp_throughput not implemented")
 
 
 def tran_time(agent, size):
     # return 0.1 + size / 100 , return unit in s
     if "TCP" in agent.network_protocol:
-        return size / tcp_throughput(Q, RTT, MAX_SEG)
-    else:
-        return size / udp_throughput(Q, RTT, MAX_SEG)
+        return size / tcp_throughput(agent.drop, agent.rtt, MAX_SEG)
+    elif "UDP" in agent.network_protocol:
+        if size < agent.buffer_size:
+            return agent.rtt
+        else:
+            agent.logger.error(f"Not implemented")
+            raise OverflowError(f"{size} is lager than buffer size {agent.buffer_size}")
 
 
 def tcp_time_ber(ber: float, bitlength: int) -> float:
@@ -56,11 +58,12 @@ def tcp_time_ber(ber: float, bitlength: int) -> float:
     # to simulate the time spent for tcp with a certain percentage of ber The TCP checksum is two bytes long Traces
     # of Internet packets from the past two years show that between 1 packet in 1,100 and 1 packet in 32,000
     # fails the TCP checksum
-    if float(ber) == 0:
-        return 0
-    else:
-        return 0
+    # if float(ber) == 0:
+    #     return 0
+    # else:
+    #     return 0
 
+    raise NotImplementedError("tcp_time_ber not implemented")
 
 def rs_rej_prop(msg_len: int, rs_k: int, ber: float) -> float:
     """
