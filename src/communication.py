@@ -200,7 +200,7 @@ def listen_func(a: agent, msgs, unprocessed_util, sock):
             if a.network_customization:
 
                 if np.random.random() <= network.rs_rej_prop(size, s, ber):  # where there is error happen
-                    print("there is an error sleep" + str(2 * tran_time(a, size)))
+                    a.logger.info("there is an error sleep" + str(2 * tran_time(a, size)))
                     size = msg_structure.get_actual_size(data)
                     sleep(2 * tran_time(a, size))
 
