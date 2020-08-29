@@ -130,6 +130,8 @@ def rudp_send(a: agent, title: str, data, dest_node_id):
 
     sock.close()
     if not title == "ACK":
+        a.logger("#"*20 + f"{data[0]}")
+
         if isinstance(data, list) and isinstance(data[0], tuple):  # in split processing format
             a.logger.info(f"Waiting_ack is {a.waiting_ack}, add {title}_{data[0]}")
             a.waiting_ack.append(f"{title}_{data[0]}")
@@ -187,8 +189,8 @@ def listen_func(a: agent, msgs, unprocessed_util, sock):
             udata = pickle.loads(data)  # Unpickled data
 
             if a.network_customization:
-                size = msg_structure.get_actual_size(data)
-                sleep(tran_time(a, size))
+                a.logger.debug(f"Sleep for {tran_time(a, msg_structure.get_actual_size(data))}")
+                sleep(tran_time(a, msg_structure.get_actual_size(data)))
 
         elif network_protocol == "UDP_FEC":
             data, addr = sock.recvfrom(buffer_size)
@@ -200,7 +202,7 @@ def listen_func(a: agent, msgs, unprocessed_util, sock):
             if a.network_customization:
 
                 if np.random.random() <= network.rs_rej_prop(size, s, ber):  # where there is error happen
-                    a.logger.info("there is an error sleep" + str(2 * tran_time(a, size)))
+                    a.logger.info("There is an error sleep" + str(2 * tran_time(a, size)))
                     size = msg_structure.get_actual_size(data)
                     sleep(2 * tran_time(a, size))
 
@@ -224,12 +226,13 @@ def listen_func(a: agent, msgs, unprocessed_util, sock):
             if a.network_customization:
 
                 # error rate delay part
-                if np.random.random() <= checksum_rej_prop(size, ber):
-                    network.rs_rej_prop(size, 10, ber)  # run this balance time out
-                    sleep(2 * tran_time(a, size))
-                    print("there is an error , delay" + str(2 * tran_time(a, size)))
+
+                network.rs_rej_prop(size, 10, ber)  # run this balance time out
+                sleep(2 * tran_time(a, size) / (1-checksum_rej_prop(size, ber)))
+                a.logger.info("There is an error , delay" + str(2 * tran_time(a, size)))
 
                 sleep(tran_time(a, size))
+                a.logger.debug(f"Sleep for {tran_time(a, size)}")
 
             udata = pickle.loads(data)  # Unpickled data
 
