@@ -150,10 +150,13 @@ def listen_func(a: agent, msgs, unprocessed_util, sock):
     Listening on function, and stores the messages in the dict 'msgs'
     Exit when an 'exit' message is received.
 
-    Used in pseudotree_creation
     """
 
+    # network parameters
     ber = a.ber
+    drop_rate = a.drop
+    rtt = a.rtt
+    buffer_size = a.buffer_size
 
     if a is None:
         agent_id = 'No agent'
@@ -165,9 +168,9 @@ def listen_func(a: agent, msgs, unprocessed_util, sock):
     properties = prop.load_properties("properties.yaml")
     network_protocol = properties["network_protocol"]
 
+    # Creating and starting the 'listen' thread for auto retransmission
     if network_protocol in ["RUDP", "RUDP_FEC"]:
-        # Creating and starting the 'listen' thread
-        resend_thread = threading.Thread(name='Resending-Unacked-Packet-of-' + str(a.id),
+        resend_thread = threading.Thread(name='Resending-Unpacked-Packet-of-' + str(a.id),
                                          target=resend_noack,
                                          kwargs={'a': a})
         resend_thread.setDaemon(True)
@@ -180,7 +183,7 @@ def listen_func(a: agent, msgs, unprocessed_util, sock):
         # element should be the actual data to be passed. Loop ends when an exit message is sent.
 
         if network_protocol == "UDP":
-            data, addr = sock.recvfrom(65536)
+            data, addr = sock.recvfrom(buffer_size)
             udata = pickle.loads(data)  # Unpickled data
 
             if a.network_customization:
@@ -188,7 +191,7 @@ def listen_func(a: agent, msgs, unprocessed_util, sock):
                 sleep(tran_time(a, size))
 
         elif network_protocol == "UDP_FEC":
-            data, addr = sock.recvfrom(65535)
+            data, addr = sock.recvfrom(buffer_size)
             n = size = msg_structure.get_actual_size(data)
             s = 10  # should bee changed to variable
             udata = rs_coding.deserialize(data)
@@ -228,12 +231,11 @@ def listen_func(a: agent, msgs, unprocessed_util, sock):
 
                 sleep(tran_time(a, size))
 
-
             udata = pickle.loads(data)  # Unpickled data
 
         elif network_protocol == "RUDP":
 
-            data, addr = sock.recvfrom(65536)
+            data, addr = sock.recvfrom(buffer_size)
             udata = pickle.loads(data)  # Unpickled data
 
             # regular data message
@@ -284,7 +286,7 @@ def listen_func(a: agent, msgs, unprocessed_util, sock):
         elif network_protocol == "RUDP_FEC":
             # TODO: to be continued
 
-            data, addr = sock.recvfrom(65536)
+            data, addr = sock.recvfrom(buffer_size)
             udata = rs_coding.deserialize(data)
             n = size = msg_structure.get_actual_size(data)
             s = 10  # should bee changed to variable
@@ -324,7 +326,6 @@ def listen_func(a: agent, msgs, unprocessed_util, sock):
                         a.logger.info(f"ACK {title}_{seq} {ori_node_id}")
                     else:
                         a.send("ACK", f"{title}_{message[0]}", ori_node_id)
-
 
             if a.network_customization:
 
