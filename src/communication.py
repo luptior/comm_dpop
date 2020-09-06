@@ -97,12 +97,14 @@ def rudp_send_fec(a: agent, title: str, data, dest_node_id):
     if not title == "ACK" and title not in a.waiting_ack:
 
         if isinstance(data, list) and isinstance(data[0], tuple):  # in split processing format
-            a.logger.info(f"Waiting_ack is {a.waiting_ack}, add {title}_{data[0]}")
+
             if "(" not in title:
+                a.logger.info(f"Waiting_ack is {a.waiting_ack}, add {title}_{data[0]}")
                 a.waiting_ack.append(f"{title}_{data[0]}")
                 a.waiting_ack_time[time.time()] = (f"{title}_{data[0]}", dest_node_id)
                 a.outgoing_draft[(f"{title}_{data[0]}", dest_node_id)] = data
             else:
+                a.logger.info(f"Waiting_ack is {a.waiting_ack}, add {title}_{data[0]}")
                 a.waiting_ack_time[time.time()] = (f"{title}", dest_node_id)
                 a.outgoing_draft[(f"{title}", dest_node_id)] = data
         elif isinstance(data, dict) and "value" not in title:  # in pipeline processing format
@@ -117,10 +119,16 @@ def rudp_send_fec(a: agent, title: str, data, dest_node_id):
                 a.waiting_ack_time[time.time()] = (f"{title}", dest_node_id)
                 a.outgoing_draft[(f"{title}", dest_node_id)] = data
         else:
-            a.logger.info(f"Waiting_ack is {a.waiting_ack}, add {title}")
-            a.waiting_ack.append(title)
-            a.waiting_ack_time[time.time()] = (title, dest_node_id)
-            a.outgoing_draft[(title, dest_node_id)] = data
+            if "(" not in title:
+                a.logger.info(f"Waiting_ack is {a.waiting_ack}, add {title}")
+                a.waiting_ack.append(title)
+                a.waiting_ack_time[time.time()] = (title, dest_node_id)
+                a.outgoing_draft[(title, dest_node_id)] = data
+            else:
+                a.logger.info(f"Waiting_ack is {a.waiting_ack}, add {title}")
+                a.waiting_ack.append(title)
+                a.waiting_ack_time[time.time()] = (title, dest_node_id)
+                a.outgoing_draft[(title, dest_node_id)] = data
         # a.logger.info(str(a.outgoing_draft))
 
     a.logger.info('Message sent, ' + title + ": " + str(data))
@@ -142,10 +150,16 @@ def rudp_send(a: agent, title: str, data, dest_node_id):
     if not title == "ACK" and title not in a.waiting_ack:
 
         if isinstance(data, list) and isinstance(data[0], tuple):  # in split processing format
-            a.logger.info(f"Waiting_ack is {a.waiting_ack}, add {title}_{data[0]}")
-            a.waiting_ack.append(f"{title}_{data[0]}")
-            a.waiting_ack_time[time.time()] = (f"{title}_{data[0]}", dest_node_id)
-            a.outgoing_draft[(f"{title}_{data[0]}", dest_node_id)] = data
+            if "(" not in title:
+                a.logger.info(f"Waiting_ack is {a.waiting_ack}, add {title}_{data[0]}")
+                a.waiting_ack.append(f"{title}_{data[0]}")
+                a.waiting_ack_time[time.time()] = (f"{title}_{data[0]}", dest_node_id)
+                a.outgoing_draft[(f"{title}_{data[0]}", dest_node_id)] = data
+            else:
+                a.logger.info(f"Waiting_ack is {a.waiting_ack}, add {title}")
+                a.waiting_ack.append(f"{title}")
+                a.waiting_ack_time[time.time()] = (f"{title}", dest_node_id)
+                a.outgoing_draft[(f"{title}", dest_node_id)] = data
         else:
             a.logger.info(f"Waiting_ack is {a.waiting_ack}, add {title}")
             a.waiting_ack.append(title)
